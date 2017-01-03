@@ -24,7 +24,7 @@ import eg
 
 
 def FormatAttr(attrName, attr, indent):
-    indent4 = ' ' * (indent + 1)
+    indent4 = ' ' * (indent + 4)
     indent = ' ' * indent
     attrField = '%s%s = ' % (indent, attrName)
 
@@ -93,7 +93,7 @@ class PersistentDataBase(object):
                 formatString = '\n' + formatString
 
             fileWriter(formatString % (' ' * indent, key))
-            value.SaveData(fileWriter, indent + 1)
+            value.SaveData(fileWriter, indent + 4)
 
     def __repr__(self):
         objRepr = repr(self._parent).split(' ')
