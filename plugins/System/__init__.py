@@ -24,8 +24,6 @@ import thread
 import time
 import wx
 import _winreg
-import win32con
-import win32gui
 from base64 import b64decode, b64encode
 from PIL import Image
 from qrcode import QRCode, constants as QRconstants
@@ -109,22 +107,6 @@ EVENT_LIST = (
     ("DeviceAttached", None),
     ("DeviceRemoved", None),
 )
-
-MONITOR_STATES = dict(
-    OFF=2,
-    STANDBY=1,
-    ON=-1
-)
-
-
-def MonitorState(state):
-    win32gui.SendMessage(
-        win32con.HWND_BROADCAST,
-        win32con.WM_SYSCOMMAND,
-        SC_MONITORPOWER,
-        MONITOR_STATES[state]
-    )
-
 
 class Text:
     class MonitorGroup:
@@ -338,6 +320,12 @@ class System(eg.PluginBase):
         self.deviceChangeNotifier.Close()
         self.powerBroadcastNotifier.Close()
         self.StopHookCode()
+
+    def AddEvents(self, *eventList):
+        if self.info.eventList is None:
+            self.info.eventList = eventList
+        else:
+            self.info.eventList += eventList
 
     def HideImage(self, title):
         if title in self.images:
@@ -699,7 +687,7 @@ class MonitorPowerOff(eg.ActionBase):
     iconFile = "icons/Display"
 
     def __call__(self):
-        MonitorState('OFF')
+        SendMessage(GetForegroundWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, 2)
 
 
 class MonitorPowerOn(eg.ActionBase):
@@ -711,7 +699,7 @@ class MonitorPowerOn(eg.ActionBase):
     iconFile = "icons/Display"
 
     def __call__(self):
-        MonitorState('ON')
+        SendMessage(GetForegroundWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, -1)
 
 
 class MonitorStandby(eg.ActionBase):
@@ -720,7 +708,7 @@ class MonitorStandby(eg.ActionBase):
     iconFile = "icons/Display"
 
     def __call__(self):
-        MonitorState('STANDBY')
+        SendMessage(GetForegroundWindow(), WM_SYSCOMMAND, SC_MONITORPOWER, 1)
 
 
 class SetDisplayPreset(eg.ActionBase):
@@ -2291,3 +2279,4 @@ def Resize(w, h, width_, height_, force = False):
             w = int(round(w / yfactor))
             h = height_
     return (w, h)
+
