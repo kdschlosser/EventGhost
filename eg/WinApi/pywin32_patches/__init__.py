@@ -25,9 +25,7 @@ import win32com_client_dynamic
 import dde
 
 # patch for > 219
-win32com.client.dynamic._GetDescInvokeType = (
-    win32com_client_dynamic.GetDescInvokeType
-)
+win32com.client.dynamic._GetDescInvokeType = win32com_client_dynamic.GetDescInvokeType
 sys.modules['win32com'] = win32com
 
 # patch for > 214

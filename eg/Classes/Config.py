@@ -129,3 +129,5 @@ def RecursivePySave(obj, fileWriter, indent=""):
         value = objDict[key]
         fileWriter(indent + "class " + key + ":\n")
         RecursivePySave(value, fileWriter, indent + "    ")
+
+

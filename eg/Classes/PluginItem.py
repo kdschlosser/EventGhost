@@ -78,6 +78,17 @@ class PluginItem(ActionItem):
             return False
         if not TreeItem.AskDelete(self):
             return False
+
+        if eg.EventInfo.GetEvents(self.executable):
+            dlg = eg.MessageDialog(
+                None,
+                'Delete saved plugin events?\n\n',
+                'Delete Events',
+                wx.YES_NO | wx.ICON_QUESTION
+            )
+            if dlg.ShowModal() == wx.ID_YES:
+                eg.EventInfo.RemovePlugin(self.executable)
+            dlg.Destroy()
         return True
 
     @eg.AssertInActionThread

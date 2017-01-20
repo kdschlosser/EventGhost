@@ -573,3 +573,4 @@ def UpdateStartupShortcut(create):
             arguments="-h -e OnInitAfterBoot",
             startIn=os.path.dirname(os.path.abspath(sys.executable)),
         )
+

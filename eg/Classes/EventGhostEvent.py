@@ -93,6 +93,8 @@ class EventGhostEvent(object):
         self.isEnded = False
         self.shouldEnd = Event()
         self.upFuncList = []
+        if source in eg.pluginList:
+            eg.EventInfo.Add(source, self.string)
 
     def AddUpFunc(self, func, *args, **kwargs):
         if self.isEnded:

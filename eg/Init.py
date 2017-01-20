@@ -37,6 +37,7 @@ def DeInit():
 
     eg.PrintDebugNotice("shutting down")
     eg.config.Save()
+    eg.EventInfo.Save()
     eg.messageReceiver.Stop()
     if eg.dummyAsyncoreDispatcher:
         eg.dummyAsyncoreDispatcher.close()
@@ -76,8 +77,6 @@ def ImportAll():
     Traverse(eg.corePluginDir, "eg.CorePluginModule")
 
 def Init():
-    import WinApi.pywin32_patches # NOQA
-
     if eg.startupArguments.isMain or eg.startupArguments.install:
         import WinApi.COMServer  # NOQA
 
@@ -129,6 +128,7 @@ def InitGui():
         windll.kernel32.RegisterApplicationRestart(args, 8)
 
     eg.Print(eg.text.MainFrame.Logger.welcomeText)
+    eg.EventInfo.Load()
 
 def InitPathsAndBuiltins():
     sys.path.insert(0, eg.mainDir.encode('mbcs'))
