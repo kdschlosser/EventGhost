@@ -22,107 +22,154 @@ import os
 import eg
 
 
-class EventInfo:
-    icon = eg.Icons.EVENT_ICON
-    pluginEventPath = None
-    undoPlugins = None
-    pluginEvents = None
+class EventInfo(object):
+    iconIndex = eg.Icons.EVENT_ICON.index
+    pluginEventPath = os.path.join(eg.configDir, 'events.py')
+    eventInfoList = []
+    undoInfoList = []
+    name = None
+    description = ''
+    info = None
+    pluginName = None
+    event = ''
+    path = ''
+    plugins = {}
 
-    def __init__(self, name, description, info):
-        self.name = name
-        if description:
-            self.description = description
+    def __init__(self, pluginInfo, eventString, eventDescription):
+        if isinstance(pluginInfo, basestring):
+            plugin = getattr(eg.plugins, pluginInfo, None)
+            if plugin is not None:
+                eventInfo = EventInfo.Create(
+                    plugin.plugin.info,
+                    eventString,
+                    eventDescription
+                )
+
+                if eventInfo:
+                    self.__dict__ = eventInfo.__dict__
         else:
-            self.description = ""
-        self.info = info
+            self.info = pluginInfo
+            self.name = eventString
+            self.description = eventDescription
+            self.path = pluginInfo.path
+            if self.info.eventPrefix:
+                self.event = self.info.eventPrefix + '.' + self.name
+            else:
+                self.event = self.name
+            self.pluginName = self.info.pluginName
+
+    def __del__(self):
+        if self not in EventInfo.undoInfoList:
+            eventInfo = EventInfo(self.info, self.name, self.description)
+            EventInfo.undoInfoList.append(eventInfo)
+
+    def __repr__(self):
+        if self.name is not None:
+            return "eg.PluginInfo('%s', '%s', '%s')" % (
+                self.info.pluginName,
+                self.name,
+                self.description
+            )
+        else:
+            return ''
+
+    @classmethod
+    def Create(cls, pluginInfo, eventString, eventDescription):
+
+        if not eventDescription:
+            eventDescription = eg.text.EventDialog.noDescription
+
+        eventList = pluginInfo.eventList
+
+        for eventInfo in eventList:
+            if eventInfo.name == eventString:
+                return
+
+        eventInfo = cls.__new__(cls, pluginInfo, eventString, eventDescription)
+
+        return eventInfo
 
     @classmethod
     def Load(cls):
-        cls.pluginEventPath = os.path.join(eg.configDir, 'events.py')
-        cls.undoPlugins = {}
-        cls.pluginEvents = {}
-
         if os.path.exists(cls.pluginEventPath):
+            eventDict = {}
             eg.ExecFile(
                 cls.pluginEventPath,
                 {},
-                cls.pluginEvents
+                eventDict
             )
-        for plugin in eg.pluginList:
-            pluginName = cls._GetPluginName(plugin)
-            if pluginName in cls.pluginEvents:
-                if plugin.info.eventList:
-                    savedEvents = list(cls.pluginEvents[pluginName])
-                    pluginEvents = tuple(
-                        event[0] for event in plugin.info.eventList
-                    )
+            cls.eventInfoList = list(eventDict.get('eventInfoList', ()))
 
-                    for event in savedEvents[:]:
-                        if event in pluginEvents:
-                            savedEvents.remove(event)
-                        else:
-                            plugin.info.eventList += ((event, u''),)
+    @classmethod
+    def Add(cls, eventString, plugin=None):
 
-                    cls.pluginEvents[pluginName] = tuple(savedEvents)
+        def AddEventInfo(evt, plug):
+            eventInfo = cls.Create(plug.info, evt)
+            if eventInfo:
+                cls.eventInfoList.append(eventInfo)
+                plugin.info.eventList += (eventInfo,)
 
+        if plugin is None and '.' in eventString:
+            for plugin in eg.pluginList:
+                eventPrefix = plugin.info.eventPrefix
+                if not eventPrefix:
+                    continue
+
+                if eventPrefix in cls.plugins:
+                    plugins = cls.plugins[eventPrefix]
                 else:
-                    plugin.info.eventList = tuple(
-                        (event, u'') for event in cls.pluginEvents[pluginName]
-                    )
+                    plugins = []
 
-    @classmethod
-    def Add(cls, plugin, event):
-        event = unicode(event)
-        if plugin.info.eventList is None:
-            plugin.info.eventList = ((event, u''),)
-        else:
-            eventList = tuple(item[0] for item in plugin.info.eventList)
-            if event in eventList:
-                event = None
+                if plugin not in plugins:
+                    plugins.append(plugin)
+                cls.plugins[eventPrefix] = plugins[:]
 
-        if event is not None:
-            eventList = cls.GetEvents(plugin)
+                if eventString.startswith(eventPrefix):
+                    eventString = '.'.join(eventString.split('.')[1:])
+                    for plugin in plugins:
+                        AddEventInfo(eventString, plugin)
 
-            if event not in eventList:
-                eventList += (event,)
-                cls.pluginEvents[cls._GetPluginName(plugin)] = eventList
-
-    @classmethod
-    def _GetPluginName(cls, plugin):
-        return plugin.__module__.split('.')[2]
-
-    @classmethod
-    def RemovePlugin(cls, plugin):
-        pluginName = cls._GetPluginName(plugin)
-        if pluginName in cls.pluginEvents:
-            cls.undoPlugins[pluginName] = cls.pluginEvents[pluginName][:]
-            del (cls.pluginEvents[pluginName])
-
-    @classmethod
-    def GetEvents(cls, plugin):
-        pluginName = cls._GetPluginName(plugin)
-
-        if pluginName in cls.pluginEvents:
-            return cls.pluginEvents[pluginName]
-        else:
-            return ()
-
-    @classmethod
-    def Undo(cls):
-        for pluginName in cls.undoPlugins.keys():
-            cls.pluginEvents[pluginName] = cls.undoPlugins[pluginName]
+        elif plugin is not None:
+            AddEventInfo(eventString, plugin)
 
     @classmethod
     def Save(cls):
-        if eg.document.isDirty:
-            cls.Undo()
+        for eventInfo in cls.undoInfoList[:]:
+            plugin = getattr(eg.plugins, eventInfo.pluginName, None)
+            if plugin or eg.document.isDirty:
+                cls.eventInfoList.append(eventInfo)
+            else:
+                del(eventInfo)
 
-        with open(cls.pluginEventPath, 'w') as f:
-            for pluginName in sorted(cls.pluginEvents.keys()):
-                if not pluginName.startswith('_'):
-                    line = '%s = (\n' % pluginName
-                    for event in cls.pluginEvents[pluginName]:
-                        line += '    %r,\n' % event
-                    line += '\n)\n\n'
+        f = open(cls.pluginEventPath, 'w')
+        if cls.eventInfoList:
+            events = tuple(
+                repr(event) for event in cls.eventInfoList if repr(event)
+            )
 
-                    f.write(line)
+            f.write('eventInfoList = (\n')
+            for eventInfo in sorted(events):
+                f.write('    %s,\n' % eventInfo)
+            f.write(')\n')
+        f.close()
+
+    @classmethod
+    def Nodes(cls):
+        for plugin in eg.pluginList:
+            info = plugin.info
+            if info.eventList:
+                yield cls.Node(plugin, info.eventList)
+
+    class Node(object):
+
+        def __init__(self, plugin, events):
+            self.name = plugin.name
+            self.description = plugin.description
+            self.folderIndex = plugin.info.icon.folderIndex
+            self.events = events
+            self.path = plugin.info.path
+            self.evalName = plugin.info.evalName
+
+        def __iter__(self):
+            for eventInfo in self.events:
+                yield eventInfo

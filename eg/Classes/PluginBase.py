@@ -148,7 +148,16 @@ class PluginBase(object):
         self.info.actionGroup.AddActionsFromList(theList, defaultAction)
 
     def AddEvents(self, *eventList):
-        self.info.eventList = eventList
+        if self.info.eventList is None:
+            self.info.eventList = ()
+
+        for event in eventList:
+            if isinstance(event, basestring):
+                event = (event, '')
+
+            eventInfo = eg.EventInfo.Create(self.info, *event)
+            if eventInfo:
+                self.info.eventList += (eventInfo,)
 
     def AddGroup(self, name=None, description=None, iconFile=None):
         """

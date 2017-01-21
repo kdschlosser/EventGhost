@@ -105,6 +105,7 @@ class EventItem(TreeItem):
         if eventString not in eventTable:
             eventTable[eventString] = []
         eventTable[eventString].append(self)
+        eg.EventInfo.Add(eventString)
 
     @eg.AssertInActionThread
     def RenameTo(self, newName):
