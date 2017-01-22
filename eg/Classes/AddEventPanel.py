@@ -138,7 +138,7 @@ class AddEventPanel(eg.Panel):
             parent = tree.AppendItem(
                 parent=self.root,
                 text=node.name,
-                image=node.folderIndex,
+                image=node.icon.folderIndex,
             )
             tree.SetPyData(parent, node)
             tree.SetItemHasChildren(parent, True)
@@ -166,7 +166,7 @@ class AddEventPanel(eg.Panel):
             child = self.tree.AppendItem(
                 parent=treeItem,
                 text=eventInfo.event,
-                image=eventInfo.iconIndex,
+                image=eventInfo.icon.index,
             )
             self.tree.SetPyData(child, eventInfo)
 
@@ -369,10 +369,14 @@ class AddEventPanel(eg.Panel):
 
         treeItem = self.FindPluginItem(eventPrefix)
 
-        while treeItem.IsOk():
+        if treeItem.IsOk():
             treeItem, cookie = tree.GetFirstChild(treeItem)
+
+        while treeItem.IsOk():
             if tree.GetItemText(treeItem).lower() == event:
                 return treeItem
+            treeItem, cookie = tree.GetNextChild(treeItem, cookie)
+
         return wx.TreeItemId()
 
     def FindPluginItem(self, pluginName):

@@ -23,7 +23,7 @@ import eg
 
 
 class EventInfo(object):
-    iconIndex = eg.Icons.EVENT_ICON.index
+    icon = eg.Icons.EVENT_ICON
     pluginEventPath = os.path.join(eg.configDir, 'events.py')
     eventInfoList = []
     undoInfoList = []
@@ -36,17 +36,16 @@ class EventInfo(object):
     plugins = {}
 
     def __init__(self, pluginInfo, eventString, eventDescription):
+        if not eventDescription:
+            eventDescription = eg.text.EventDialog.noDescription
+
         if isinstance(pluginInfo, basestring):
+            print pluginInfo, eventString, eventDescription
+            print eg.pluginList
             plugin = getattr(eg.plugins, pluginInfo, None)
             if plugin is not None:
-                eventInfo = EventInfo.Create(
-                    plugin.plugin.info,
-                    eventString,
-                    eventDescription
-                )
-
-                if eventInfo:
-                    self.__dict__ = eventInfo.__dict__
+                print eventString, eventDescription
+                plugin.plugin.AddEvents((eventString, eventDescription))
         else:
             self.info = pluginInfo
             self.name = eventString
@@ -65,7 +64,7 @@ class EventInfo(object):
 
     def __repr__(self):
         if self.name is not None:
-            return "eg.PluginInfo('%s', '%s', '%s')" % (
+            return "eg.EventInfo('%s', '%s', '%s')" % (
                 self.info.pluginName,
                 self.name,
                 self.description
@@ -76,8 +75,8 @@ class EventInfo(object):
     @classmethod
     def Create(cls, pluginInfo, eventString, eventDescription):
 
-        if not eventDescription:
-            eventDescription = eg.text.EventDialog.noDescription
+        if not pluginInfo.eventList:
+            pluginInfo.eventList = ()
 
         eventList = pluginInfo.eventList
 
@@ -85,7 +84,7 @@ class EventInfo(object):
             if eventInfo.name == eventString:
                 return
 
-        eventInfo = cls.__new__(cls, pluginInfo, eventString, eventDescription)
+        eventInfo = eg.EventInfo(pluginInfo, eventString, eventDescription)
 
         return eventInfo
 
@@ -104,7 +103,7 @@ class EventInfo(object):
     def Add(cls, eventString, plugin=None):
 
         def AddEventInfo(evt, plug):
-            eventInfo = cls.Create(plug.info, evt)
+            eventInfo = cls.Create(plug.info, evt, '')
             if eventInfo:
                 cls.eventInfoList.append(eventInfo)
                 plugin.info.eventList += (eventInfo,)
@@ -156,20 +155,23 @@ class EventInfo(object):
     @classmethod
     def Nodes(cls):
         for plugin in eg.pluginList:
-            info = plugin.info
-            if info.eventList:
-                yield cls.Node(plugin, info.eventList)
+            if plugin.info.eventList:
+                yield cls.Node(plugin)
 
     class Node(object):
+        pluginInfo = None
 
-        def __init__(self, plugin, events):
-            self.name = plugin.name
-            self.description = plugin.description
-            self.folderIndex = plugin.info.icon.folderIndex
-            self.events = events
-            self.path = plugin.info.path
-            self.evalName = plugin.info.evalName
+        def __init__(self, plugin):
+            self.pluginInfo = plugin.info
+
+        def __getattr__(self, item):
+            if hasattr(self.pluginInfo, item):
+                return getattr(self.pluginInfo, item)
+
+            raise AttributeError(
+                '%r does not have attribute %s' % (self, item)
+            )
 
         def __iter__(self):
-            for eventInfo in self.events:
+            for eventInfo in self.pluginInfo.eventList:
                 yield eventInfo

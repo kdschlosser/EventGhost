@@ -329,6 +329,7 @@ class Document(object):
         self.SetIsDirty(False)
         self.AfterLoad()
         wx.CallAfter(eg.Notify, "DocumentNewRoot", root)
+        eg.EventInfo.Load()
         return root
 
     @eg.LogIt
