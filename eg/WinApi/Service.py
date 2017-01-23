@@ -52,6 +52,7 @@ from Dynamic import (
     WinError,
 )
 
+
 class Service(object):
     schService = None
     schSCManager = None
@@ -129,7 +130,7 @@ class Service(object):
         if not schService:
             raise WinError()
         else:
-            #print ("Service installed successfully")
+            # print ("Service installed successfully")
             CloseServiceHandle(schService)
 
     def SetDescription(self, description):
@@ -185,7 +186,7 @@ class Service(object):
             None              # no arguments
         ):
             raise WinError()
-        #print("Service start pending...")
+        # print("Service start pending...")
         # Check the status until the service is no longer start pending.
         ssStatus = self.GetStatus()
         # Save the tick count and initial checkpoint.
@@ -245,7 +246,7 @@ class Service(object):
             if GetTickCount() - dwStartTime > dwTimeout:
                 raise TimeOutError()
         # If the service is running, dependencies must be stopped first.
-        #self.StopDependentServices()
+        # self.StopDependentServices()
 
         # Send a stop code to the service.
         if not ControlService(
