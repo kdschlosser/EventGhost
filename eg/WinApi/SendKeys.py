@@ -21,14 +21,44 @@ import wx
 # Local imports
 import eg
 from eg.WinApi.Dynamic import (
-    AttachThreadInput, byref, c_ubyte, CloseHandle, DWORD, GetCurrentThreadId,
-    GetFocus, GetForegroundWindow, GetGUIThreadInfo, GetKeyboardState,
-    GetMessage, GetWindowThreadProcessId, GUITHREADINFO, INPUT, INPUT_KEYBOARD,
-    KEYEVENTF_KEYUP, MapVirtualKey, MSG, OpenProcess, pointer, PostMessage,
-    PROCESS_QUERY_INFORMATION, SendInput, SetKeyboardState, SetTimer, sizeof,
-    VK_CONTROL, VK_LCONTROL, VK_LSHIFT, VK_MENU, VK_SHIFT, VkKeyScanW,
-    WaitForInputIdle, WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP,
-    WM_TIMER,
+    AttachThreadInput,
+    byref,
+    c_ubyte,
+    CloseHandle,
+    DWORD,
+    GetCurrentThreadId,
+    GetFocus,
+    GetForegroundWindow,
+    GetGUIThreadInfo,
+    GetKeyboardState,
+    GetMessage,
+    GetWindowThreadProcessId,
+    GUITHREADINFO,
+    INPUT,
+    INPUT_KEYBOARD,
+    KEYEVENTF_KEYUP,
+    MapVirtualKey,
+    MSG,
+    OpenProcess,
+    pointer,
+    PostMessage,
+    PROCESS_QUERY_INFORMATION,
+    SendInput,
+    SetKeyboardState,
+    SetTimer,
+    sizeof,
+    VK_CONTROL,
+    VK_LCONTROL,
+    VK_LSHIFT,
+    VK_MENU,
+    VK_SHIFT,
+    VkKeyScanW,
+    WaitForInputIdle,
+    WM_KEYDOWN,
+    WM_KEYUP,
+    WM_SYSKEYDOWN,
+    WM_SYSKEYUP,
+    WM_TIMER
 )
 
 VK_CODES = (
@@ -321,6 +351,7 @@ VK_KEYS = {
 for keyword, code in VK_CODES:
     VK_KEYS[keyword.upper()] = code
 
+
 class SendKeysParser:
     @eg.LogIt
     def __init__(self):
@@ -335,7 +366,13 @@ class SendKeysParser:
         self.guiTreadInfo = GUITHREADINFO()
         self.guiTreadInfo.cbSize = sizeof(GUITHREADINFO)
 
-    def __call__(self, hwnd, keystrokeString, useAlternateMethod=False, mode=2):
+    def __call__(
+        self,
+        hwnd,
+        keystrokeString,
+        useAlternateMethod=False,
+        mode=2
+    ):
         keyData = ParseText(keystrokeString)
         if keyData:
             needGetFocus = False
@@ -368,7 +405,7 @@ class SendKeysParser:
                 0,
                 processID
             )
-            #self.WaitForInputProcessed()
+            # self.WaitForInputProcessed()
 
             oldKeyboardState = PBYTE256()
             GetKeyboardState(byref(oldKeyboardState))
@@ -426,8 +463,8 @@ class SendKeysParser:
 
                     if keyCode == VK_LSHIFT:
                         keyboardStateBuffer[VK_SHIFT] |= 128
-                    #elif keyCode == VK_MENU:
-                    #    self.isSysKey = True
+                    # elif keyCode == VK_MENU:
+                    #     self.isSysKey = True
                     elif keyCode == VK_CONTROL:
                         keyboardStateBuffer[VK_LCONTROL] |= 128
 
@@ -453,8 +490,8 @@ class SendKeysParser:
 
                     if keyCode == VK_LSHIFT:
                         keyboardStateBuffer[VK_SHIFT] &= ~128
-                    #elif keyCode == VK_MENU:
-                    #    self.isSysKey = False
+                    # elif keyCode == VK_MENU:
+                    #     self.isSysKey = False
                     elif keyCode == VK_CONTROL:
                         keyboardStateBuffer[VK_LCONTROL] &= ~128
 
@@ -499,6 +536,7 @@ def ParseSingleChar(char):
         data.append(VK_LSHIFT)
     data.append(vkCode)
     return data
+
 
 def ParseText(text):
     """
