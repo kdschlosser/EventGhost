@@ -42,6 +42,7 @@ from Dynamic import (
 
 memcpy = ctypes.cdll.msvcrt.memcpy
 
+
 def GetClipboardText():
     if not SafeOpenClipboard():
         return
@@ -65,6 +66,7 @@ def GetClipboardText():
     text = text.replace("\r\n", "\n")
     return text
 
+
 def SafeOpenClipboard():
     # some programs seem to poll the clipboard and therefore OpenClipboard
     # returns FALSE. To increase our chances to get the clipboard lock, we
@@ -76,6 +78,7 @@ def SafeOpenClipboard():
             return False
         sleep(0.01)
     return True
+
 
 def SetClipboardText(text):
     charBuffer = create_unicode_buffer(text)
