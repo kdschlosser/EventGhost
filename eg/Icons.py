@@ -28,7 +28,6 @@ from cStringIO import StringIO
 from os.path import abspath, join
 from PIL import Image
 
-# Local imports
 import eg
 
 IMAGES_PATH = eg.imagesDir
@@ -38,6 +37,7 @@ DISABLED_PIL = Image.open(join(IMAGES_PATH, "disabled.png"))
 FOLDER_PIL = Image.open(join(IMAGES_PATH, "folder.png")).convert("RGBA")
 PLUGIN_PIL = Image.open(join(IMAGES_PATH, "plugin.png"))
 ACTION_PIL = Image.open(join(IMAGES_PATH, "action.png")).convert("RGBA")
+
 
 class IconBase(object):
     """
@@ -202,11 +202,17 @@ def ClearImageList():
         for icon in clsType.cache.itervalues():
             icon.__dict__ = {"key": icon.key}
 
+
 def CreateBitmapOnTopOfIcon(foregroundIcon, backgroundIcon, size=(12, 12)):
     small = foregroundIcon.pil.resize(size, Image.BICUBIC)
     pil = backgroundIcon.pil.copy()
     pil.paste(small, (16 - size[0], 16 - size[1]), small)
-    return wx.BitmapFromBufferRGBA(pil.size[0], pil.size[1], str(pil.tobytes()))
+    return wx.BitmapFromBufferRGBA(
+        pil.size[0],
+        pil.size[1],
+        str(pil.tobytes())
+    )
+
 
 def GetBitmap(filePath):
     """
@@ -217,6 +223,7 @@ def GetBitmap(filePath):
     """
     return PilToBitmap(Image.open(filePath).convert("RGBA"))
 
+
 def GetInternalBitmap(name):
     """
     Same as GetBitmap() but looks for the file in the programs images
@@ -224,14 +231,20 @@ def GetInternalBitmap(name):
     """
     return GetBitmap(join(IMAGES_PATH, name + ".png"))
 
+
 def GetInternalImage(name):
     return wx.Image(join(eg.imagesDir, name + ".png"), wx.BITMAP_TYPE_PNG)
+
 
 def PilToBitmap(pil):
     """
     Convert a PIL image to a wx.Bitmap (with alpha channel support).
     """
-    return wx.BitmapFromBufferRGBA(pil.size[0], pil.size[1], str(pil.tobytes()))
+    return wx.BitmapFromBufferRGBA(
+        pil.size[0],
+        pil.size[1],
+        str(pil.tobytes())
+    )
 
 # setup some commonly used icons
 INFO_ICON = PathIcon(join(IMAGES_PATH, "info.png"))
