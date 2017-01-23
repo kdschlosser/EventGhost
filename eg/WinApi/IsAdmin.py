@@ -48,6 +48,7 @@ from Dynamic import (
 
 SECURITY_NT_AUTHORITY = 5
 
+
 def IsAdmin():
     """
     Find out if the user (the owner of the current process) is a member of
@@ -68,6 +69,7 @@ def IsAdmin():
                 raise WinError()
         else:
             raise WinError(err)
+        
     # Then we must query the size of the group information associated with
     # the token. Note that we expect a FALSE result from GetTokenInformation
     # because we've given it a NULL buffer. On exit cbTokenGroups will tell
