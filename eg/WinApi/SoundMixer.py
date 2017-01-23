@@ -158,9 +158,11 @@ MIXER_CONTROL_CLASSES = {
     },
 }
 
+
 # Exceptions
 class SoundMixerException(Exception):
     pass
+
 
 def ChangeMasterVolumeBy(value, deviceId=0):
     # Obtain the volumne control object
@@ -182,6 +184,7 @@ def ChangeMasterVolumeBy(value, deviceId=0):
     elif newVolume > maximum:
         newVolume = maximum
     SetControlValue(hmixer, mixerControl, newVolume)
+
 
 def GetControls(hmixer, mixerline):
     numCtrls = mixerline.cControls
@@ -223,8 +226,10 @@ def GetControls(hmixer, mixerline):
         )
     return result
 
+
 def GetControlDetails():
     pass
+
 
 def GetControlValue(hmixer, mixerControl):
     valueDetails = MIXERCONTROLDETAILS_UNSIGNED()
@@ -243,16 +248,17 @@ def GetControlValue(hmixer, mixerControl):
         raise SoundMixerException()
     return valueDetails.dwValue
 
+
 def GetDeviceId(deviceId, strVal=False):
     if strVal and deviceId == "Primary Sound Driver":
         deviceId = 0
     if isinstance(deviceId, int):
         if strVal:
             devices = GetMixerDevices()
-            if deviceId < len(devices) - 1 and deviceId > -1:
+            if -1 < deviceId < len(devices) - 1:
                 return devices[deviceId]
             else:
-                #return devices[0]
+                # return devices[0]
                 raise SoundMixerException()
         else:
             return deviceId
@@ -265,8 +271,9 @@ def GetDeviceId(deviceId, strVal=False):
             else:
                 return devices.index(deviceId) - 1
         else:
-            #return 0
+            # return 0
             raise SoundMixerException()
+
 
 def GetDeviceLines(deviceId=0):
     deviceId = GetDeviceId(deviceId)
@@ -304,6 +311,7 @@ def GetDeviceLines(deviceId=0):
             for name in GetControls(hmixer, mixerline):
                 print "            Control:", name
 
+
 def GetMasterVolume(deviceId=0):
     # Obtain the volumne control object
     deviceId = GetDeviceId(deviceId)
@@ -320,6 +328,7 @@ def GetMasterVolume(deviceId=0):
     minimum = mixerControl.Bounds.lMinimum
     value = 100.0 * (value - minimum) / (maximum - minimum)
     return value
+
 
 def GetMixerControl(componentType, ctrlType, deviceId=0):
     """
@@ -369,24 +378,27 @@ def GetMixerControl(componentType, ctrlType, deviceId=0):
         raise SoundMixerException()
     return hmixer, mixerControl
 
+
 def GetMixerDevices(useList=False):
     """
     Returns a list of all mixer device names available on the system.
     """
     mixcaps = MIXERCAPS()
-    result = []
+    result = ["Primary Sound Driver"]
     # get the number of Mixer devices in this computer
-    result.append("Primary Sound Driver")
     for i in range(mixerGetNumDevs()):
         # get info about the device
         if mixerGetDevCaps(i, byref(mixcaps), sizeof(MIXERCAPS)):
             continue
         # store the name of the device
         result.append(mixcaps.szPname)
-    return result if useList else dict((i - 1, result[i]) for i in range(len(result)))
+    return result if useList else dict(
+        (i - 1, result[i]) for i in range(len(result))
+    )
+
 
 def GetMute(deviceId=0):
-    # Obtain the volumne control object
+    # Obtain the volume control object
     deviceId = GetDeviceId(deviceId)
     hmixer, mixerControl = GetMixerControl(
         MIXERLINE_COMPONENTTYPE_DST_SPEAKERS,
@@ -396,6 +408,7 @@ def GetMute(deviceId=0):
 
     # Then get the volume
     return GetControlValue(hmixer, mixerControl)
+
 
 def SetControlValue(hmixer, mixerControl, value):
     """
@@ -422,6 +435,7 @@ def SetControlValue(hmixer, mixerControl, value):
     if rc != MMSYSERR_NOERROR:
         raise SoundMixerException()
 
+
 def SetMasterVolume(value, deviceId=0):
     # Obtain the volumne control object
     deviceId = GetDeviceId(deviceId)
@@ -440,6 +454,7 @@ def SetMasterVolume(value, deviceId=0):
         newValue = maximum
     SetControlValue(hmixer, volCtrl, newValue)
 
+
 def SetMute(mute=True, deviceId=0):
     # Obtain the volumne control object
     deviceId = GetDeviceId(deviceId)
@@ -451,6 +466,7 @@ def SetMute(mute=True, deviceId=0):
 
     # Then set the volume
     return SetControlValue(hmixer, mixerControl, int(mute))
+
 
 def ToggleMute(deviceId=0):
     deviceId = GetDeviceId(deviceId)
