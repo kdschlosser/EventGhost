@@ -53,6 +53,7 @@ MESSAGE_STDERR = 2
 MESSAGE_RESULT = 3
 MESSAGE_EXCEPTION = 4
 
+
 class PipeStream(object):
     def __init__(self, hPipe, code):
         self.hPipe = hPipe
@@ -78,6 +79,7 @@ def FormatException(excInfo):
     lines += format_exception_only(excType, excValue)
     return u"".join(lines)
 
+
 def ReadPipeMessage(hPipe):
     data = ""
     fSuccess = 0
@@ -99,6 +101,7 @@ def ReadPipeMessage(hPipe):
         data += chBuf.value
     return loads(data)
 
+
 def WritePipeMessage(hPipe, code, data):
     message = dumps((code, data))
     cbWritten = DWORD(0)
@@ -111,6 +114,7 @@ def WritePipeMessage(hPipe, code, data):
     )
     if (not fSuccess) or (len(message) != cbWritten.value):
         raise Exception("WritePipeMessage failed")
+
 
 def Main(pipeName, debugLevel):
     if debugLevel:
