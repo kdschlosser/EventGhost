@@ -25,8 +25,8 @@ from ctypes import windll
 from time import gmtime
 from types import ModuleType
 
-# Local imports
 import eg
+
 
 def DeInit():
     eg.PrintDebugNotice("stopping threads")
@@ -41,6 +41,7 @@ def DeInit():
     if eg.dummyAsyncoreDispatcher:
         eg.dummyAsyncoreDispatcher.close()
 
+
 def ImportAll():
     from os.path import join, basename
 
@@ -54,7 +55,6 @@ def ImportAll():
                 if not os.path.exists(join(path, "__init__.py")):
                     continue
                 moduleName = moduleRoot + "." + name
-                #print moduleName
                 __import__(moduleName)
                 Traverse(path, moduleName)
                 continue
@@ -69,11 +69,11 @@ def ImportAll():
                 "eg.CorePluginModule.EventGhost.OsdSkins.Default",
             ):
                 continue
-            #print moduleName
             __import__(moduleName)
 
     Traverse(join(eg.mainDir, "eg"), "eg")
     Traverse(eg.corePluginDir, "eg.CorePluginModule")
+
 
 def Init():
     import WinApi.pywin32_patches # NOQA
@@ -81,8 +81,9 @@ def Init():
     if eg.startupArguments.isMain or eg.startupArguments.install:
         import WinApi.COMServer  # NOQA
 
+
 def InitGui():
-    #import eg.WinApi.COMServer
+    # import eg.WinApi.COMServer
 
     import __builtin__
     __builtin__.raw_input = RawInput
@@ -90,21 +91,17 @@ def InitGui():
 
     eg.scheduler.start()
     eg.messageReceiver.Start()
-
     eg.document = eg.Document()
 
     if not (eg.config.hideOnStartup or eg.startupArguments.hideOnStartup):
         eg.document.ShowFrame()
 
     eg.actionThread.Start()
-
     eg.eventThread.startupEvent = eg.startupArguments.startupEvent
-
-    config = eg.config
 
     startupFile = eg.startupArguments.startupFile
     if startupFile is None:
-        startupFile = config.autoloadFilePath
+        startupFile = eg.config.autoloadFilePath
     if startupFile and not os.path.exists(startupFile):
         eg.PrintError(eg.text.Error.FileNotFound % startupFile)
         startupFile = None
@@ -129,6 +126,7 @@ def InitGui():
         windll.kernel32.RegisterApplicationRestart(args, 8)
 
     eg.Print(eg.text.MainFrame.Logger.welcomeText)
+
 
 def InitPathsAndBuiltins():
     sys.path.insert(0, eg.mainDir.encode('mbcs'))
@@ -167,14 +165,17 @@ def InitPathsAndBuiltins():
     corePluginPackage.__path__ = [eg.corePluginDir]
     sys.modules["eg.CorePluginModule"] = corePluginPackage
     eg.CorePluginModule = corePluginPackage
+
     # we create a package 'PluginModule' and set its path to the plugin-dir
     # so we can simply use __import__ to load a plugin file
     if not os.path.exists(eg.localPluginDir):
         os.makedirs(eg.localPluginDir)
+
     userPluginPackage = ModuleType("eg.UserPluginModule")
     userPluginPackage.__path__ = [eg.localPluginDir]
     sys.modules["eg.UserPluginModule"] = userPluginPackage
     eg.UserPluginModule = userPluginPackage
+
 
 def InitPil():
     """
@@ -187,9 +188,11 @@ def InitPil():
     import PIL.GifImagePlugin
     PIL.Image._initialized = 2
 
+
 # replace builtin input() with a small dialog
 def Input(prompt=None):
     return eval(eg.SimpleInputDialog.RawInput(prompt))
+
 
 # replace builtin raw_input() with a small dialog
 def RawInput(prompt=None):
