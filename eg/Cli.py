@@ -45,7 +45,7 @@ class args:
     debugLevel = 0
     hideOnStartup = False
     install = False
-    isMain = hasattr(__main__, "isMain")  #splitext(basename(scriptPath))[0].lower() == "eventghost"
+    isMain = hasattr(__main__, "isMain")
     pluginFile = None
     startupEvent = None
     startupFile = None
@@ -59,39 +59,49 @@ if args.isMain:
             args.debugLevel = 1
             if len(arg) > 6:
                 args.debugLevel = int(arg[6:])
+
         elif arg in ("-n", "-netsend"):
             from Classes.NetworkSend import Main
             Main(list(argvIter))
             sys.exit(0)
+
         elif arg in ('-h', '-hide'):
             args.hideOnStartup = True
+
         elif arg == '-install':
             import compileall
             compileall.compile_dir(mainDir)
             args.install = True
+
         elif arg == '-uninstall':
             for root, dirs, files in os.walk(mainDir):
                 for name in files:
                     if name.lower().endswith((".pyc", ".pyo")):
                         os.remove(join(root, name))
             sys.exit(0)
+
         elif arg in ('-m', '-multiload'):
             args.allowMultiLoad = True
+
         elif arg in ('-e', '-event'):
             eventstring = argvIter.next()
             payloads = list(argvIter)
             if len(payloads) == 0:
                 payloads = None
             args.startupEvent = (eventstring, payloads)
+
         elif arg in ('-f', '-file'):
             args.startupFile = abspath(argvIter.next())
+
         elif arg in ('-p', '-plugin'):
             args.pluginFile = abspath(argvIter.next())
-            #args.isMain = False
+
         elif arg == '-configdir':
             args.configDir = argvIter.next()
+
         elif arg == '-translate':
             args.translate = True
+
         elif arg == "-restart":
             import time
             while True:
@@ -117,8 +127,8 @@ if args.isMain:
     if (
         not args.allowMultiLoad and
         not args.translate and
-        args.isMain  #and
-        #not args.pluginFile
+        args.isMain  # and
+        # not args.pluginFile
     ):
         # check if another instance of the program is running
         appMutex = ctypes.windll.kernel32.CreateMutexA(
