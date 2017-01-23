@@ -18,7 +18,6 @@
 
 import re
 
-# Local imports
 from Dynamic import (
     byref,
     c_ubyte,
@@ -53,13 +52,14 @@ GUID_CLASS_COMPORT = GUID(
     (c_ubyte * 8)(0x9c, 0xe4, 0x08, 0x00, 0x3e, 0x30, 0x1f, 0x73)
 )
 
-#DIGCF_PRESENT = 2
+# DIGCF_PRESENT = 2
 DIGCF_DEVICEINTERFACE = 16
 INVALID_HANDLE_VALUE = 0
 ERROR_INSUFFICIENT_BUFFER = 122
 SPDRP_HARDWAREID = 1
 SPDRP_FRIENDLYNAME = 12
 ERROR_NO_MORE_ITEMS = 259
+
 
 def GetComPorts(availableOnly=True):
     """
