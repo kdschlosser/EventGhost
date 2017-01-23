@@ -74,6 +74,7 @@ MESSAGE_EXCEPTION = 4
 
 BUFSIZE = 4096
 
+
 def ExecAs(scriptPath, asAdministrator, funcName, *args, **kwargs):
     pipeName = "\\\\.\\pipe\\" + str(GUID.create_new())
     Msg("creating named pipe")
@@ -127,7 +128,7 @@ def ExecAs(scriptPath, asAdministrator, funcName, *args, **kwargs):
         cbRead = DWORD(0)
         while True:
             fSuccess = ReadFile(hPipe, chBuf, BUFSIZE, byref(cbRead), None)
-            if ((fSuccess == 1) or (cbRead.value != 0)):
+            if (fSuccess == 1) or (cbRead.value != 0):
                 code, data = loads(chBuf.value)
                 if code == MESSAGE_STDERR:
                     sys.stderr.write(data)
@@ -149,6 +150,7 @@ def ExecAs(scriptPath, asAdministrator, funcName, *args, **kwargs):
         raise Exception("Child process raised an exception\n" + data)
     return result
 
+
 def ExecAsAdministrator(scriptPath, funcName, *args, **kwargs):
     """
     Execute some Python code in a process with elevated privileges.
@@ -165,6 +167,7 @@ def ExecAsAdministrator(scriptPath, funcName, *args, **kwargs):
     :returns: The return value of the function
     """
     return ExecAs(scriptPath, True, funcName, *args, **kwargs)
+
 
 def GetUncPathOf(filePath):
     buf = create_string_buffer(1024)
@@ -190,6 +193,7 @@ else:
     def Msg(dummyMsg):
         pass
 
+
 def RunAs(filePath, asAdministrator, *args):
     sei = SHELLEXECUTEINFO()
     sei.cbSize = sizeof(SHELLEXECUTEINFO)
@@ -210,8 +214,10 @@ def RunAs(filePath, asAdministrator, *args):
         raise WindowsError(err, "ShellExecuteEx: %s" % FormatError(err))
     return sei.hProcess
 
+
 def RunAsAdministrator(filePath, *args):
     return RunAs(filePath, True, *args)
+
 
 def WritePipeMessage(hPipe, code, data):
     message = dumps((code, data))
