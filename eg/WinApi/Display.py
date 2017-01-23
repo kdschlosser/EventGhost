@@ -18,16 +18,40 @@
 
 # Local imports
 from Dynamic import (
-    CDS_NORESET, CDS_SET_PRIMARY, CDS_UPDATEREGISTRY, ChangeDisplaySettingsEx,
-    DEVMODE, DISPLAY_DEVICE, DISPLAY_DEVICE_ATTACHED_TO_DESKTOP,
-    DISPLAY_DEVICE_MIRRORING_DRIVER, DISPLAY_DEVICE_PRIMARY_DEVICE,
-    DM_BITSPERPEL, DM_DISPLAYFLAGS, DM_DISPLAYFREQUENCY, DM_PELSHEIGHT,
-    DM_PELSWIDTH, DM_POSITION, EDS_RAWMODE, ENUM_CURRENT_SETTINGS,
-    EnumDisplayDevices, EnumDisplaySettingsEx, pointer, sizeof,
+    CDS_NORESET,
+    CDS_SET_PRIMARY,
+    CDS_UPDATEREGISTRY,
+    ChangeDisplaySettingsEx,
+    DEVMODE,
+    DISPLAY_DEVICE,
+    DISPLAY_DEVICE_ATTACHED_TO_DESKTOP,
+    DISPLAY_DEVICE_MIRRORING_DRIVER,
+    DISPLAY_DEVICE_PRIMARY_DEVICE,
+    DM_BITSPERPEL,
+    DM_DISPLAYFLAGS,
+    DM_DISPLAYFREQUENCY,
+    DM_PELSHEIGHT,
+    DM_PELSWIDTH,
+    DM_POSITION,
+    EDS_RAWMODE,
+    ENUM_CURRENT_SETTINGS,
+    EnumDisplayDevices,
+    EnumDisplaySettingsEx,
+    pointer,
+    sizeof
 )
 
+
 class Display(object):
+
     def __init__(self, iDevNum, displayDevice):
+        self.x = None
+        self.y = None
+        self.width = None
+        self.height = None
+        self.frequency = None
+        self.bitsPerPixel = None
+
         self.iDevNum = iDevNum
         self.deviceName = displayDevice.DeviceName
         self.deviceString = displayDevice.DeviceString
@@ -107,6 +131,7 @@ def GetDisplay(displayNum):
         return None
     return Display(displayNum, displayDevice)
 
+
 def GetDisplays():
     res = []
     displayDevice = DISPLAY_DEVICE()
@@ -123,6 +148,7 @@ def GetDisplays():
             displayDevice.cb = sizeof(DISPLAY_DEVICE)
         iDevNum += 1
     return res
+
 
 def GetDisplayModes():
     res = []
@@ -159,6 +185,7 @@ def GetDisplayModes():
         )
         res.append(displayMode)
     return tuple(res)
+
 
 def SetDisplayModes(*args):
     for (
