@@ -88,6 +88,7 @@ EDITIONS = {
 
 GetSystemMetrics = windll.user32.GetSystemMetrics
 
+
 class OSVERSIONINFOEX(Structure):
     _fields_ = [
         ('dwOSVersionInfoSize', DWORD),
