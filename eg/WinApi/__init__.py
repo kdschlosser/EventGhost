@@ -40,6 +40,7 @@ from Utils import (  # NOQA
     PySendMessageTimeout as SendMessageTimeout,
 )
 
+
 def GetTopLevelWindowList(includeInvisible):
     """
     cFunctions.GetTopLevelWindowList() may return hwnds that are a larger
