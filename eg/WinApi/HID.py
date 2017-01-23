@@ -24,26 +24,41 @@ import win32con
 import win32event
 import win32file
 import _winreg
-from ctypes import c_byte, c_char, c_int, c_long, c_ulong, c_ushort, c_wchar, Structure, Union
+from ctypes import (
+    c_byte,
+    c_char,
+    c_int,
+    c_long,
+    c_ulong,
+    c_ushort,
+    c_wchar,
+    Structure,
+    Union
+)
 from ctypes import byref, sizeof, pointer, POINTER
 from ctypes.wintypes import BOOLEAN, ULONG
 
-# Local imports
 import eg
 
-DeviceRegEx = re.compile(r"\\\\\?\\(\w+)#VID_([0-9a-fA-F]+)\&PID_([0-9a-fA-F]+)#", re.IGNORECASE)
+DeviceRegEx = re.compile(
+    r"\\\\\?\\(\w+)#VID_([0-9a-fA-F]+)\&PID_([0-9a-fA-F]+)#",
+    re.IGNORECASE
+)
+
 
 class Text:
     errorFind = "Error finding HID device: "
     errorOpen = "Error opening HID device: "
     errorRead = "Error reading HID device: "
-    errorDisconnected = "Error HID device disconected: "
-    errorInvalidDataIndex = "Found data index not defined as button or control value."
+    errorDisconnected = "Error HID device disconnected: "
+    errorInvalidDataIndex = (
+        "Found data index not defined as button or control value."
+    )
     errorReportLength = "Report length must not be zero for device."
     errorRetrieval = "Error getting HID device info."
-    errorReportLength = "Report length must not be zero for device "
     errorMultipleDevices = "Multiple devices found. Don't know which to use."
     vendorID = "Vendor ID "
+
 
 class HIDThread(threading.Thread):
     def __init__(self, deviceName, devicePath, threadName = None):
@@ -62,7 +77,10 @@ class HIDThread(threading.Thread):
         self.ButtonCallback = None
         self.ValueCallback = None
         self.StopCallback = None
-        threading.Thread.__init__(self, name = threadName if threadName else self.devicePath)
+        threading.Thread.__init__(
+            self,
+            name=threadName if threadName else self.devicePath
+        )
 
     @eg.LogIt
     def AbortThread(self):
@@ -72,7 +90,7 @@ class HIDThread(threading.Thread):
         win32event.SetEvent(self._overlappedRead.hEvent)
 
     def run(self):
-        #open file/device
+        # open file/device
         try:
             handle = win32file.CreateFile(
                 self.devicePath,
@@ -85,20 +103,22 @@ class HIDThread(threading.Thread):
             )
         except pywintypes.error as (errno, function, strerror):
             self.lockObject.release()
-            eg.PrintError(self.text.errorOpen + self.deviceName + " (" + strerror + ")")
+            eg.PrintError(
+                '%s%s (%s)' % (self.text.errorOpen, self.deviceName, strerror)
+            )
             return
 
         hidDLL = ctypes.windll.hid
-        #setupapiDLL = ctypes.windll.setupapi
+        # setupapiDLL = ctypes.windll.setupapi
 
-        #get preparsed data
+        # get preparsed data
         preparsedData = c_ulong()
         hidDLL.HidD_GetPreparsedData(
             int(handle),
             ctypes.byref(preparsedData)
         )
 
-        #getCaps
+        # getCaps
         hidpCaps = HIDP_CAPS()
         hidDLL.HidP_GetCaps(preparsedData, ctypes.byref(hidpCaps))
 
@@ -107,11 +127,11 @@ class HIDThread(threading.Thread):
             self.abort = True
             eg.PrintError(self.text.errorReportLength + self.deviceName)
 
-        rt = c_int(0)   #report type input
-        rl = c_ulong(n)  #report length
+        rt = c_int(0)   # report type input
+        rl = c_ulong(n)  # report length
         maxDataL = hidDLL.HidP_MaxDataListLength(rt, preparsedData)
 
-        #getting button caps
+        # getting button caps
         bCapsArrL = c_ushort(hidpCaps.NumberInputButtonCaps)
         bCapsArrType = HIDP_BUTTON_CAPS * bCapsArrL.value
         bCapsArr = bCapsArrType()
@@ -123,7 +143,7 @@ class HIDThread(threading.Thread):
             preparsedData
         )
 
-        #getting value caps
+        # getting value caps
         vCapsArrL = c_ushort(hidpCaps.NumberInputValueCaps)
         vCapsArrType = HIDP_VALUE_CAPS * vCapsArrL.value
         vCapsArr = vCapsArrType()
@@ -135,12 +155,12 @@ class HIDThread(threading.Thread):
             preparsedData
         )
 
-        #parsing caps
+        # parsing caps
         # prepare a list to find and store for each index
         # whether it is a button or value
         dataIndexType = [0] * hidpCaps.NumberInputDataIndices
 
-        #list entries depending on caps
+        # list entries depending on caps
         for i in range(bCapsArrL.value):
             if bCapsArr[i].IsRange:
                 for ii in range(
@@ -163,11 +183,11 @@ class HIDThread(threading.Thread):
                 ii = vCapsArr[i].Info.NotRange.DataIndex
                 dataIndexType[ii] = 2
 
-        #prepare data array with maximum possible length
+        # prepare data array with maximum possible length
         DataArrayType = HIDP_DATA * maxDataL
         data = DataArrayType()
 
-        #initializing finished
+        # initializing finished
         try:
             self.handle = handle
             self.initialized = True
@@ -178,7 +198,7 @@ class HIDThread(threading.Thread):
             self.lockObject.release()
 
             while not self.abort:
-                if rc == 997:  #error_io_pending
+                if rc == 997:  # error_io_pending
                     win32event.WaitForSingleObject(
                         self._overlappedRead.hEvent,
                         win32event.INFINITE
@@ -187,25 +207,34 @@ class HIDThread(threading.Thread):
                 buf = newBuf
                 try:
                     win32event.ResetEvent(self._overlappedRead.hEvent)
-                    rc, newBuf = win32file.ReadFile(handle, n, self._overlappedRead)
+                    rc, newBuf = win32file.ReadFile(
+                        handle,
+                        n,
+                        self._overlappedRead
+                    )
                 except pywintypes.error as (errno, function, strerror):
-                    #device got disconnected so set status to waiting
+                    # device got disconnected so set status to waiting
                     self.abort = True
                     if errno == 1167:
-                        eg.PrintError(self.text.errorDisconnected + self.deviceName)
+                        eg.PrintError(
+                            self.text.errorDisconnected + self.deviceName
+                        )
                     else:
-                        eg.PrintError(self.text.errorRead + self.deviceName + " (" + strerror + ")")
+                        eg.PrintError(
+                            '%s%s (%s)' %
+                            (self.text.errorRead, self.deviceName, strerror)
+                        )
 
-                #parse data
+                # parse data
                 if len(buf) == n and not self.abort:
-                    #raw data events
+                    # raw data events
                     if self.RawCallback:
                         try:
                             self.RawCallback(buf)
                         except Exception:
                             eg.PrintTraceback()
 
-                    #handling button presses and values
+                    # handling button presses and values
                     if maxDataL != 0:
                         dataL = c_ulong(maxDataL)
                         hidDLL.HidP_GetData(
@@ -216,27 +245,30 @@ class HIDThread(threading.Thread):
                             ctypes.c_char_p(str(buf)),
                             rl
                         )
-                        #parse data to trigger events
+                        # parse data to trigger events
                         btnPressed = []
                         values = {}
                         for i in range(dataL.value):
                             tmpIndex = data[i].DataIndex
-                            if tmpIndex >= len(dataIndexType) or dataIndexType[tmpIndex] == 1:  #button
-                                #collect buttons pressed
+                            if (
+                                tmpIndex >= len(dataIndexType) or
+                                dataIndexType[tmpIndex] == 1
+                            ):  # button
+                                # collect buttons pressed
                                 btnPressed.append(tmpIndex)
-                            elif dataIndexType[tmpIndex] == 2:  #control value
+                            elif dataIndexType[tmpIndex] == 2:  # control value
                                 values[tmpIndex] = int(data[i].Data.RawValue)
                             else:
                                 eg.PrintError(self.text.errorInvalidDataIndex)
 
-                        #value events
+                        # value events
                         if (self.ValueCallback):
                             try:
                                 self.ValueCallback(values)
                             except Exception:
                                 eg.PrintTraceback()
 
-                        #button events
+                        # button events
                         if self.ButtonCallback:
                             try:
                                 self.ButtonCallback(btnPressed)
@@ -249,10 +281,10 @@ class HIDThread(threading.Thread):
         finally:
             win32file.CloseHandle(handle)
 
-            #free references
+            # free references
             hidDLL.HidD_FreePreparsedData(ctypes.byref(preparsedData))
 
-            #HID thread finished
+            # HID thread finished
             if self.StopCallback:
                 try:
                     self.StopCallback()
@@ -268,7 +300,11 @@ class HIDThread(threading.Thread):
     def SetFeature(self, buffer):
         if self.handle:
             bufferLength = ULONG(len(buffer))
-            result = ctypes.windll.hid.HidD_SetFeature(int(self.handle), ctypes.create_string_buffer(buffer), bufferLength)
+            result = ctypes.windll.hid.HidD_SetFeature(
+                int(self.handle),
+                ctypes.create_string_buffer(buffer),
+                bufferLength
+            )
             if not result:
                 raise Exception("could not set feature")
 
@@ -291,7 +327,9 @@ class HIDThread(threading.Thread):
         finally:
             self.lockObject.release()
             if eg.debugLevel:
-                print "finished waiting for init of HID-Thread " + self.getName()
+                print (
+                    "finished waiting for init of HID-Thread " + self.getName()
+                )
 
     @eg.LogIt
     def Write(self, data, timeout):
@@ -299,31 +337,54 @@ class HIDThread(threading.Thread):
             try:
                 self.lockObject.acquire()
                 if eg.debugLevel:
-                    print "writing " + str(len(data)) + " bytes to " + self.getName()
+                    print (
+                        "writing %d bytes to %s" % (len(data), self.getName())
+                    )
                 if not self._overlappedWrite:
                     self._overlappedWrite = win32file.OVERLAPPED()
-                err, n = win32file.WriteFile(self.handle, data, self._overlappedWrite)
-                if err:  #will be ERROR_IO_PENDING:
+                err, n = win32file.WriteFile(
+                    self.handle,
+                    data,
+                    self._overlappedWrite
+                )
+                if err:  # will be ERROR_IO_PENDING:
                     # Wait for the write to complete.
-                    n = win32file.GetOverlappedResult(self.handle, self._overlappedWrite, 1)
+                    n = win32file.GetOverlappedResult(
+                        self.handle,
+                        self._overlappedWrite,
+                        1
+                    )
                     if n != len(data):
                         raise Exception("could not write full data")
                 elif n != len(data):
                     raise Exception("could not write full data")
-                if timeout:  #waits for response from device
+
+                if timeout:  # waits for response from device
                     win32event.ResetEvent(self._overlappedRead.hEvent)
-                    res = win32event.WaitForSingleObject(self._overlappedRead.hEvent, timeout)
+                    res = win32event.WaitForSingleObject(
+                        self._overlappedRead.hEvent,
+                        timeout
+                    )
                     if res == win32event.WAIT_TIMEOUT:
-                        raise Exception("no response from device within timeout")
+                        raise Exception(
+                            "no response from device within timeout"
+                        )
             finally:
                 self.lockObject.release()
         else:
             raise Exception("invalid handle")
-            return
 
 
-class DeviceDescription():
-    def __init__(self, devicePath, vendorId, vendorString, productId, productString, versionNumber):
+class DeviceDescription:
+    def __init__(
+        self,
+        devicePath,
+        vendorId,
+        vendorString,
+        productId,
+        productString,
+        versionNumber
+    ):
         self.devicePath = devicePath
         self.vendorId = vendorId
         self.vendorString = vendorString
@@ -334,31 +395,32 @@ class DeviceDescription():
 
 def GetDeviceDescriptions():
     """
-    gets inforamtions about the available HID as a list of DeviceDescription objects
+    Gets information about the available HID as a list of DeviceDescription
+    objects
     """
     deviceList = []
 
-    #dll references
+    # dll references
     setupapiDLL = ctypes.windll.setupapi
     hidDLL = ctypes.windll.hid
 
-    #prepare Interfacedata
+    # prepare Interfacedata
     interfaceInfo = SP_DEVICE_INTERFACE_DATA()
     interfaceInfo.cbSize = sizeof(interfaceInfo)
 
-    #prepare InterfaceDetailData Structure
+    # prepare InterfaceDetailData Structure
     interfaceDetailData = SP_DEVICE_INTERFACE_DETAIL_DATA_A()
     interfaceDetailData.cbSize = 5
 
-    #prepare HIDD_ATTRIBUTES
+    # prepare HIDD_ATTRIBUTES
     hiddAttributes = HIDD_ATTRIBUTES()
     hiddAttributes.cbSize = sizeof(hiddAttributes)
 
-    #get guid for HID device class
+    # get guid for HID device class
     g = GUID()
     hidDLL.HidD_GetHidGuid(byref(g))
 
-    #get handle to the device information set
+    # get handle to the device information set
     hinfo = setupapiDLL.SetupDiGetClassDevsA(
         byref(g),
         None,
@@ -366,7 +428,7 @@ def GetDeviceDescriptions():
         DIGCF_PRESENT + DIGCF_DEVICEINTERFACE
     )
 
-    #enumerate devices
+    # enumerate devices
     i = 0
     while setupapiDLL.SetupDiEnumDeviceInterfaces(
         hinfo,
@@ -377,7 +439,7 @@ def GetDeviceDescriptions():
     ):
         i += 1
 
-        #get the required size
+        # get the required size
         requiredSize = c_ulong()
         setupapiDLL.SetupDiGetDeviceInterfaceDetailA(
             hinfo,
@@ -389,9 +451,9 @@ def GetDeviceDescriptions():
         )
         if requiredSize.value > 250:
             eg.PrintError(Text.errorRetrieval)
-            continue  #prevent a buffer overflow
+            continue  # prevent a buffer overflow
 
-        #get the actual info
+        # get the actual info
         setupapiDLL.SetupDiGetDeviceInterfaceDetailA(
             hinfo,
             byref(interfaceInfo),
@@ -402,7 +464,7 @@ def GetDeviceDescriptions():
         )
         devicePath = interfaceDetailData.DevicePath
 
-        #get handle to HID device
+        # get handle to HID device
         try:
             hidHandle = win32file.CreateFile(
                 devicePath,
@@ -413,62 +475,68 @@ def GetDeviceDescriptions():
                 0,
                 0
             )
-            #skipping devices which cannot be opened
-            #(e.g. mice & keyboards, which are opened exclusively by OS)
+            # skipping devices which cannot be opened
+            # (e.g. mice & keyboards, which are opened exclusively by OS)
             if int(hidHandle) <= 0:
                 continue
         except:
             continue
 
-        #getting additional info
+        # getting additional info
         hidDLL.HidD_GetAttributes(int(hidHandle), byref(hiddAttributes))
 
-        #prepare string buffer for device info strings
+        # prepare string buffer for device info strings
         hidpStringType = c_wchar * 128
         infoStr = hidpStringType()
 
-        #getting manufacturer
+        # getting manufacturer
         result = hidDLL.HidD_GetManufacturerString(
             int(hidHandle), byref(infoStr), ctypes.sizeof(infoStr))
         if not result or len(infoStr.value) == 0:
-            #build a generic ManufacturerString with the vendor ID
+            # build a generic ManufacturerString with the vendor ID
             vendorString = Text.vendorID + str(hiddAttributes.VendorID)
         else:
             vendorString = infoStr.value
 
-        #getting device name
+        # getting device name
         result = hidDLL.HidD_GetProductString(
             int(hidHandle), byref(infoStr), ctypes.sizeof(infoStr))
         if not result or len(infoStr.value) == 0:
-            #getting product name via registry
+            # getting product name via registry
             devicePathSplit = devicePath[4:].split("#")
             regHandle = _winreg.OpenKey(
                 _winreg.HKEY_LOCAL_MACHINE,
-                "SYSTEM\\CurrentControlSet\\Enum\\" + devicePathSplit[0] +
-                "\\" + devicePathSplit[1] + "\\" + devicePathSplit[2])
-            productString, regType = _winreg.QueryValueEx(regHandle, "DeviceDesc")
+                (
+                    "SYSTEM\\CurrentControlSet\\Enum\\%s\\%s\\%s" %
+                    tuple(devicePathSplit[:3])
+                )
+            )
+            productString, regType = _winreg.QueryValueEx(
+                regHandle,
+                "DeviceDesc"
+            )
             _winreg.CloseKey(regHandle)
         else:
             productString = infoStr.value
 
-        #close handle
+        # close handle
         win32file.CloseHandle(hidHandle)
 
-        #create object with all the infos
+        # create object with all the info
         device = DeviceDescription(
             devicePath,
             hiddAttributes.VendorID,
             vendorString,
             hiddAttributes.ProductID,
             productString,
-            hiddAttributes.VersionNumber)
-        vendorString
+            hiddAttributes.VersionNumber
+        )
 
-        #add device to internal list
+        # add device to internal list
         deviceList.append(device)
 
-    #end loop
-    #destroy deviceinfolist
+    # end loop
+    # destroy deviceinfolist
     setupapiDLL.SetupDiDestroyDeviceInfoList(hinfo)
     return deviceList
 
@@ -480,7 +548,7 @@ def GetDevicePath(
     useDeviceIndex,  # use True to get a specific device
     deviceIndex,     # use -1 to require the same devicePath if multiple found
     noOtherPort,     # if True the devicePath has to be the same
-    deviceList = None
+    deviceList=None
 ):
     """
     gets the devicePath
@@ -492,12 +560,12 @@ def GetDevicePath(
     device = None
     for item in deviceList:
         if noOtherPort:
-            #just search for devicepath
+            # just search for devicepath
             if item.devicePath == devicePath:
-                #found right device
+                # found right device
                 return devicePath
         else:
-            #find the right device by vendor and product ids
+            # find the right device by vendor and product ids
             validVendorId = item.vendorId == vendorId
             validProductId = item.productId == productId
             if versionNumber is None:
@@ -505,25 +573,30 @@ def GetDevicePath(
             else:
                 validVersionNumber = item.versionNumber == versionNumber
             if validVendorId and validProductId and validVersionNumber:
-                if item.devicePath == devicePath or (useDeviceIndex and deviceIndex == found):
-                    #found right device
+                if (
+                    item.devicePath == devicePath or
+                    (useDeviceIndex and deviceIndex == found)
+                ):
+                    # found right device
                     return item.devicePath
-                found = found + 1
+                found += 1
                 device = item
 
     if found == 1:
         return device.devicePath
 
-    #multiple devices found
-    #don't know which to use
+    # multiple devices found
+    # don't know which to use
     if found > 1:
         eg.PrintError(Text.errorMultipleDevices)
 
     return None
 
+
 def IsDeviceName(deviceNameList, vid, pid):
     """
-    checks if the given vid and pid are match in the deviceNameList from System.DeviceAttached
+    checks if the given vid and pid are match in the deviceNameList from
+    System.DeviceAttached
     """
     if not deviceNameList:
         return False
@@ -531,9 +604,14 @@ def IsDeviceName(deviceNameList, vid, pid):
     if not match:
         return False
     deviceClass, vidStr, pidStr = match.groups()
-    return deviceClass == "HID" and pid == int(pidStr, 16) and vid == int(vidStr, 16)
+    return (
+        deviceClass == "HID" and
+        pid == int(pidStr, 16) and
+        vid == int(vidStr, 16)
+    )
 
-#structures for ctypes
+
+# structures for ctypes
 class GUID(Structure):
     _fields_ = [
         ("Data1", c_ulong),
