@@ -42,7 +42,6 @@ import time
 import wx
 from os.path import exists, join
 
-# Local imports
 import eg
 import Init
 
@@ -88,6 +87,7 @@ eg.actionGroup.items = []
 eg.folderPath = eg.FolderPath()
 eg.GUID = eg.GUID()
 
+
 def _CommandEvent():
     """Generate new (CmdEvent, Binder) tuple
         e.g. MooCmdEvent, EVT_MOO = EgCommandEvent()
@@ -119,11 +119,13 @@ if eg.startupArguments.configDir is None:
     eg.configDir = join(eg.folderPath.RoamingAppData, eg.APP_NAME)
 else:
     eg.configDir = eg.startupArguments.configDir
+
 if not exists(eg.configDir):
     try:
         os.makedirs(eg.configDir)
     except:
         pass
+
 if eg.startupArguments.isMain:
     if exists(eg.configDir):
         os.chdir(eg.configDir)
@@ -133,9 +135,12 @@ eg.localPluginDir = join(eg.folderPath.ProgramData, eg.APP_NAME, "plugins")
 eg.corePluginDir = join(eg.mainDir, "plugins")
 eg.pluginDirs = [eg.corePluginDir, eg.localPluginDir]
 Init.InitPathsAndBuiltins()
+
 from eg.WinApi.Dynamic import GetCurrentProcessId  # NOQA
+
 eg.processId = GetCurrentProcessId()
 Init.InitPil()
+
 
 class Exception(Exception):
     def __unicode__(self):
@@ -161,6 +166,7 @@ def Bind(notification, listener):
         notificationHandler = eg.notificationHandlers[notification]
     notificationHandler.listeners.append(listener)
 
+
 def CallWait(func, *args, **kwargs):
     result = [None]
     event = threading.Event()
@@ -175,11 +181,13 @@ def CallWait(func, *args, **kwargs):
     event.wait()
     return result[0]
 
+
 def DummyFunc(*dummyArgs, **dummyKwargs):
     """
     Just a do-nothing-function, that accepts arbitrary arguments.
     """
     pass
+
 
 def Exit():
     """
@@ -190,6 +198,7 @@ def Exit():
     because the SystemExit exception is catched for a PythonScript.)
     """
     sys.exit()
+
 
 def HasActiveHandler(eventstring):
     for eventHandler in eg.eventTable.get(eventstring, []):
@@ -202,6 +211,7 @@ def HasActiveHandler(eventstring):
             return True
     return False
 
+
 def MessageBox(message, caption=eg.APP_NAME, style=wx.OK, parent=None):
     if parent is None:
         style |= wx.STAY_ON_TOP
@@ -210,24 +220,26 @@ def MessageBox(message, caption=eg.APP_NAME, style=wx.OK, parent=None):
     dialog.Destroy()
     return result
 
+
 def Notify(notification, value=None):
     if notification in eg.notificationHandlers:
         for listener in eg.notificationHandlers[notification].listeners:
             listener(value)
 
+
 # pylint: disable-msg=W0613
 def RegisterPlugin(
-    name = None,
-    description = None,
-    kind = "other",
-    author = "[unknown author]",
-    version = "[unknown version]",
-    icon = None,
-    canMultiLoad = False,
-    createMacrosOnAdd = False,
-    url = None,
-    help = None,
-    guid = None,
+    name=None,
+    description=None,
+    kind="other",
+    author="[unknown author]",
+    version="[unknown version]",
+    icon=None,
+    canMultiLoad=False,
+    createMacrosOnAdd=False,
+    url=None,
+    help=None,
+    guid=None,
     **kwargs
 ):
     """
@@ -259,11 +271,12 @@ def RegisterPlugin(
     :param guid: will help EG to identify your plugin, so there are no name
         clashes with other plugins that accidentally might have the same
         name and will later ease the update of plugins.
-    :param \*\*kwargs: just to consume unknown parameters, to make the call
+    :param kwargs: just to consume unknown parameters, to make the call
        backward compatible.
     """
     pass
 # pylint: enable-msg=W0613
+
 
 def RestartAsyncore():
     """
@@ -278,6 +291,7 @@ def RestartAsyncore():
     if oldDispatcher is None:
         # create a global asyncore loop thread
         threading.Thread(target=asyncore.loop, name="AsyncoreThread").start()
+
 
 def RunProgram():
     eg.stopExecutionFlag = False
@@ -302,6 +316,7 @@ def RunProgram():
             eg.programCounter = item.parent.GetNextChild(idx)
     eg.indent = 0
 
+
 def StopMacro(ignoreReturn=False):
     """
     Instructs EventGhost to stop executing the current macro after the
@@ -311,8 +326,10 @@ def StopMacro(ignoreReturn=False):
     if ignoreReturn:
         del eg.programReturnStack[:]
 
+
 def Unbind(notification, listener):
     eg.notificationHandlers[notification].listeners.remove(listener)
+
 
 def Wait(secs, raiseException=True):
     while secs > 0.0:
@@ -364,15 +381,18 @@ eg.PrintStack = eg.log.PrintStack
 eg.config = eg.Config()
 eg.debugLevel = int(eg.config.logDebug) or eg.debugLevel
 
+
 def TracebackHook(tType, tValue, traceback):
     eg.log.PrintTraceback(excInfo=(tType, tValue, traceback))
 sys.excepthook = TracebackHook
 
 eg.colour = eg.Colour()
+
 if eg.startupArguments.isMain and not eg.startupArguments.translate:
     eg.text = eg.Text(eg.config.language)
 else:
     eg.text = eg.Text('en_EN')
+
 eg.actionThread = eg.ActionThread()
 eg.eventThread = eg.EventThread()
 eg.pluginManager = eg.PluginManager()
@@ -394,6 +414,7 @@ eg.taskBarIcon = eg.TaskBarIcon(
     not eg.startupArguments.install and
     not eg.startupArguments.pluginFile
 )
+
 eg.SetProcessingState = eg.taskBarIcon.SetProcessingState
 eg.wit = None
 
