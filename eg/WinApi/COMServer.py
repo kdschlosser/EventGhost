@@ -29,6 +29,7 @@ from win32com.server.register import RegisterClasses
 # Local imports
 import eg
 
+
 class EventGhostCom:
     _public_methods_ = [
         'TriggerEvent',
@@ -66,6 +67,7 @@ class EventGhostCom:
 genPath = os.path.join(eg.configDir, "gen_py").encode('mbcs')
 if not os.path.exists(genPath):
     os.makedirs(genPath)
+    
 win32com.__gen_path__ = genPath
 sys.modules["win32com.gen_py"].__path__ = [genPath]
 win32com.client.gencache.is_readonly = False
@@ -80,6 +82,7 @@ except pywintypes.error, data:
     if data[0] != 5:
         raise
 sys.coinit_flags = 2
+
 try:
     __factory_infos = factory.RegisterClassFactories(
         [EventGhostCom._reg_clsid_]
@@ -87,6 +90,7 @@ try:
 except:
     __factory_infos = []
     eg.PrintError("RegisterClassFactories failed!")
+
 #import win32api
 #pythoncom.EnableQuitMessage(win32api.GetCurrentThreadId())
 pythoncom.CoResumeClassObjects()
@@ -95,6 +99,7 @@ try:
     e = win32com.client.Dispatch("EventGhost")
 except:
     sys.stderr.write("Unable to establish COM dispatch!\n")
+
 
 def DeInit():
     # shutdown COM-Server
