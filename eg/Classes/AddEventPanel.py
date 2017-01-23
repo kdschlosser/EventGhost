@@ -162,7 +162,6 @@ class AddEventPanel(eg.Panel):
             handler=self.OnExpanding
         )
         for eventInfo in node:
-            print eventInfo
             child = self.tree.AppendItem(
                 parent=treeItem,
                 text=eventInfo.event,
@@ -218,7 +217,7 @@ class AddEventPanel(eg.Panel):
         treeItem = event.GetItem()
         if treeItem.IsOk():
             node = self.tree.GetPyData(treeItem)
-            if isinstance(node, eg.EventInfo):
+            if isinstance(node, eg.EventInfo.Event):
                 text = node.event
             else:
                 text = node.name
@@ -243,7 +242,7 @@ class AddEventPanel(eg.Panel):
     def DoSelectionChanged(self, treeItem):
         if treeItem.IsOk():
             node = self.tree.GetPyData(treeItem)
-            if isinstance(node, eg.EventInfo):
+            if isinstance(node, eg.EventInfo.Event):
                 self.resultData = node.event
                 Config.lastSelected = node.event
 

@@ -79,15 +79,18 @@ class PluginItem(ActionItem):
         if not TreeItem.AskDelete(self):
             return False
 
-        if eg.EventInfo.GetEvents(self.executable):
+        addedEvents = list(info for info in self.info.eventList if info.added)
+
+        if addedEvents:
             dlg = eg.MessageDialog(
                 None,
                 'Delete saved plugin events?\n\n',
                 'Delete Events',
                 wx.YES_NO | wx.ICON_QUESTION
             )
-            if dlg.ShowModal() == wx.ID_YES:
-                eg.EventInfo.RemovePlugin(self.executable)
+            if dlg.ShowModal() == wx.ID_NO:
+                for eventInfo in addedEvents:
+                    eventInfo.added = False
             dlg.Destroy()
         return True
 
