@@ -79,11 +79,6 @@ install:
   - easy_install pywin32-220.win32-py2.7.exe
 
 
-  # ------------PyWin32 Post Install----------------
-
-  - python C:\Python27\Scripts\pywin32_postinstall.py -install
-
-
 # ---------------Start Build Process----------------
 
 build: off
