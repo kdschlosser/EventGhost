@@ -179,16 +179,21 @@ class PyWin32Dependency(DependencyBase):
     url = "https://eventghost.github.io/dist/dependencies/pywin32-220-cp27-none-win32.whl"
 
     def Check(self):
-        versionFilePath = join(
-            sys.prefix, "lib/site-packages/pywin32.version.txt"
-        )
-        try:
-            version = open(versionFilePath, "rt").readline().strip()
-        except IOError:
-            raise MissingDependency
-        if CompareVersion(version, self.version) < 0:
-            raise WrongVersion
+        site_packages = join(sys.prefix, 'lib', 'site-packages')
 
+        try:
+            version = open(
+                join(site_packages, 'pywin32.version.txt'),
+                "rt"
+            ).readline().strip()
+
+            if CompareVersion(version, self.version) < 0:
+                raise WrongVersion
+
+        except IOError:
+            if 'pywin32-220-py2.7-win32.egg' not in os.listdir(site_packages):
+                raise MissingDependency
+            
 
 class StacklessDependency(DependencyBase):
     name = "Stackless Python"
