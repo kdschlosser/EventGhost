@@ -81,7 +81,7 @@ install:
 
   # ------------PyWin32 Post Install----------------
 
-  - python C:\Python27\Scripts\pywin32_postinstall.py
+  - python C:\Python27\Scripts\pywin32_postinstall.py -install
 
 
 # ---------------Start Build Process----------------
