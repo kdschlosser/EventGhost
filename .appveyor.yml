@@ -32,6 +32,9 @@ install:
   # Subversion
   - ps: Start-FileDownload "https://sourceforge.net/projects/win32svn/files/1.8.17/Setup-Subversion-1.8.17.msi/download" -Timeout 60000 -FileName "Setup-Subversion-1.8.17.msi"
 
+  # PyWin32
+  - ps: Start-FileDownload "https://sourceforge.net/projects/pywin32/files/pywin32/Build%20220/pywin32-220.win32-py2.7.exe/download" -Timeout 60000 -FileName "pywin32-220.win32-py2.7.exe"
+
 
   # --------------PowerShell Installs---------------
 
@@ -53,6 +56,7 @@ install:
   # Subversion **NOTE this is need to have ctypeslib install properly
   - set PATH=%PATH%;C:\Program Files (x86)\Subversion\bin
 
+
   # -----------------Python PIP---------------------
 
   # SetupTools/Easy_Install Upgrade
@@ -65,12 +69,19 @@ install:
   - pip install pillow==3.4.2
   - pip install py2exe_py2==0.6.9
 
+
   # --------------Python Easy_Install---------------
 
   # Module Installations
   - easy_install comtypes
   - easy_install http://svn.python.org/projects/ctypes/trunk/ctypeslib/#egg=ctypeslib-dev
   - easy_install pycrypto
+  - easy_install pywin32-220.win32-py2.7.exe
+
+
+  # ------------PyWin32 Post Install----------------
+
+  - python C:\Python27\Scripts\pywin32_postinstall.py
 
 
 # ---------------Start Build Process----------------
