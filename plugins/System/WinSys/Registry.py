@@ -42,15 +42,16 @@ regTypes = (
     (_winreg.REG_SZ, "REG_SZ")
 )
 
-class Config(eg.PersistentData):
-    lastKeySelected = _winreg.HKEY_CURRENT_USER
-    lastSubkeySelected = "Software"
-    lastValueNameSelected = None
+
+ICON = "icons/Registry"
 
 
-class Text:
+class Text(eg.TranslatableStrings):
+    class Group:
+        name = 'Registry'
+        description = 'Registry'
+    
     name = description = "Registry"
-
     noKeyError = "No key given"
     noSubkeyError = "No subkey given"
     noTypeError = "No type given"
@@ -58,7 +59,6 @@ class Text:
     noValueNameError = "No value name given"
     keyOpenError = "Error opening registry key"
     valueChangeError = "Error while modifying value"
-
     defaultText = "(Default)"
     chooseText = "Choose Registry Key:"
     keyText = "Key:"
@@ -69,17 +69,18 @@ class Text:
     oldValue = "Current value:"
     oldType = "Current Type:"
     typeText = "Type:"
-
     keyText2 = "Key"
     noValueText = "value not found"
-
-
-class RegistryChange(eg.ActionBase):
-    name = "Change Registry Value"
-    description = "Changes a value in the Windows registry."
-    iconFile = "icons/Registry"
-
-    class text:
+    
+    class RegistryQuery:
+        actions = ("check if exists", "return as result", "compare to")
+        labels = (
+            'Check if "%s" exists',
+            'Return "%s" as result',
+            'Compare "%s" with %s'
+        )
+        
+    class RegistryChange:
         actions = ("create or change", "change if exists only", "delete")
         labels = (
             'Change "%s" to %s',
@@ -88,6 +89,19 @@ class RegistryChange(eg.ActionBase):
         )
         disableParsing = "Disable parsing of string"
 
+
+class Config(eg.PersistentData):
+    lastKeySelected = _winreg.HKEY_CURRENT_USER
+    lastSubkeySelected = "Software"
+    lastValueNameSelected = None
+    
+
+class RegistryChange(eg.ActionBase):
+    name = "Change Registry Value"
+    description = "Changes a value in the Windows registry."
+    iconFile = "icons/Registry"
+    text = Text.RegistryChange
+    
     def __call__(
         self,
         key,
@@ -326,7 +340,7 @@ class RegistryChange(eg.ActionBase):
 
     @classmethod
     def OnAddAction(cls):
-        cls.text2 = cls.plugin.text.RegistryGroup
+        cls.text2 = Text
 
 
 class RegistryQuery(eg.ActionBase):
@@ -335,14 +349,7 @@ class RegistryQuery(eg.ActionBase):
         "Queries the Windows registry and returns or compares the value."
     )
     iconFile = "icons/Registry"
-
-    class text:
-        actions = ("check if exists", "return as result", "compare to")
-        labels = (
-            'Check if "%s" exists',
-            'Return "%s" as result',
-            'Compare "%s" with %s'
-        )
+    text = Text.RegistryQuery
 
     def __call__(self, key, subkey, valueName, action, compareValue):
         if not key:  #nothing selected
@@ -497,7 +504,7 @@ class RegistryQuery(eg.ActionBase):
 
     @classmethod
     def OnAddAction(cls):
-        cls.text2 = cls.plugin.text.RegistryGroup
+        cls.text2 = Text
 
 
 class RegistryChooser(wx.Window):

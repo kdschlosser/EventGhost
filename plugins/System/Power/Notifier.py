@@ -188,7 +188,7 @@ class POWERSCHEME_PERSONALITY(ctypes.Structure):
     ]
 
 
-class PowerBroadcastNotifier:
+class BroadcastNotifier:
     def __init__(self, plugin):
         self.plugin = plugin
         self.monitorNotify = None

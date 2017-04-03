@@ -23,7 +23,10 @@ from os.path import join
 from subprocess import PIPE, Popen, STARTF_USESHOWWINDOW, STARTUPINFO
 from threading import Thread
 from time import time as ttime
-from win32file import Wow64DisableWow64FsRedirection, Wow64RevertWow64FsRedirection
+from win32file import (
+    Wow64DisableWow64FsRedirection,
+    Wow64RevertWow64FsRedirection
+)
 
 # Local imports
 import eg
@@ -34,12 +37,9 @@ from eg.WinApi.Dynamic import (
     windll,
 )
 
-class Command(eg.ActionBase):
-    name = "Run Command"
-    description = "Runs a Windows command-line statement."
-    iconFile = "icons/Execute"
 
-    class text:
+class Text(eg.TranslatableStrings):
+    class Command:
         Command = "Command Line:"
         waitCheckbox = "Wait until command is terminated before proceeding"
         eventCheckbox = "Trigger event when command is terminated"
@@ -49,6 +49,13 @@ class Command(eg.ActionBase):
         additionalSuffix = "Additional Suffix:"
         payload = "Use result as payload"
         runAsAdminCheckbox = "Run as Administrator (UAC prompt will appear if UAC is enabled!)"
+
+
+class Command(eg.ActionBase):
+    name = "Run Command"
+    description = "Runs a Windows command-line statement."
+    iconFile = "icons/Execute"
+    text = Text.Command
 
     class TriggerEvent(Thread):
         def __init__(self, processInformation, suffix, prefix, filename, cp, pld):

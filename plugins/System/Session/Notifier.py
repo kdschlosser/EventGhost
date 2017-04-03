@@ -80,7 +80,7 @@ WTS_WPARAM_DICT = {
     9: "SessionRemoteControl"
 }
 
-class SessionChangeNotifier:
+class ChangeNotifier:
     inited = False
 
     def __init__(self, plugin):

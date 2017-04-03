@@ -19,11 +19,18 @@
 import os
 import wx
 from os.path import (
-    abspath, basename, dirname, expandvars, isdir, split, splitext
+    abspath,
+    basename,
+    dirname,
+    expandvars,
+    isdir,
+    split,
+    splitext
 )
 from threading import Thread
 from win32file import (
-    Wow64DisableWow64FsRedirection, Wow64RevertWow64FsRedirection
+    Wow64DisableWow64FsRedirection,
+    Wow64RevertWow64FsRedirection
 )
 from win32process import GetPriorityClass, SetPriorityClass
 
@@ -31,10 +38,21 @@ from win32process import GetPriorityClass, SetPriorityClass
 import eg
 from eg.WinApi import IsWin64
 from eg.WinApi.Dynamic import (
-    AttachThreadInput, byref, CloseHandle, DWORD, FormatError,
-    GetCurrentThreadId, GetExitCodeProcess, GetForegroundWindow,
-    GetWindowThreadProcessId, INFINITE, SEE_MASK_NOCLOSEPROCESS,
-    SHELLEXECUTEINFO, sizeof, WaitForSingleObject, windll,
+    AttachThreadInput,
+    byref,
+    CloseHandle,
+    DWORD,
+    FormatError,
+    GetCurrentThreadId,
+    GetExitCodeProcess,
+    GetForegroundWindow,
+    GetWindowThreadProcessId,
+    INFINITE,
+    SEE_MASK_NOCLOSEPROCESS,
+    SHELLEXECUTEINFO,
+    sizeof,
+    WaitForSingleObject,
+    windll
 )
 
 PATHEXT = tuple(os.environ.get(
@@ -58,12 +76,9 @@ WINSTATE_FLAGS = (
     0,  # SW_HIDE
 )
 
-class Execute(eg.ActionBase):
-    name = "Run Application"
-    description = "Runs an executable file or opens any file or folder."
-    iconFile = "icons/Execute"
 
-    class text:
+class Text(eg.TranslatableStrings):
+    class Execute:
         label = "Run Application: %s"
         labelFile = "Open File: %s"
         labelFolder = "Open Folder: %s"
@@ -100,6 +115,13 @@ class Execute(eg.ActionBase):
         disableParsing = "Disable parsing of string"
         additionalSuffix = "Additional Suffix:"
         priorityIssue = "WARNING: Couldn't set priority!"
+
+
+class Execute(eg.ActionBase):
+    name = "Run Application"
+    description = "Runs an executable file or opens any file or folder."
+    iconFile = "icons/Execute"
+    text = Text.Execute
 
     class TriggerEvent(Thread):
         def __init__(self, processInformation, suffix, prefix):
