@@ -41,7 +41,8 @@ class Text(eg.TranslatableStrings):
     class Group:
         name = 'CD-ROM Drive'
         description = 'CD-ROM Drive'
-        
+    
+    
     labels = [
         "Toggle drive tray: %s",
         "Open drive tray: %s",
@@ -213,4 +214,3 @@ class CDRom(DriveBase):
     
     def _run(self, drive):
         return drive
-

@@ -27,8 +27,8 @@ class Text(eg.TranslatableStrings):
     class Group:
         name = 'Removable Drive'
         description = 'Removable Drive'
-     
-        
+
+
 class RemovableDriveBase(ActionBase.ActionBase):
     WMI_CLASS = 'Win32_LogicalDisk'
     DEVICE_TYPE = 'DriveType=2'

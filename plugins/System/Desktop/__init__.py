@@ -45,9 +45,10 @@ ICON = None
 
 class Text(eg.TranslatableStrings):
     class Group:
-        name = ' Desktop'
+        name = 'Desktop'
         description = 'Desktop'
-        
+    
+    
     class SetWallpaper:
         text1 = "Path to image file:"
         text2 = "Alignment:"
@@ -75,7 +76,7 @@ def AddActions(plugin):
     group.AddAction(ShowPicture)
     group.AddAction(ShowQRcode)
 
-    
+
 class SetWallpaper(eg.ActionWithStringParameter):
     name = "Change Wallpaper"
     description = "Changes your desktop wallpaper."
@@ -1121,4 +1122,3 @@ def Resize(w, h, width_, height_, force=False):
             w = int(round(w / yfactor))
             h = height_
     return (w, h)
-

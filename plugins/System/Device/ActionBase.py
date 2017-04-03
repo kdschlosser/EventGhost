@@ -34,7 +34,7 @@ class ActionBase(eg.ActionBase):
     WMI_CLASS = ''
     DEVICE_TYPE = None
     DEVICE_NAME = ''
-
+    
     def _get_devices(self, deviceId=None, deviceName=None):
         """
         Calls WMI to retrieve the devices.
@@ -46,7 +46,7 @@ class ActionBase(eg.ActionBase):
         :type deviceId: str
         :rtype: tuple(instances)
         """
-
+        
         try:
             if deviceId is None and deviceName is None:
                 return WMI.GetDevices(self.WMI_CLASS, self.DEVICE_TYPE)
@@ -60,13 +60,13 @@ class ActionBase(eg.ActionBase):
                     self.WMI_CLASS,
                     '{0}="{1}"'.format(self.DEVICE_NAME, deviceId)
                 )[0]
-                
+        
         except pythoncom.com_error:
             if deviceName is None:
                 raise WMI.DeviceError('')
             else:
                 raise WMI.DeviceError(deviceName)
-
+    
     def GetLabel(self, deviceId='', deviceName=''):
         return "{0}: {1}".format(self.text.name, deviceName)
     
@@ -79,7 +79,7 @@ class ActionBase(eg.ActionBase):
             raise WMI.DeviceError(deviceName, device.ConfigManagerErrorCode)
         
         return self._run(device)
-       
+    
     def Configure(self, deviceId='', deviceName=''):
         panel = eg.ConfigPanel()
         devices = self._get_devices()
@@ -93,15 +93,15 @@ class ActionBase(eg.ActionBase):
         if not choices:
             choices = ['']
             ids = [None]
-            
+        
         else:
             ids = [
                 d.DeviceID for d in devices
                 if d.ConfigManagerErrorCode in (0, 22, None)
             ]
-            
+        
         if deviceName in choices:
-             selection = choices.index(deviceName)
+            selection = choices.index(deviceName)
         
         driveCtrl = panel.Choice(selection, choices=choices)
         panel.AddLine(self.plugin.text.device, driveCtrl)

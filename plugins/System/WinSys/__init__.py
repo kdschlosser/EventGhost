@@ -74,4 +74,3 @@ class RefreshEnvironment(eg.ActionBase):
         """
     
     __call__ = eg.Environment.Refresh
-

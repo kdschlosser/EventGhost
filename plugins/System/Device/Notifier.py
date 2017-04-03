@@ -83,13 +83,13 @@ GUID_DEVCLASS_PCMCIA = '{4D36E977-E325-11CE-BFC1-08002BE10318}'
 KSCATEGORY_CAPTURE = '{65E8773D-8F56-11D0-A3B9-00A0C9223196}'
 KSCATEGORY_VIDEO = '{6994AD05-93EF-11D0-A3CC-00A0C9223196}'
 KSCATEGORY_STILL = '{FB6C428A-0353-11D1-905F-0000C0CC16BA}'
-GUID_DEVINTERFACE_WRITEONCEDISK = ( # Blank CD/DVD insertion
+GUID_DEVINTERFACE_WRITEONCEDISK = (# Blank CD/DVD insertion
     '{53F5630C-B6BF-11D0-94F2-00A0C91EFB8B}'
 )
 GUID_DEVINTERFACE_USB_HOST_CONTROLLER = (
     '{3ABF6F2D-71C4-462A-8A92-1E6861E6AF27}'
 )
-GUID_DEVINTERFACE_SERENUM_BUS_ENUMERATOR = ( # S Dev
+GUID_DEVINTERFACE_SERENUM_BUS_ENUMERATOR = (# S Dev
     '{4D36E978-E325-11CE-BFC1-08002BE10318}'
 )
 
@@ -107,7 +107,7 @@ GUID_DEVINTERFACE_NET = (
 )
 
 DEVICES = {
-    GUID_DEVINTERFACE_KEYBOARD: (
+    GUID_DEVINTERFACE_KEYBOARD           : (
         dict(
             cls_name='Keyboard',
             attr_names=(),
@@ -115,7 +115,7 @@ DEVICES = {
             display_name='Keyboard'
         ),
     ),
-    GUID_DEVICE_BATTERY: (
+    GUID_DEVICE_BATTERY                  : (
         dict(
             cls_name='Battery',
             attr_names=(
@@ -145,7 +145,7 @@ DEVICES = {
             display_name='Portable Battery'
         ),
     ),
-    GUID_DEVINTERFACE_CDROM: (
+    GUID_DEVINTERFACE_CDROM              : (
         dict(
             cls_name='CDROMDrive',
             attr_names=(
@@ -160,7 +160,7 @@ DEVICES = {
             display_name='CD-ROM Drive'
         ),
     ),
-    GUID_DEVINTERFACE_MONITOR: (
+    GUID_DEVINTERFACE_MONITOR            : (
         dict(
             cls_name='DesktopMonitor',
             attr_names=(
@@ -174,7 +174,7 @@ DEVICES = {
             display_name='Desktop Monitor'
         ),
     ),
-    GUID_DEVINTERFACE_DISK: (
+    GUID_DEVINTERFACE_DISK               : (
         dict(
             cls_name='DiskDrive',
             attr_names=(
@@ -210,7 +210,7 @@ DEVICES = {
             display_name='USB Controller'
         ),
     ),
-    GUID_DEVINTERFACE_USB_HUB: (
+    GUID_DEVINTERFACE_USB_HUB            : (
         dict(
             cls_name='USBHub',
             attr_names=('USBVersion',),
@@ -218,7 +218,7 @@ DEVICES = {
             display_name='USB Hub'
         ),
     ),
-    GUID_DEVINTERFACE_DISPLAY_ADAPTER: (
+    GUID_DEVINTERFACE_DISPLAY_ADAPTER    : (
         dict(
             cls_name='VideoController',
             attr_names=(
@@ -231,7 +231,7 @@ DEVICES = {
             display_name='Video Controller'
         ),
     ),
-    GUID_DEVINTERFACE_TAPE: (
+    GUID_DEVINTERFACE_TAPE               : (
         dict(
             cls_name='TapeDrive',
             attr_names=(
@@ -243,7 +243,7 @@ DEVICES = {
             display_name='Tape Drive'
         ),
     ),
-    KSCATEGORY_AUDIO: (
+    KSCATEGORY_AUDIO                     : (
         dict(
             cls_name='SoundDevice',
             attr_names=('Manufacturer', 'ProductName'),
@@ -251,7 +251,7 @@ DEVICES = {
             display_name='Sound Device'
         ),
     ),
-    GUID_DEVINTERFACE_COMPORT: (
+    GUID_DEVINTERFACE_COMPORT            : (
         dict(
             cls_name='SerialPort',
             attr_names=(),
@@ -259,7 +259,7 @@ DEVICES = {
             display_name='Serial Port'
         ),
     ),
-    GUID_DEVINTERFACE_MOUSE: (
+    GUID_DEVINTERFACE_MOUSE              : (
         dict(
             cls_name='PointingDevice',
             attr_names=(
@@ -273,7 +273,7 @@ DEVICES = {
             display_name='Pointing Device'
         ),
     ),
-    GUID_DEVINTERFACE_MODEM: (
+    GUID_DEVINTERFACE_MODEM              : (
         dict(
             cls_name='POTSModem',
             attr_names=(),
@@ -281,7 +281,7 @@ DEVICES = {
             display_name='POTS Modem'
         ),
     ),
-    GUID_DEVINTERFACE_PARALLEL: (
+    GUID_DEVINTERFACE_PARALLEL           : (
         dict(
             cls_name='ParallelPort',
             attr_names=(),
@@ -289,7 +289,7 @@ DEVICES = {
             display_name='Parallel Port'
         ),
     ),
-    BUS1394_CLASS_GUID: (
+    BUS1394_CLASS_GUID                   : (
         dict(
             cls_name='1394Controller',
             attr_names=(),
@@ -297,7 +297,7 @@ DEVICES = {
             display_name='1394 Controller'
         ),
     ),
-    GUID_61883_CLASS: (
+    GUID_61883_CLASS                     : (
         dict(
             cls_name='1394ControllerDevice',
             attr_names=(),
@@ -305,7 +305,7 @@ DEVICES = {
             display_name='1394 Controller Device'
         ),
     ),
-    GUID_DEVCLASS_IRDA: (
+    GUID_DEVCLASS_IRDA                   : (
         dict(
             cls_name='InfraredDevice',
             attr_names=(),
@@ -313,7 +313,7 @@ DEVICES = {
             display_name='Infrared Device'
         ),
     ),
-    GUID_DEVCLASS_SYSTEM: (
+    GUID_DEVCLASS_SYSTEM                 : (
         dict(
             cls_name='MotherboardDevice',
             attr_names=(),
@@ -381,7 +381,7 @@ DEVICES = {
             display_name='Processor'
         )
     ),
-    GUID_DEVCLASS_PCMCIA: (
+    GUID_DEVCLASS_PCMCIA                 : (
         dict(
             cls_name='PCMCIAController',
             attr_names=(),
@@ -389,7 +389,7 @@ DEVICES = {
             display_name='PCMCIA Controller'
         ),
     ),
-    GUID_DEVCLASS_PRINTERS: (
+    GUID_DEVCLASS_PRINTERS               : (
         dict(
             cls_name='Printer',
             attr_names=(),
@@ -409,7 +409,7 @@ DEVICES = {
             display_name='Printer Controller'
         )
     ),
-    KSCATEGORY_BDA_NETWORK_EPG: (
+    KSCATEGORY_BDA_NETWORK_EPG           : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -417,7 +417,7 @@ DEVICES = {
             display_name='EPG'
         ),
     ),
-    KSCATEGORY_BDA_NETWORK_TUNER: (
+    KSCATEGORY_BDA_NETWORK_TUNER         : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -425,7 +425,7 @@ DEVICES = {
             display_name='Network Tuner'
         ),
     ),
-    KSCATEGORY_TVTUNER: (
+    KSCATEGORY_TVTUNER                   : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -433,7 +433,7 @@ DEVICES = {
             display_name='TV Tuner'
         ),
     ),
-    GUID_BTHPORT_DEVICE_INTERFACE: (
+    GUID_BTHPORT_DEVICE_INTERFACE        : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -441,7 +441,7 @@ DEVICES = {
             display_name='BlueTeeth Device'
         ),
     ),
-    GUID_DEVINTERFACE_WPD: (
+    GUID_DEVINTERFACE_WPD                : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -449,7 +449,7 @@ DEVICES = {
             display_name='Portable'
         ),
     ),
-    GUID_DEVINTERFACE_USB_DEVICE: (
+    GUID_DEVINTERFACE_USB_DEVICE         : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -457,7 +457,7 @@ DEVICES = {
             display_name='USB Device'
         ),
     ),
-    GUID_DEVINTERFACE_HID: (
+    GUID_DEVINTERFACE_HID                : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -465,7 +465,7 @@ DEVICES = {
             display_name='HID Device'
         ),
     ),
-    GUID_DEVINTERFACE_IMAGE: (
+    GUID_DEVINTERFACE_IMAGE              : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -473,7 +473,7 @@ DEVICES = {
             display_name='Imaging Device'
         ),
     ),
-    KSCATEGORY_CAPTURE: (
+    KSCATEGORY_CAPTURE                   : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -481,7 +481,7 @@ DEVICES = {
             display_name='Video Capture'
         ),
     ),
-    KSCATEGORY_VIDEO: (
+    KSCATEGORY_VIDEO                     : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -489,7 +489,7 @@ DEVICES = {
             display_name='Video Device'
         ),
     ),
-    KSCATEGORY_STILL: (
+    KSCATEGORY_STILL                     : (
         dict(
             cls_name='PNPEntity',
             attr_names=('Caption', 'Description', 'Manufacturer'),
@@ -579,7 +579,6 @@ SEARCH = [
     GUID_DEVINTERFACE_USB_DEVICE,
 ]
 
-
 if not eg.WindowsVersion.IsXP():
     DEVICES[GUID_DEVINTERFACE_DISK][0]['attr_names'] += (
         'FirmwareRevision',
@@ -627,7 +626,7 @@ if not eg.WindowsVersion.Is10():
             display_name='Floppy Controller'
         )
     )
-
+    
     SEARCH.insert(0, GUID_DEVINTERFACE_FLOPPY)
 
 
@@ -635,6 +634,7 @@ class DEV_BROADCAST_DEVICEINTERFACE(_DEV_BROADCAST_DEVICEINTERFACE):
     def __init__(self):
         self.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE
         self.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE)
+
 
 DBD_NAME_OFFSET = DEV_BROADCAST_DEVICEINTERFACE.dbcc_name.offset
 
@@ -647,18 +647,18 @@ ASSOCIATORS = (
 def _parse_vendor_id(vendor_id):
     vendor_id = vendor_id.replace('\\\\?\\', '').split('#')
     vendor_id = vendor_id[:-1]
-
+    
     if len(vendor_id) >= 3:
         vendor_id = '\\'.join(vendor_id[:3]).upper()
     else:
         vendor_id = '\\'.join(vendor_id[:2]).upper()
-
+    
     return vendor_id
 
 
 def _get_ids(device):
     res = ()
-
+    
     if hasattr(device, 'PNPDeviceID') and device.PNPDeviceID is not None:
         res = (device.PNPDeviceID,)
     else:
@@ -694,7 +694,6 @@ def _create_event(
     cls_name,
     **kwargs
 ):
-   
     if hasattr(device, 'DeviceId'):
         devId = device.DeviceId
     elif hasattr(device, 'DeviceID'):
@@ -711,25 +710,25 @@ def _create_event(
     name = device.Name
     if name.endswith('.'):
         name = name[:-1]
-
+    
     for device_id in device_ids:
         if device_id.startswith('WPDBUSENUMROOT'):
             name = device.Description.strip() + '.' + device.Name[0]
             device_ids += (devId,)
-
+    
     if hasattr(device, 'ClassGuid') and device.ClassGuid in SETUP_CLASS_GUIDS:
         suffix = [SETUP_CLASS_GUIDS[device.ClassGuid], name]
     else:
         suffix = [display_name.replace(' ', ''), name]
-
+    
     key = _create_key(device_ids)
     if not key:
         return False, False
     if key in current_devices:
         return None, None
-
+    
     current_devices[key] = (suffix, payload)
-
+    
     return suffix, payload
 
 
@@ -738,7 +737,7 @@ class WMI(threading.Thread):
     Subclass of threading.Thread that handles the WMI lookup of devices as well
      as generating events.
     """
-
+    
     def __init__(self, plugin):
         """
         Threading object that runs the WMI device lookup.
@@ -746,7 +745,7 @@ class WMI(threading.Thread):
         :param plugin: System plugin instance
         :type plugin: instance
         """
-
+        
         threading.Thread.__init__(self, name='WMI Thread')
         self.plugin = plugin
         self.wmi = None
@@ -760,7 +759,7 @@ class WMI(threading.Thread):
         self.localDrives = {}
         self.cdromDrives = {}
         self.wmi = None
-
+    
     def _get_drive_type(self, driveType):
         driveTypes = (
             ([], {}, None),
@@ -772,7 +771,7 @@ class WMI(threading.Thread):
             (['RamDrive'], self.ramDrives, 'DiskDrive'),
         )
         return driveTypes[driveType]
-
+    
     @eg.LogIt
     def UnmountDrive(self, letter):
         """
@@ -784,7 +783,7 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         eventTypes = (
             None,
             None,
@@ -794,10 +793,10 @@ class WMI(threading.Thread):
             'Ejected',
             'Destroyed'
         )
-
+        
         for i in range(2, 7):
             suffix, storedDrives, _ = self._get_drive_type(i)
-
+            
             if letter + ':' in storedDrives:
                 suffix, payload = storedDrives[letter + ':']
                 self.plugin.TriggerEvent(
@@ -806,7 +805,7 @@ class WMI(threading.Thread):
                 )
                 del storedDrives[letter + ':']
                 return
-
+    
     @eg.LogIt
     def MountDrive(self, letter=None):
         """
@@ -818,70 +817,69 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         if letter:
             TriggerEvent = self.plugin.TriggerEvent
             logicalDisks = self.wmi.ExecQuery(
                 'Select * from Win32_LogicalDisk WHERE DeviceID="%s"' %
                 (letter + ':',)
             )
-
+        
         else:
             def TriggerEvent(*args):
                 pass
-
+            
             logicalDisks = self.wmi.ExecQuery(
                 "Select * from Win32_LogicalDisk"
             )
-
+        
         for disk in logicalDisks:
             suffix, storedDrives, clsName = (
                 self._get_drive_type(disk.DriveType)
             )
-
+            
             if clsName is not None:
                 drives = self.wmi.ExecQuery(
                     'Select * from Win32_' + clsName
                 )
-
+                
                 for drive in drives:
                     deviceId = drive.DeviceID
-
+                    
                     if deviceId in storedDrives:
                         continue
-
+                    
                     payload = ClassType(
                         clsName,
                         (DeviceBase,),
                         dict(obj=drive, __name__=clsName)
                     )()
-
+                    
                     if clsName != 'DiskDrive':
                         if 'CD-Rom' in suffix:
                             if letter and drive.Drive[:-1] != letter:
                                 continue
                             if not drive.MediaLoaded:
                                 continue
-
+                            
                             suffix += [
                                 'Inserted',
                                 drive.Caption
                             ]
-                            
+                        
                         elif 'NetworkDrive' in suffix:
                             if letter and drive.Name[:-1] != letter:
                                 continue
-                                
+                            
                             suffix += [
                                 'Attached',
                                 drive.ProviderName.replace('\\', '\\\\')
                             ]
-
                         
                         suffix += [disk.DeviceID[:-1]]
                         storedDrives[disk.DeviceID] = (suffix[1:], payload)
                         TriggerEvent('.'.join(suffix), payload)
-
+                    
                     else:
                         partitionQuery = ASSOCIATORS % (
                             'DiskDrive',
@@ -897,19 +895,19 @@ class WMI(threading.Thread):
                             for disk in self.wmi.ExecQuery(diskQuery):
                                 if letter and disk.DeviceID[:-1] != letter:
                                     continue
-
+                                
                                 suffix += [
                                     'Mounted',
                                     drive.Caption,
                                     disk.DeviceID[:-1]
                                 ]
-
+                                
                                 storedDrives[disk.DeviceID] = (
                                     suffix[1:],
                                     payload
                                 )
                                 TriggerEvent('.'.join(suffix), payload)
-
+    
     @eg.LogIt
     def Removed(self, guid, data):
         """
@@ -923,15 +921,15 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         TriggerEvent = self.plugin.TriggerEvent
-
+        
         if guid in NOEVENT or guid == GUID_DEVINTERFACE_NET2:
             return
-
+        
         cDevices = self._current_devices(guid)
         vendor_id = _parse_vendor_id(data)
-
+        
         for device_ids in cDevices.keys():
             for device_id in device_ids:
                 if device_id.find(vendor_id) > -1:
@@ -940,12 +938,12 @@ class WMI(threading.Thread):
                         '.'.join(['Device.Removed'] + suffix),
                         payload
                     )
-
+                    
                     del cDevices[device_ids]
                     return
-
+        
         TriggerEvent('Device.Removed', [data])
-
+    
     @eg.LogIt
     def Attached(self, guid, data):
         """
@@ -959,26 +957,26 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         if guid in NOEVENT:
             return
-
+        
         if guid in GUID_DEVINTERFACE_NET:
             guid = GUID_DEVINTERFACE_NET1
-
+        
         vendor_id = _parse_vendor_id(data)
         current_devices = self._current_devices(guid)
         TriggerEvent = self.plugin.TriggerEvent
-
+        
         def FindId(device):
             device_ids = _get_ids(device)
             for device_id in device_ids:
                 if device_id.upper().find(vendor_id) > -1:
                     return device_ids
             return ()
-
+        
         def FindDevices(cls_name, **kwargs):
-
+            
             def ProcessDevices(devc, devc_ids):
                 suffix, payload = _create_event(
                     devc,
@@ -987,16 +985,16 @@ class WMI(threading.Thread):
                     cls_name=cls_name,
                     **kwargs
                 )
-
+                
                 if not suffix:
                     return suffix
-
+                
                 TriggerEvent(
                     '.'.join(['Device.Attached'] + suffix),
                     payload
                 )
                 return True
-
+            
             try:
                 query = (
                     "SELECT * from Win32_{0} WHERE PNPDeviceID LIKE '%{1}%'"
@@ -1004,16 +1002,16 @@ class WMI(threading.Thread):
                 devices = self.wmi.ExecQuery(
                     query.format(cls_name, vendor_id.split('\\')[-1].lower())
                 )
-
+                
                 if not len(devices):
                     raise ValueError
-
+                
                 for device in devices:
                     result = ProcessDevices(device, (device.PNPDeviceID,))
                     if result is False:
                         continue
                 return True
-
+            
             except (win32com.client.pythoncom.com_error, ValueError):
                 query = "SELECT * from Win32_{0}"
                 devices = self.wmi.ExecQuery(
@@ -1025,7 +1023,7 @@ class WMI(threading.Thread):
                         continue
                     return result
             return False
-
+        
         if guid in DEVICES:
             res = FindDevices(**DEVICES[guid][0])
             if res is not False:
@@ -1036,9 +1034,9 @@ class WMI(threading.Thread):
                     res = FindDevices(**dev)
                     if res is not False:
                         return
-
+        
         TriggerEvent('Device.Attached', [data])
-
+    
     def DriveEvent(self, eventType, letter):
         """
         Puts the Windows notification data into the queue.
@@ -1050,10 +1048,10 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         self.queue.append((getattr(self, eventType), (letter,)))
         self.queueEvent.set()
-
+    
     def DeviceEvent(self, eventType, guid, data):
         """
         Puts the Windows notification data into the queue.
@@ -1067,16 +1065,16 @@ class WMI(threading.Thread):
         :return: None
         :rtype: None
         """
-
+        
         self.queue.append((getattr(self, eventType), (guid, data)))
         self.queueEvent.set()
-
+    
     def _current_devices(self, guid):
         guid = guid.upper()
         if guid not in self.currentDevices:
             self.currentDevices[guid] = {}
         return self.currentDevices[guid]
-
+    
     def run(self):
         """
         Handles the population of devices when the thread starts. This also
@@ -1087,18 +1085,18 @@ class WMI(threading.Thread):
         """
         pythoncom.CoInitialize()
         self.wmi = wmi = win32com.client.GetObject("winmgmts:\\root\\cimv2")
-
+        
         self.MountDrive()
-
+        
         for guid in DEVICES.keys():
             if guid == GUID_DEVINTERFACE_NET2:
                 continue
-
+            
             for dev in DEVICES[guid]:
                 devices = wmi.ExecQuery(
                     "Select * from Win32_" + dev['cls_name']
                 )
-
+                
                 for device in devices:
                     _create_event(
                         device,
@@ -1106,7 +1104,7 @@ class WMI(threading.Thread):
                         self._current_devices(guid),
                         **dev
                     )
-
+        
         while not self.stopEvent.isSet():
             self.queueEvent.wait()
             if not self.stopEvent.isSet():
@@ -1114,11 +1112,11 @@ class WMI(threading.Thread):
                     func, data = self.queue.pop(0)
                     func(*data)
                 self.queueEvent.clear()
-
+        
         del self.wmi
         self.wmi = None
         pythoncom.CoUninitialize()
-
+    
     def stop(self):
         """
         Stops the thread.
@@ -1136,7 +1134,7 @@ class ChangeNotifier:
     from the message and then passes it to the WMI thread so an event can be
      generated.
     """
-
+    
     def __init__(self, plugin):
         """
         Registers for Windows notifications for Devices/Drives being attached
@@ -1148,15 +1146,15 @@ class ChangeNotifier:
         self.plugin = plugin
         self.notifier = None
         self.WMI = WMI(plugin)
-
+        
         eg.messageReceiver.AddHandler(
             WM_DEVICECHANGE,
             self.OnDeviceChange
         )
-
+        
         self.WMI.start()
         wx.CallAfter(self.Register)
-
+    
     def Register(self):
         """
         Registers for the notifications. This gets called via the use of
@@ -1171,7 +1169,7 @@ class ChangeNotifier:
             pointer(DEV_BROADCAST_DEVICEINTERFACE()),
             DEVICE_NOTIFY_ALL_INTERFACE_CLASSES
         )
-
+    
     def Close(self):
         """
         Performs the shutdown of the WMI thread. Als unregisters for the
@@ -1182,12 +1180,12 @@ class ChangeNotifier:
         """
         self.WMI.stop()
         UnregisterDeviceNotification(self.notifier)
-
+        
         eg.messageReceiver.RemoveHandler(
             WM_DEVICECHANGE,
             self.OnDeviceChange
         )
-
+    
     def OnDeviceChange(self, hwnd, msg, wparam, lparam):
         """
         Callback method the Windows notification calls when a message needs to
@@ -1204,24 +1202,24 @@ class ChangeNotifier:
         :return: None
         :rtype: None
         """
-
+        
         def DriveLettersFromMask(mask):
             return [
                 chr(65 + driveNum) for driveNum in range(0, 26)
                 if (mask & (2 ** driveNum))
             ]
-
+        
         def IsDeviceInterface():
             dbch = DEV_BROADCAST_HDR.from_address(lparam)
             return dbch.dbch_devicetype == DBT_DEVTYP_DEVICEINTERFACE
-
+        
         def IsVolume():
             dbch = DEV_BROADCAST_HDR.from_address(lparam)
             return dbch.dbch_devicetype == DBT_DEVTYP_VOLUME
-
+        
         def DeviceEvent(suffix):
             dbcc = DEV_BROADCAST_DEVICEINTERFACE.from_address(lparam)
-
+            
             p = c_wchar_p()
             oledll.ole32.StringFromCLSID(
                 byref(dbcc.dbcc_classguid),
@@ -1229,28 +1227,28 @@ class ChangeNotifier:
             )
             guid = p.value
             windll.ole32.CoTaskMemFree(p)
-
+            
             self.WMI.DeviceEvent(
                 suffix,
                 guid,
                 wstring_at(lparam + DBD_NAME_OFFSET)
             )
-
+        
         def VolumeEvent(mountType):
             dbcv = DEV_BROADCAST_VOLUME.from_address(lparam)
             letters = DriveLettersFromMask(dbcv.dbcv_unitmask)
             for letter in letters:
                 self.WMI.DriveEvent(mountType, letter)
-
+        
         if wparam == DBT_DEVICEARRIVAL:
             if IsDeviceInterface():
                 DeviceEvent('Attached')
             elif IsVolume():
                 VolumeEvent("MountDrive")
-
+        
         elif wparam == DBT_DEVICEREMOVECOMPLETE:
-                if IsDeviceInterface():
-                    DeviceEvent('Removed')
-                elif IsVolume():
-                    VolumeEvent("UnmountDrive")
+            if IsDeviceInterface():
+                DeviceEvent('Removed')
+            elif IsVolume():
+                VolumeEvent("UnmountDrive")
         return 1

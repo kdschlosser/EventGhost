@@ -96,10 +96,10 @@ class MonitorPowerBase(eg.ActionBase):
     
     def __call__(self):
         raise NotImplementedError
-        
+    
     def _change_monitor_state(self, state):
         SendMessage(HWND_BROADCAST, WM_SYSCOMMAND, SC_MONITORPOWER, state)
-    
+
 
 class MonitorPowerOff(MonitorPowerBase):
     name = "Turn Off"
@@ -108,7 +108,7 @@ class MonitorPowerOff(MonitorPowerBase):
         "be the most power-saving mode the display supports."
     )
     iconFile = "icons/Display"
-
+    
     def __call__(self):
         self._change_monitor_state(2)
 
@@ -120,7 +120,7 @@ class MonitorPowerOn(MonitorPowerBase):
         "mode. Will also stop a running screen saver."
     )
     iconFile = "icons/Display"
-
+    
     def __call__(self):
         self._change_monitor_state(-1)
 
@@ -129,6 +129,6 @@ class MonitorStandby(MonitorPowerBase):
     name = "Standby"
     description = "Sets the state of the display to low-power mode."
     iconFile = "icons/Display"
-
+    
     def __call__(self):
         self._change_monitor_state(1)

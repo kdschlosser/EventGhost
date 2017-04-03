@@ -55,7 +55,7 @@ def AddActions(plugin):
         Text.Group.description,
         ICON
     )
-   
+    
     group.AddAction(Reboot)
     group.AddAction(PowerDown)
     group.AddAction(Hibernate)
@@ -73,24 +73,25 @@ class Text(eg.TranslatableStrings):
     class Group:
         name = 'Power'
         description = 'Power'
-        
+    
+    
     text = "Choose option:"
     choices = [
         "Disable system idle timer",
         "Enable system idle timer"
     ]
-    
+
 
 class __ComputerPowerAction(eg.ActionBase):
     iconFile = "icons/Shutdown"
-
+    
     def Configure(self, bForceClose=False):
         panel = eg.ConfigPanel()
         checkbox = panel.CheckBox(bForceClose, self.plugin.text.forcedCB)
         panel.sizer.Add(checkbox, 0, wx.ALL, 10)
         while panel.Affirmed():
             panel.SetResult(checkbox.GetValue())
-
+    
     def GetLabel(self, bForceClose=False):
         s = eg.ActionBase.GetLabel(self)
         if bForceClose:
@@ -106,7 +107,7 @@ class Hibernate(__ComputerPowerAction):
         "(S4) state."
     )
     iconFile = "icons/Hibernate"
-
+    
     def __call__(self, bForceClose=False):
         thread.start_new_thread(
             ctypes.windll.Powrprof.SetSuspendState,
@@ -123,7 +124,7 @@ class LockWorkstation(eg.ActionBase):
         "Workstation."
     )
     iconFile = "icons/LockWorkstation"
-
+    
     def __call__(self):
         ctypes.windll.user32.LockWorkStation()
 
@@ -135,11 +136,11 @@ class LogOff(eg.ActionBase):
         "then signs the user out."
     )
     iconFile = "icons/LogOff"
-
+    
     def __call__(self):
-        #SHTDN_REASON_MAJOR_OPERATINGSYSTEM = 0x00020000
-        #SHTDN_REASON_MINOR_UPGRADE         = 0x00000003
-        #SHTDN_REASON_FLAG_PLANNED          = 0x80000000
+        # SHTDN_REASON_MAJOR_OPERATINGSYSTEM = 0x00020000
+        # SHTDN_REASON_MINOR_UPGRADE         = 0x00000003
+        # SHTDN_REASON_FLAG_PLANNED          = 0x80000000
         #                                     ----------
         #                                     0x80020003
         ExitWindowsEx(EWX_LOGOFF, 0x80020003)
@@ -152,7 +153,7 @@ class PowerDown(__ComputerPowerAction):
         "must support the power-off feature."
     )
     iconFile = "icons/PowerDown"
-
+    
     def __call__(self, bForceClose=False):
         AdjustPrivileges()
         InitiateSystemShutdown(None, None, 0, bForceClose, False)
@@ -162,15 +163,16 @@ class Reboot(__ComputerPowerAction):
     name = "Reboot"
     description = "Reboots the system."
     iconFile = "icons/Reboot"
-
+    
     def __call__(self, bForceClose=False):
         AdjustPrivileges()
         InitiateSystemShutdown(None, None, 0, bForceClose, True)
 
+
 class SetSystemIdleTimer(eg.ActionBase):
     name = "Set System Idle Timer"
     description = "Enables or disables the system idle timer."
-
+    
     def __call__(self, flag=False):
         # ES_CONTINUOUS       = 0x80000000
         # ES_DISPLAY_REQUIRED = 0x00000002
@@ -180,7 +182,7 @@ class SetSystemIdleTimer(eg.ActionBase):
             SetThreadExecutionState(0x80000000)
         else:
             SetThreadExecutionState(0x80000003)
-
+    
     def Configure(self, flag=False):
         panel = eg.ConfigPanel()
         text = self.text
@@ -193,10 +195,10 @@ class SetSystemIdleTimer(eg.ActionBase):
         )
         radioBox.SetSelection(int(flag))
         panel.sizer.Add(radioBox, 0, wx.EXPAND)
-
+        
         while panel.Affirmed():
             panel.SetResult(bool(radioBox.GetSelection()))
-
+    
     def GetLabel(self, flag=0):
         return self.text.choices[flag]
 
@@ -208,7 +210,7 @@ class Standby(__ComputerPowerAction):
         "(sleep) state."
     )
     iconFile = "icons/Standby"
-
+    
     def __call__(self, bForceClose=False):
         thread.start_new_thread(
             ctypes.windll.Powrprof.SetSuspendState,
@@ -222,10 +224,11 @@ class SetIdleTime(eg.ActionBase):
         description = "Sets the idle timer."
         label1 = "Wait"
         label2 = "seconds before triggering idle event."
-
+    
+    
     def __call__(self, idleTime):
         HookSetIdleTime(int(idleTime * 1000))
-
+    
     def Configure(self, waitTime=60.0):
         panel = eg.ConfigPanel()
         waitTimeCtrl = panel.SpinNumCtrl(waitTime, integerWidth=5)
@@ -237,7 +240,7 @@ class SetIdleTime(eg.ActionBase):
 class ResetIdleTimer(eg.ActionBase):
     name = "Reset Idle Time"
     description = "Resets the idle timer."
-
+    
     def __call__(self):
         HookResetIdleTimer()
 
@@ -251,11 +254,12 @@ class GetBootTimestamp(eg.ActionBase):
             otherwise, it is in human-readable format.
         """
         timestamp = "Return result as an UNIX timestamp"
-
-    def __call__(self, timestamp = True):
-        return eg.Utils.GetBootTimestamp(unix_timestamp = timestamp)
-
-    def Configure(self, timestamp = True):
+    
+    
+    def __call__(self, timestamp=True):
+        return eg.Utils.GetBootTimestamp(unix_timestamp=timestamp)
+    
+    def Configure(self, timestamp=True):
         panel = eg.ConfigPanel()
         checkbox = panel.CheckBox(timestamp, self.text.timestamp)
         panel.sizer.Add(checkbox, 0, wx.ALL, 10)
@@ -272,11 +276,12 @@ class GetUpTime(eg.ActionBase):
             hours, minutes, and seconds.
         """
         ticks = "Return result as the number of seconds (ticks)"
-
-    def __call__(self, ticks = True):
-        return eg.Utils.GetUpTime(seconds = ticks)
-
-    def Configure(self, ticks = True):
+    
+    
+    def __call__(self, ticks=True):
+        return eg.Utils.GetUpTime(seconds=ticks)
+    
+    def Configure(self, ticks=True):
         panel = eg.ConfigPanel()
         checkbox = panel.CheckBox(ticks, self.text.ticks)
         panel.sizer.Add(checkbox, 0, wx.ALL, 10)
@@ -301,12 +306,10 @@ def AdjustPrivileges():
     newState.Privileges[0].Luid = luid
     newState.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED
     AdjustTokenPrivileges(
-        hToken,            # TokenHandle
-        0,                 # DisableAllPrivileges
-        newState,          # NewState
-        sizeof(newState),  # BufferLength
-        None,              # PreviousState
+        hToken, # TokenHandle
+        0, # DisableAllPrivileges
+        newState, # NewState
+        sizeof(newState), # BufferLength
+        None, # PreviousState
         None               # ReturnLength
     )
-
-

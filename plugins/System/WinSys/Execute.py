@@ -55,24 +55,25 @@ from eg.WinApi.Dynamic import (
     windll
 )
 
+
 PATHEXT = tuple(os.environ.get(
     "PATHEXT",
     ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC"
 ).upper().split(os.path.pathsep) + [".MSC"])
 
 PRIORITY_FLAGS = (
-    64,     # IDLE_PRIORITY_CLASS
-    16384,  # BELOW_NORMAL_PRIORITY_CLASS
-    32,     # NORMAL_PRIORITY_CLASS
-    32768,  # ABOVE_NORMAL_PRIORITY_CLASS
-    128,    # HIGH_PRIORITY_CLASS
+    64, # IDLE_PRIORITY_CLASS
+    16384, # BELOW_NORMAL_PRIORITY_CLASS
+    32, # NORMAL_PRIORITY_CLASS
+    32768, # ABOVE_NORMAL_PRIORITY_CLASS
+    128, # HIGH_PRIORITY_CLASS
     256,    # REALTIME_PRIORITY_CLASS
 )
 
 WINSTATE_FLAGS = (
-    1,  # SW_SHOWNORMAL
-    6,  # SW_MINIMIZE | SW_HIDE
-    3,  # SW_SHOWMAXIMIZED
+    1, # SW_SHOWNORMAL
+    6, # SW_MINIMIZE | SW_HIDE
+    3, # SW_SHOWMAXIMIZED
     0,  # SW_HIDE
 )
 
@@ -122,14 +123,15 @@ class Execute(eg.ActionBase):
     description = "Runs an executable file or opens any file or folder."
     iconFile = "icons/Execute"
     text = Text.Execute
-
+    
+    
     class TriggerEvent(Thread):
         def __init__(self, processInformation, suffix, prefix):
             Thread.__init__(self)
             self.processInformation = processInformation
             self.suffix = suffix
             self.prefix = prefix
-
+        
         def run(self):
             WaitForSingleObject(self.processInformation.hProcess, INFINITE)
             exitCode = DWORD()
@@ -141,8 +143,9 @@ class Execute(eg.ActionBase):
             CloseHandle(self.processInformation.hProcess)
             if hasattr(self.processInformation, "hThread"):
                 CloseHandle(self.processInformation.hThread)
-            eg.TriggerEvent(self.suffix, prefix = self.prefix)
-
+            eg.TriggerEvent(self.suffix, prefix=self.prefix)
+    
+    
     def __call__(
         self,
         pathname='',
@@ -157,7 +160,7 @@ class Execute(eg.ActionBase):
         disableParsingPathname=False,
         disableParsingArguments=False,
         disableParsingAdditionalSuffix=False,
-        runAsAdmin = False,
+        runAsAdmin=False,
     ):
         if eg.config.refreshEnv:
             eg.Environment.Refresh()
@@ -190,10 +193,10 @@ class Execute(eg.ActionBase):
         activeThread = GetWindowThreadProcessId(GetForegroundWindow(), None)
         currentThread = GetCurrentThreadId()
         attached = AttachThreadInput(currentThread, activeThread, True)
-
+        
         if not windll.shell32.ShellExecuteExW(byref(processInformation)):
             raise self.Exception(FormatError())
-
+        
         if attached:
             AttachThreadInput(currentThread, activeThread, False)
         if disableWOW64:
@@ -236,7 +239,7 @@ class Execute(eg.ActionBase):
                 raise self.Exception(FormatError())
             returnValue = exitCode.value
             if triggerEvent:
-                eg.TriggerEvent(suffix, prefix = prefix)
+                eg.TriggerEvent(suffix, prefix=prefix)
             CloseHandle(processInformation.hProcess)
             return returnValue
         elif triggerEvent:
@@ -244,7 +247,7 @@ class Execute(eg.ActionBase):
             te.start()
         else:
             CloseHandle(processInformation.hProcess)
-
+    
     def Configure(
         self,
         pathname='',
@@ -259,7 +262,7 @@ class Execute(eg.ActionBase):
         disableParsingPathname=False,
         disableParsingArguments=False,
         disableParsingAdditionalSuffix=False,
-        runAsAdmin = False,
+        runAsAdmin=False,
     ):
         panel = eg.ConfigPanel()
         text = self.text
@@ -281,7 +284,7 @@ class Execute(eg.ActionBase):
             workingDir or "",
             dialogTitle=text.browseWorkingDirDialogTitle
         )
-        #workingDirCtrl.SetValue(workingDir)
+        # workingDirCtrl.SetValue(workingDir)
         winStateChoice = panel.Choice(winState, text.WindowOptions)
         priorityChoice = panel.Choice(5 - priority, text.ProcessOptions)
         waitCheckBox = panel.CheckBox(
@@ -305,7 +308,7 @@ class Execute(eg.ActionBase):
             bool(runAsAdmin),
             text.runAsAdminCheckbox
         )
-
+        
         SText = panel.StaticText
         procPriorLabel = SText(text.ProcessOptionsDesc)
         lowerSizer = wx.GridBagSizer(0, 0)
@@ -319,7 +322,7 @@ class Execute(eg.ActionBase):
         ])
         lowerSizer.AddGrowableCol(1)
         lowerSizer.AddGrowableCol(3)
-
+        
         lowerSizer2 = wx.GridBagSizer(2, 0)
         stTxt = SText(text.additionalSuffix)
         lowerSizer2.AddMany([
@@ -332,8 +335,8 @@ class Execute(eg.ActionBase):
         ])
         lowerSizer2.AddGrowableCol(1)
         lowerSizer2.AddGrowableCol(3)
-
-        def OnPathnameChanged(evt = None):
+        
+        def OnPathnameChanged(evt=None):
             path = filepathCtrl.GetValue().upper()
             if not isdir(path):
                 enable = True
@@ -346,10 +349,11 @@ class Execute(eg.ActionBase):
             workingDirCtrl.Enable(enable)
             wow64CheckBox.Enable(enable)
             runAsAdminCheckBox.Enable(enable)
+        
         filepathCtrl.changeCallback = OnPathnameChanged
         OnPathnameChanged()
-
-        def OnEventCheckBox(evt = None):
+        
+        def OnEventCheckBox(evt=None):
             enable = eventCheckBox.GetValue()
             stTxt.Enable(enable)
             additionalSuffixCtrl.Enable(enable)
@@ -358,9 +362,10 @@ class Execute(eg.ActionBase):
                 additionalSuffixCtrl.ChangeValue("")
             if evt:
                 evt.Skip()
+        
         eventCheckBox.Bind(wx.EVT_CHECKBOX, OnEventCheckBox)
         OnEventCheckBox()
-
+        
         panel.sizer.AddMany([
             (SText(text.FilePath)),
             (filepathCtrl, 0, wx.EXPAND),
@@ -383,7 +388,7 @@ class Execute(eg.ActionBase):
             ((10, 8)),
             (runAsAdminCheckBox),
         ])
-
+        
         while panel.Affirmed():
             panel.SetResult(
                 filepathCtrl.GetValue(),
@@ -400,7 +405,7 @@ class Execute(eg.ActionBase):
                 disableParsingAdditionalSuffixBox.GetValue(),
                 runAsAdminCheckBox.GetValue()
             )
-
+    
     def GetLabel(self, pathname='', *dummyArgs):
         path = expandvars(pathname).upper()
         if isdir(path):

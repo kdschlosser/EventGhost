@@ -21,11 +21,10 @@
 # Thanks to Diz
 # ---------------------------------------
 
+import eg
 import wx
 import ctypes
 from comtypes import GUID
-
-import eg
 from eg.WinApi.Dynamic import (
     windll,
     byref,
@@ -42,6 +41,7 @@ from eg.WinApi.Dynamic import (
     PBT_APMSUSPEND,
     WM_POWERBROADCAST,
 )
+
 
 UCHAR = ctypes.c_ubyte
 DWORD = ctypes.wintypes.DWORD
@@ -61,7 +61,6 @@ SVR_ON = 0x1
 
 AWY_EXITING = 0x0
 AWY_ENTERING = 0x1
-
 
 if eg.WindowsVersion >= 8:
     GUID_CONSOLE_DISPLAY_STATE = GUID(
@@ -100,47 +99,46 @@ GUID_TYPICAL_POWER_SAVINGS = GUID(
     '{381b4222-f694-41f0-9685-ff5bb260df2e}'
 )
 
-
 POWER_MESSAGES = {
-    GUID_CONSOLE_DISPLAY_STATE: {
+    GUID_CONSOLE_DISPLAY_STATE       : {
         MON_OFF: 'Monitor.Off',
-        MON_ON: 'Monitor.On',
+        MON_ON : 'Monitor.On',
         MON_DIM: 'Monitor.Dim'
     },
-    GUID_SYSTEM_AWAYMODE: {
-        AWY_EXITING: 'AwayMode.Exiting',
+    GUID_SYSTEM_AWAYMODE             : {
+        AWY_EXITING : 'AwayMode.Exiting',
         AWY_ENTERING: 'AwayMode.Entering'
     },
-    GUID_ACDC_POWER_SOURCE: {
-        PWR_AC: 'PowerSource.Line',
-        PWR_DC: 'PowerSource.Battery',
+    GUID_ACDC_POWER_SOURCE           : {
+        PWR_AC : 'PowerSource.Line',
+        PWR_DC : 'PowerSource.Battery',
         PWR_UPS: 'PowerSource.UPS'
     },
     GUID_BATTERY_PERCENTAGE_REMAINING: {
         i: 'BatteryLevel.' + str(i) + '%' for i in range(101)
     },
-    GUID_POWER_SAVING_STATUS: {
+    GUID_POWER_SAVING_STATUS         : {
         SVR_OFF: 'PowerSaving.Off',
-        SVR_ON: 'PowerSaving.On'
+        SVR_ON : 'PowerSaving.On'
     },
-    GUID_POWERSCHEME_PERSONALITY: {
-        GUID_MIN_POWER_SAVINGS: 'PowerProfile.PowerSaver',
-        GUID_MAX_POWER_SAVINGS: 'PowerProfile.HighPerformance',
+    GUID_POWERSCHEME_PERSONALITY     : {
+        GUID_MIN_POWER_SAVINGS    : 'PowerProfile.PowerSaver',
+        GUID_MAX_POWER_SAVINGS    : 'PowerProfile.HighPerformance',
         GUID_TYPICAL_POWER_SAVINGS: 'PowerProfile.Balanced'
     },
-    PBT_APMRESUMEAUTOMATIC: 'ResumeAutomatic',
-    PBT_APMRESUMESUSPEND: 'Resume',
-    PBT_APMSUSPEND: 'Suspend'
+    PBT_APMRESUMEAUTOMATIC           : 'ResumeAutomatic',
+    PBT_APMRESUMESUSPEND             : 'Resume',
+    PBT_APMSUSPEND                   : 'Suspend'
     # PBT_APMPOWERSTATUSCHANGE: "PowerStatusChange",
 }
 
 if eg.WindowsVersion.IsXP():
     POWER_MESSAGES.update({
-        PBT_APMBATTERYLOW: 'BatteryLevel.Low', # pre win vista
-        PBT_APMOEMEVENT: 'OemEvent', # pre win vista
+        PBT_APMBATTERYLOW        : 'BatteryLevel.Low', # pre win vista
+        PBT_APMOEMEVENT          : 'OemEvent', # pre win vista
         PBT_APMQUERYSUSPENDFAILED: 'QuerySuspendFailed', # pre win vista
-        PBT_APMRESUMECRITICAL: 'ResumeCritical', # pre win vista
-        PBT_APMQUERYSUSPEND: 'QuerySuspend', # pre win vista
+        PBT_APMRESUMECRITICAL    : 'ResumeCritical', # pre win vista
+        PBT_APMQUERYSUSPEND      : 'QuerySuspend', # pre win vista
     })
 else:
     def Register(guid):
@@ -149,8 +147,8 @@ else:
             byref(guid),
             0
         )
-
-
+    
+    
     def Unregister(cls):
         windll.user32.UnregisterDeviceNotification(cls)
 
@@ -197,15 +195,15 @@ class BroadcastNotifier:
         self.batteryNotify = None
         self.savingNotify = None
         self.schemeNotify = None
-
+        
         if eg.WindowsVersion >= 'Vista':
             wx.CallAfter(self.RegisterMessages)
-
+        
         eg.messageReceiver.AddHandler(
             WM_POWERBROADCAST,
             self.OnPowerBroadcast
         )
-
+    
     def RegisterMessages(self):
         self.monitorNotify = Register(GUID_CONSOLE_DISPLAY_STATE)
         self.awayNotify = Register(GUID_SYSTEM_AWAYMODE)
@@ -213,7 +211,7 @@ class BroadcastNotifier:
         self.batteryNotify = Register(GUID_BATTERY_PERCENTAGE_REMAINING)
         self.savingNotify = Register(GUID_POWER_SAVING_STATUS)
         self.schemeNotify = Register(GUID_POWERSCHEME_PERSONALITY)
-
+    
     def Close(self):
         if eg.WindowsVersion >= 'Vista':
             Unregister(self.monitorNotify)
@@ -222,35 +220,35 @@ class BroadcastNotifier:
             Unregister(self.batteryNotify)
             Unregister(self.savingNotify)
             Unregister(self.schemeNotify)
-
+        
         eg.messageReceiver.RemoveHandler(
             WM_POWERBROADCAST,
             self.OnPowerBroadcast
         )
-
+    
     @eg.LogIt
     def OnPowerBroadcast(self, hwnd, uMsg, wParam, lParam):
         if wParam == PBT_APMRESUMEAUTOMATIC:
             eg.actionThread.CallWait(eg.actionThread.OnComputerResume)
-
+        
         msg = POWER_MESSAGES.get(wParam, None)
-
+        
         msgCls = [
             POWERBROADCAST_SETTING,
             POWERSCHEME_PERSONALITY,
             BATTERY_PERCENTAGE_REMAINING
         ]
-
+        
         while msg is None and msgCls:
             msg = CreatePowerClass(lParam, msgCls.pop(0))
-
+        
         if msg is not None:
             eg.eventThread.TriggerEventWait(
                 suffix=msg,
                 prefix="System",
                 source=self.plugin
             )
-
+        
         if wParam == PBT_APMSUSPEND:
             eg.actionThread.CallWait(eg.actionThread.OnComputerSuspend)
         return 1

@@ -16,9 +16,9 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-from Notifier import ChangeNotifier
+import eg
 import Battery
-#import BlueTooth
+# import BlueTooth
 import CDRom
 import HardDrive
 import Monitor
@@ -29,6 +29,7 @@ import SoundCard
 import UPS
 import VideoCard
 import Devices
+from Notifier import ChangeNotifier
 
 
 ICON = None
@@ -36,7 +37,7 @@ ICON = None
 
 class Text(eg.TranslatableStrings):
     class Group:
-        name = ' Devices'
+        name = 'Devices'
         description = 'Devices'
 
 
@@ -59,11 +60,11 @@ def AddActions(plugin):
     group.AddAction(Battery.BatteryEstimatedRunTime)
     group.AddAction(Battery.BatteryEstimatedChargeRemaining)
     
-#     group = deviceGroup.AddGroup(
-#         BlueTooth.Text.Group.name,
-#         BlueTooth.Text.Group.description,
-#         BlueTooth.ICON
-#     )
+    #     group = deviceGroup.AddGroup(
+    #         BlueTooth.Text.Group.name,
+    #         BlueTooth.Text.Group.description,
+    #         BlueTooth.ICON
+    #     )
     group = deviceGroup.AddGroup(
         CDRom.Text.Group.name,
         CDRom.Text.Group.description,
@@ -158,7 +159,6 @@ def AddActions(plugin):
     group.AddAction(UPS.UPSEstimatedRunTime)
     group.AddAction(UPS.UPSEstimatedChargeRemaining)
     
-    
     group = deviceGroup.AddGroup(
         VideoCard.Text.Group.name,
         VideoCard.Text.Group.description,
@@ -174,9 +174,3 @@ def AddActions(plugin):
     group.AddAction(VideoCard.VideoCardCurrentResolution)
     group.AddAction(VideoCard.VideoCardCurrentVerticalResolution)
     group.AddAction(VideoCard.VideoCardCurrentHorizontalResolution)
-
-    
-
-
-
-

@@ -25,9 +25,10 @@ ICON = "icons/SetClipboard"
 
 class Text(eg.TranslatableStrings):
     class Group:
-        name = ' Clipboard'
+        name = 'Clipboard'
         description = 'Clipboard'
-        
+    
+    
     class SetClipboard:
         error = "Can't open clipboard"
 

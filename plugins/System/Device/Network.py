@@ -30,6 +30,7 @@ class Text(eg.TranslatableStrings):
         name = 'Network Card'
         description = 'Network Card'
     
+    
     class WakeOnLan:
         parameterDescription = "Ethernet adapter MAC address to wake up:"
 
@@ -40,7 +41,7 @@ class NetworkBase(ActionBase.ActionBase):
     )
     DEVICE_TYPE = None
     DEVICE_NAME = 'Name'
-    
+
 
 class NetworkIPAddresses(NetworkBase):
     """
@@ -70,10 +71,10 @@ class NetworkEnable(NetworkBase):
     """
     Enable network adapter action.
     """
-
+    
     name = "Enable"
     description = "Enable a network adapter"
-
+    
     def _run(self, adapter):
         return adapter.Enable
 
@@ -82,13 +83,13 @@ class NetworkDisable(NetworkBase):
     """
     Disable network adapter action.
     """
-
+    
     name = "Disable"
     description = "Disable a network adapter"
-
+    
     def _run(self, adapter):
         return adapter.Disable
-        
+
 
 class WakeOnLan(eg.ActionBase):
     name = "Wake on LAN"
@@ -98,7 +99,7 @@ class WakeOnLan(eg.ActionBase):
     )
     iconFile = "icons/WakeOnLan"
     text = Text.WakeOnLan
-
+    
     def __call__(self, macAddress):
         # Check macaddress format and try to compensate.
         if len(macAddress) == 12:
@@ -108,35 +109,35 @@ class WakeOnLan(eg.ActionBase):
             macAddress = macAddress.replace(sep, '')
         else:
             raise ValueError('Incorrect MAC address format')
-
+        
         # Pad the synchronization stream.
         data = ''.join(['FFFFFFFFFFFF', macAddress * 20])
         send_data = ''
-
+        
         # Split up the hex values and pack.
         for i in range(0, len(data), 2):
             send_data = ''.join(
                 [send_data, struct.pack('B', int(data[i: i + 2], 16))]
             )
-
+        
         # Broadcast it to the LAN.
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         sock.sendto(send_data, ('<broadcast>', 7))
-
+    
     def Configure(self, macAddress=""):
         from wx.lib.masked import TextCtrl
+        
+        
         panel = eg.ConfigPanel()
-        macCtrl  = TextCtrl(
+        macCtrl = TextCtrl(
             panel,
-            mask = "##-##-##-##-##-##",
-            includeChars = "ABCDEF",
-            choiceRequired = True,
-            defaultValue = macAddress.upper(),
-            formatcodes = "F!",
+            mask="##-##-##-##-##-##",
+            includeChars="ABCDEF",
+            choiceRequired=True,
+            defaultValue=macAddress.upper(),
+            formatcodes="F!",
         )
         panel.AddLine(self.text.parameterDescription, macCtrl)
         while panel.Affirmed():
             panel.SetResult(macCtrl.GetValue())
-
-

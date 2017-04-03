@@ -31,10 +31,12 @@ class Text(eg.TranslatableStrings):
     class Group:
         name = 'Sound Card'
         description = 'Sound Card'
-        
+    
+    
     class SetMasterVolume:
         text1 = "Set master volume to"
         text2 = "percent."
+    
     
     class PlaySound:
         text1 = "Path to soundfile:"
@@ -42,45 +44,45 @@ class Text(eg.TranslatableStrings):
         text3 = "Trigger event after completion"
         fileMask = "Wav-Files (*.WAV)|*.wav|All-Files (*.*)|*.*"
         eventSuffix = "Completion"
-        
+    
+    
     class ChangeMasterVolumeBy:
         text1 = "Change master volume by"
         text2 = "percent."
-        
 
 
 class ChangeMasterVolumeBy(eg.ActionBase):
     name = "Change Master Volume"
     description = "Changes the master volume relative to the current value."
     iconFile = "icons/SoundCard"
-
+    
     text = Text.ChangeMasterVolumeBy
     
-
     def __call__(self, value, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
-        value = float(value) if isinstance(value, (int, float)) else float(eg.ParseString(value))
+        value = float(value) if isinstance(value, (int, float)) else float(
+            eg.ParseString(value))
         SoundMixer.ChangeMasterVolumeBy(value, deviceId)
         return SoundMixer.GetMasterVolume(deviceId)
-
+    
     def Configure(self, value=0, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
         deviceCtrl = panel.Choice(
             deviceId + 1, choices=SoundMixer.GetMixerDevices(True)
         )
-        #if eg.WindowsVersion.IsVista():
+        # if eg.WindowsVersion.IsVista():
         #    deviceCtrl.SetValue(0)
         #    deviceCtrl.Enable(False)
-
+        
         valueCtrl = panel.SmartSpinNumCtrl(value, min=-100, max=100)
         sizer = eg.HBoxSizer(
             (panel.StaticText(self.text.text1), 0, wx.ALIGN_CENTER_VERTICAL),
             (valueCtrl, 0, wx.LEFT | wx.RIGHT, 5),
             (panel.StaticText(self.text.text2), 0, wx.ALIGN_CENTER_VERTICAL),
         )
-
-        #panel.AddLine("Device:", deviceCtrl)
+        
+        # panel.AddLine("Device:", deviceCtrl)
         panel.AddLine(self.plugin.text.device, deviceCtrl)
         panel.AddLine(sizer)
         while panel.Affirmed():
@@ -88,7 +90,7 @@ class ChangeMasterVolumeBy(eg.ActionBase):
                 valueCtrl.GetValue(),
                 deviceCtrl.GetStringSelection(),
             )
-
+    
     def GetLabel(self, value, deviceId=0):
         primaryDevice = (deviceId == self.plugin.text.primaryDevice)
         deviceId = SoundMixer.GetDeviceId(deviceId)
@@ -109,10 +111,10 @@ class GetMute(eg.ActionBase):
     name = "Get Mute Status"
     description = "Gets mute status."
     iconFile = "icons/SoundCard"
-
+    
     def __call__(self, deviceId=0):
         return SoundMixer.GetMute(deviceId)
-
+    
     def Configure(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
@@ -122,11 +124,11 @@ class GetMute(eg.ActionBase):
         """if eg.WindowsVersion.IsVista():
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
-        #panel.AddLine("Device:", deviceCtrl)
+        # panel.AddLine("Device:", deviceCtrl)
         panel.AddLine(self.plugin.text.device, deviceCtrl)
         while panel.Affirmed():
             panel.SetResult(deviceCtrl.GetStringSelection())
-
+    
     def GetLabel(self, *args):
         return self.text.name
 
@@ -135,12 +137,12 @@ class MuteOff(eg.ActionBase):
     name = "Turn Mute Off"
     description = "Turns mute off."
     iconFile = "icons/SoundCard"
-
+    
     def __call__(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         SoundMixer.SetMute(False, deviceId)
         return False
-
+    
     def Configure(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
@@ -150,11 +152,11 @@ class MuteOff(eg.ActionBase):
         """if eg.WindowsVersion.IsVista():
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
-        #panel.AddLine("Device:", deviceCtrl)
+        # panel.AddLine("Device:", deviceCtrl)
         panel.AddLine(self.plugin.text.device, deviceCtrl)
         while panel.Affirmed():
             panel.SetResult(deviceCtrl.GetStringSelection())
-
+    
     def GetLabel(self, *args):
         return self.text.name
 
@@ -163,12 +165,12 @@ class MuteOn(eg.ActionBase):
     name = "Turn Mute On"
     description = "Turns mute on."
     iconFile = "icons/SoundCard"
-
+    
     def __call__(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         SoundMixer.SetMute(True, deviceId)
         return True
-
+    
     def Configure(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
@@ -178,14 +180,14 @@ class MuteOn(eg.ActionBase):
         """if eg.WindowsVersion.IsVista():
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
-        #panel.AddLine("Device:", deviceCtrl)
+        # panel.AddLine("Device:", deviceCtrl)
         panel.AddLine(self.plugin.text.device, deviceCtrl)
         while panel.Affirmed():
             panel.SetResult(deviceCtrl.GetStringSelection())
-
+    
     def GetLabel(self, *args):
         return self.text.name
-        
+
 
 class PlaySound(eg.ActionWithStringParameter):
     name = "Play Sound"
@@ -193,19 +195,20 @@ class PlaySound(eg.ActionWithStringParameter):
     iconFile = "icons/SoundCard"
     text = Text.PlaySound
     
-
+    
     class TriggerEvent(threading.Thread):
         def __init__(self, sound, suffix, prefix):
             threading.Thread.__init__(self)
             self.sound = sound
             self.suffix = suffix
             self.prefix = prefix
-
+        
         def run(self):
             self.sound.Play(wx.SOUND_SYNC)
-            eg.TriggerEvent(self.suffix, prefix = self.prefix)
-
-    def __call__(self, wavfile, flags=wx.SOUND_ASYNC, evt = False):
+            eg.TriggerEvent(self.suffix, prefix=self.prefix)
+    
+    
+    def __call__(self, wavfile, flags=wx.SOUND_ASYNC, evt=False):
         self.sound = wx.Sound(wavfile)
         suffix = "%s.%s" % (
             "%s.%s" % (self.name.replace(' ', ''), self.text.eventSuffix),
@@ -215,25 +218,25 @@ class PlaySound(eg.ActionWithStringParameter):
         if flags == wx.SOUND_SYNC:
             self.sound.Play(flags)
             if evt:
-                eg.TriggerEvent(suffix, prefix = prefix)
+                eg.TriggerEvent(suffix, prefix=prefix)
         elif evt:
             te = self.TriggerEvent(self.sound, suffix, prefix)
             te.start()
         else:
             self.sound.Play(flags)
-
-    def Configure(self, wavfile='', flags=wx.SOUND_ASYNC, evt = False):
+    
+    def Configure(self, wavfile='', flags=wx.SOUND_ASYNC, evt=False):
         panel = eg.ConfigPanel()
         text = self.text
         filepathCtrl = panel.FileBrowseButton(wavfile, fileMask=text.fileMask)
         waitCheckbox = panel.CheckBox(flags == wx.SOUND_SYNC, text.text2)
         eventCheckbox = panel.CheckBox(evt, text.text3)
-
+        
         panel.sizer.Add(panel.StaticText(text.text1), 0, wx.EXPAND)
         panel.sizer.Add(filepathCtrl, 0, wx.EXPAND)
         panel.sizer.Add(waitCheckbox, 0, wx.EXPAND | wx.TOP, 10)
         panel.sizer.Add(eventCheckbox, 0, wx.EXPAND | wx.TOP, 8)
-
+        
         while panel.Affirmed():
             if waitCheckbox.IsChecked():
                 flags = wx.SOUND_SYNC
@@ -244,27 +247,28 @@ class PlaySound(eg.ActionWithStringParameter):
                 flags,
                 eventCheckbox.IsChecked()
             )
-    
+
 
 class SetMasterVolume(eg.ActionBase):
     name = "Set Master Volume"
     description = "Sets the master volume to an absolute value."
     iconFile = "icons/SoundCard"
     text = Text.SetMasterVolume
-
+    
     def __call__(self, value, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
-        value = float(value) if isinstance(value, (int, float)) else float(eg.ParseString(value))
+        value = float(value) if isinstance(value, (int, float)) else float(
+            eg.ParseString(value))
         SoundMixer.SetMasterVolume(value, deviceId)
         return SoundMixer.GetMasterVolume(deviceId)
-
+    
     def Configure(self, value=0, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
         deviceCtrl = panel.Choice(
             deviceId + 1, choices=SoundMixer.GetMixerDevices(True)
         )
-#        deviceCtrl = panel.Choice(deviceId, SoundMixer.GetMixerDevices())
+        #        deviceCtrl = panel.Choice(deviceId, SoundMixer.GetMixerDevices())
         """if eg.WindowsVersion.IsVista():
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
@@ -293,7 +297,7 @@ class SetMasterVolume(eg.ActionBase):
                 valueCtrl.GetValue(),
                 deviceCtrl.GetStringSelection(),
             )
-
+    
     def GetLabel(self, value, deviceId=0):
         primaryDevice = (deviceId == self.plugin.text.primaryDevice)
         deviceId = SoundMixer.GetDeviceId(deviceId)
@@ -314,11 +318,11 @@ class ToggleMute(eg.ActionBase):
     name = "Toggle Mute"
     description = "Toggles mute."
     iconFile = "icons/SoundCard"
-
+    
     def __call__(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         return SoundMixer.ToggleMute(deviceId)
-
+    
     def Configure(self, deviceId=0):
         deviceId = SoundMixer.GetDeviceId(deviceId)
         panel = eg.ConfigPanel()
@@ -328,10 +332,10 @@ class ToggleMute(eg.ActionBase):
         """if eg.WindowsVersion.IsVista():
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
-        #panel.AddLine("Device:", deviceCtrl)
+        # panel.AddLine("Device:", deviceCtrl)
         panel.AddLine(self.plugin.text.device, deviceCtrl)
         while panel.Affirmed():
             panel.SetResult(deviceCtrl.GetStringSelection())
-
+    
     def GetLabel(self, *args):
         return self.text.name

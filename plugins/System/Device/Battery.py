@@ -27,7 +27,7 @@ class Text(eg.TranslatableStrings):
     class Group:
         name = 'Portable Battery'
         description = 'Portable Battery'
-        
+
 
 class BatteryBase(ActionBase.ActionBase):
     WMI_CLASS = 'Win32_PortableBattery'

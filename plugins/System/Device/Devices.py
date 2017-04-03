@@ -35,18 +35,18 @@ class GetDevices(eg.ActionBase):
 
     Help is located in the configuration dialog for this action.
     """
-
+    
     __docsort__ = ('__call__',)
-
+    
     name = 'Get System Devices'
     description = (
         'Returns a device object that represents a physical device\n'
         'on your computer.'
     )
-
+    
     def __init__(self):
         self.result = None
-
+    
     def __call__(self, pattern=None, **kwargs):
         """
         Searches Windows WMI for devices matching a user supplied string.
@@ -86,14 +86,14 @@ class GetDevices(eg.ActionBase):
         :return: WMI instances that represent a device.
         :rtype: tuple of instances
         """
-
+        
         if pattern is None and not kwargs:
             return
-
+        
         if isinstance(pattern, dict):
             clsName = pattern.keys()[0]
             pattern = pattern.values()[0]
-
+        
         elif pattern is None:
             if len(kwargs.keys()) > 1:
                 eg.PrintNotice(
@@ -106,42 +106,42 @@ class GetDevices(eg.ActionBase):
             pattern = kwargs.values()[0]
         else:
             clsName = None
-
+        
         searchableItems = []
         foundDevices = ()
-
+        
         pythoncom.CoInitialize()
         wmi = win32com.client.GetObject("winmgmts:\\root\\cimv2")
-
+        
         for devs in DEVICES.values():
             for dev in devs:
                 if clsName == dev['cls_name']:
                     searchableItems.append(dev)
                     break
-
+                
                 if clsName is None:
                     displayName = dev['display_name'].replace(' ', '')
                     if displayName == dev['cls_name']:
                         searchableItems.append(dev)
-
+            
             if clsName is not None and searchableItems:
                 break
-
+        
         for searchCls in searchableItems:
             primarySearch = searchCls['action_search']
             clsName = searchCls['cls_name']
             for device in wmi.ExecQuery("Select * from Win32_" + clsName):
                 priSearch = [getattr(device, primarySearch)]
-
+                
                 for attr in ('Name', 'DeviceId', 'Description'):
                     priSearch.append(getattr(device, attr, None))
-
+                
                 hardId = getattr(device, 'HardwareId', None)
                 if hardId and isinstance(hardId, tuple):
                     priSearch.extend(list(hardId))
                 elif hardId:
                     priSearch.append(hardId)
-
+                
                 if '*' not in pattern and '?' not in pattern:
                     if pattern in priSearch:
                         foundDevices += (device,)
@@ -154,20 +154,20 @@ class GetDevices(eg.ActionBase):
         win32com.client.pythoncom.CoUninitialize()
         eg.Print(str(len(foundDevices)) + ' Devices Found')
         return foundDevices
-
+    
     def Configure(self, pattern=None):
-
+        
         filePath = os.path.join(os.path.split(__file__)[0], 'Help.zip')
         sys.path.insert(0, filePath)
-
+        
         Help = __import__('Help')
-
+        
         win32com.client.pythoncom.CoInitialize()
         wmi = win32com.client.GetObject("winmgmts:\\root\\cimv2")
-
+        
         panel = eg.ConfigPanel()
         panel.EnableButtons(False)
-
+        
         self.result = pattern
         splitterWindow = wx.SplitterWindow(
             panel,
@@ -179,9 +179,9 @@ class GetDevices(eg.ActionBase):
                 wx.NO_FULL_REPAINT_ON_RESIZE
             )
         )
-
+        
         htmlHelp = eg.HtmlWindow(splitterWindow)
-
+        
         tree = wx.TreeCtrl(
             splitterWindow,
             -1,
@@ -191,15 +191,15 @@ class GetDevices(eg.ActionBase):
                 wx.CLIP_CHILDREN
             )
         )
-
+        
         root = tree.AddRoot('Devices')
         tree.SetPyData(root, 'START')
-
+        
         def SetHelp(cName):
             if cName.startswith('1394'):
                 cName = cName[4:] + '1394'
             htmlHelp.SetPage(getattr(Help, cName.upper()).encode('ascii'))
-
+        
         deviceDict = {}
         for guid in DEVICES.keys():
             devices = DEVICES[guid]
@@ -207,26 +207,26 @@ class GetDevices(eg.ActionBase):
                 clsName = device['display_name'].replace(' ', '')
                 if device['cls_name'] == clsName:
                     deviceDict[clsName] = device
-
+        
         for clsName in sorted(deviceDict.keys()):
             dvc = deviceDict[clsName]
             deviceTree = tree.AppendItem(root, dvc['display_name'])
             tree.SetPyData(deviceTree, clsName)
-
+            
             for device in wmi.ExecQuery("Select * from Win32_" + clsName):
                 deviceLabel = getattr(device, dvc['action_search'])
                 deviceItem = tree.AppendItem(deviceTree, deviceLabel)
                 tree.SetPyData(deviceItem, dvc)
                 if self.result == {clsName: deviceLabel}:
                     tree.SelectItem(deviceItem)
-
+        
         def SetResult(item, pyData):
             deviceName = tree.GetItemText(item)
             clsName = pyData['cls_name']
             self.result = {clsName: deviceName}
             panel.EnableButtons(True)
             return clsName
-
+        
         def OnActivated(evt):
             item = evt.GetItem()
             if item.IsOk():
@@ -243,7 +243,7 @@ class GetDevices(eg.ActionBase):
                     panel.EnableButtons(False)
                     self.result = None
                 SetHelp(helpName)
-
+        
         def OnSelectionChanged(evt):
             item = evt.GetItem()
             if item.IsOk():
@@ -255,27 +255,28 @@ class GetDevices(eg.ActionBase):
                     self.result = None
                     helpName = pyData
                 SetHelp(helpName)
-
+        
         def OnClose(evt):
             self.event.set()
             evt.Skip()
+        
         panel.Bind(wx.EVT_CLOSE, OnClose)
-
+        
         tree.Expand(root)
         tree.Bind(wx.EVT_TREE_ITEM_ACTIVATED, OnActivated)
         tree.Bind(wx.EVT_TREE_SEL_CHANGED, OnSelectionChanged)
-
+        
         splitterWindow.SplitVertically(tree, htmlHelp)
         splitterWindow.SetMinimumPaneSize(120)
         splitterWindow.UpdateSize()
-
+        
         panel.sizer.Add(splitterWindow, 1, wx.EXPAND | wx.ALL, 10)
         SetHelp('START')
         splitterWindow.SetSashPosition(200)
-
+        
         while panel.Affirmed():
             panel.SetResult(self.result)
-
+        
         del wmi
         win32com.client.pythoncom.CoUninitialize()
         sys.path.remove(filePath)

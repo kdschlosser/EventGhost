@@ -35,13 +35,15 @@ class Text(eg.TranslatableStrings):
         name = "Video Card"
         description = "Video Card"
     
+    
     class SetDisplayPreset:
         query = "Query current display settings"
         fields = (
             "Device", "Left  ", "Top   ", "Width", "Height", "Frequency",
             "Colour Depth", "Attached", "Primary", "Flags"
         )
-        
+    
+    
     class ChangeSettings:
         label = "Set Display%d to mode %dx%d@%d Hz"
         display = "Display:"
@@ -171,21 +173,21 @@ class SetDisplayPreset(eg.ActionBase):
     description = "Sets the display preset."
     iconFile = "icons/Display"
     text = Text.SetDisplayPreset
-
+    
     def __call__(self, *args):
         SetDisplayModes(*args)
-
+    
     def Configure(self, *args):
         result = [None]
         panel = eg.ConfigPanel()
         panel.dialog.buttonRow.okButton.Enable(False)
         panel.dialog.buttonRow.applyButton.Enable(False)
-
+        
         def OnButton(event):
             FillList(GetDisplayModes())
             panel.dialog.buttonRow.okButton.Enable(True)
             panel.dialog.buttonRow.applyButton.Enable(True)
-
+        
         button = wx.Button(panel, -1, self.text.query)
         button.Bind(wx.EVT_BUTTON, OnButton)
         panel.sizer.Add(button)
@@ -194,7 +196,7 @@ class SetDisplayPreset(eg.ActionBase):
         fields = self.text.fields
         for col, name in enumerate(fields):
             listCtrl.InsertColumn(col, name)
-
+        
         def FillList(args):
             result[0] = args
             listCtrl.DeleteAllItems()
@@ -202,8 +204,9 @@ class SetDisplayPreset(eg.ActionBase):
                 listCtrl.InsertStringItem(i, "")
                 for col, arg in enumerate(argLine):
                     listCtrl.SetStringItem(i, col, str(arg))
+        
         FillList(args)
-
+        
         for i in range(1, len(fields)):
             listCtrl.SetColumnWidth(i, -2)
         x = 0
@@ -211,10 +214,10 @@ class SetDisplayPreset(eg.ActionBase):
             x += listCtrl.GetColumnWidth(i)
         listCtrl.SetMinSize((x + 4, -1))
         panel.sizer.Add(listCtrl, 1, wx.EXPAND)
-
+        
         while panel.Affirmed():
             panel.SetResult(*result[0])
-
+    
     def GetLabel(self, *args):
         return self.name
 
@@ -223,9 +226,9 @@ class ChangeSettings(eg.ActionBase):
     name = "Change Display Settings"
     description = "Changes display settings."
     iconFile = "icons/Display"
-
+    
     text = Text.ChangeSettings
-
+    
     def __call__(
         self,
         displayNum=None,
@@ -240,7 +243,7 @@ class ChangeSettings(eg.ActionBase):
         GetDisplay(displayNum - 1).SetDisplayMode(
             size, frequency, depth, flags
         )
-
+    
     def Configure(
         self,
         displayNum=None,
@@ -255,11 +258,11 @@ class ChangeSettings(eg.ActionBase):
         if displayNum is None:
             displayNum = 1
             size, frequency, depth = GetDisplay(0).GetCurrentMode()
-
+        
         displayChoice = DisplayChoice(panel)
         if displayNum is not None and displayNum <= displayChoice.GetCount():
             displayChoice.SetSelection(displayNum - 1)
-
+        
         resolutionChoice = wx.Choice(panel)
         frequencyChoice = wx.Choice(panel)
         depthChoice = wx.Choice(panel)
@@ -267,7 +270,7 @@ class ChangeSettings(eg.ActionBase):
         updateRegistryCheckBox = panel.CheckBox(
             updateRegistry, text.storeInRegistry
         )
-
+        
         sizer = wx.GridBagSizer(6, 5)
         flag = wx.ALIGN_CENTER_VERTICAL
         sizer.Add(panel.StaticText(text.display), (0, 0), flag=flag)
@@ -278,17 +281,17 @@ class ChangeSettings(eg.ActionBase):
         sizer.Add(resolutionChoice, (1, 1), flag=flag)
         sizer.Add(frequencyChoice, (2, 1), flag=flag)
         sizer.Add(depthChoice, (3, 1), flag=flag)
-
+        
         panel.sizer.Add(sizer, 0, wx.EXPAND)
         flag = wx.ALIGN_CENTER_VERTICAL | wx.TOP
         panel.sizer.Add(includeAllCheckBox, 0, flag, 10)
         panel.sizer.Add(updateRegistryCheckBox, 0, flag, 10)
-
+        
         settings = eg.Bunch()
-
+        
         def GetClientData(ctrl):
             return ctrl.GetClientData(ctrl.GetSelection())
-
+        
         def UpdateDeepth(event=None):
             resolution = GetClientData(resolutionChoice)
             settings.depthDict = depthDict = settings.modes[resolution]
@@ -305,7 +308,7 @@ class ChangeSettings(eg.ActionBase):
             UpdateFrequencies()
             if event:
                 event.Skip()
-
+        
         def UpdateFrequencies(event=None):
             depth = GetClientData(depthChoice)
             frequencyList = settings.depthDict[depth]
@@ -319,7 +322,7 @@ class ChangeSettings(eg.ActionBase):
             frequencyChoice.Select(sel)
             if event:
                 event.Skip()
-
+        
         def UpdateResolutions(event=None):
             display = displayChoice.GetValue()
             modes = display.GetDisplayModes(includeAllCheckBox.GetValue())
@@ -337,14 +340,14 @@ class ChangeSettings(eg.ActionBase):
             UpdateDeepth(None)
             if event:
                 event.Skip()
-
+        
         displayChoice.Bind(wx.EVT_CHOICE, UpdateResolutions)
         resolutionChoice.Bind(wx.EVT_CHOICE, UpdateDeepth)
         depthChoice.Bind(wx.EVT_CHOICE, UpdateFrequencies)
         includeAllCheckBox.Bind(wx.EVT_CHECKBOX, UpdateResolutions)
-
+        
         UpdateResolutions()
-
+        
         while panel.Affirmed():
             panel.SetResult(
                 displayChoice.GetSelection() + 1,
@@ -354,7 +357,7 @@ class ChangeSettings(eg.ActionBase):
                 includeAllCheckBox.GetValue(),
                 updateRegistryCheckBox.GetValue()
             )
-
+    
     def GetLabel(
         self,
         displayNum,
@@ -375,7 +378,7 @@ class DisplayChoice(wx.Choice):
             self.Append("%d: %s" % (i + 1, display.deviceString))
             self.SetClientData(i, display.deviceName)
         self.SetSelection(0)
-
+    
     def GetValue(self):
         pos = wx.Choice.GetSelection(self)
         return self.displays[pos]

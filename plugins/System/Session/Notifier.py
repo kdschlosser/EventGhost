@@ -22,6 +22,7 @@ from ctypes.wintypes import BOOL, DWORD, HANDLE, HWND, LPWSTR
 # Local imports
 import eg
 
+
 PVOID = c_void_p
 LPTSTR = LPWSTR
 
@@ -80,9 +81,10 @@ WTS_WPARAM_DICT = {
     9: "SessionRemoteControl"
 }
 
+
 class ChangeNotifier:
     inited = False
-
+    
     def __init__(self, plugin):
         self.TriggerEvent = plugin.TriggerEvent
         self.retryCount = 0
@@ -91,7 +93,7 @@ class ChangeNotifier:
             self.OnSessionChange
         )
         eg.scheduler.AddTask(0, self.Register)
-
+    
     def Close(self):
         if self.inited:
             WTSUnRegisterSessionNotification(eg.messageReceiver.hwnd)
@@ -99,7 +101,7 @@ class ChangeNotifier:
             WM_WTSSESSION_CHANGE,
             self.OnSessionChange
         )
-
+    
     @eg.LogIt
     def OnSessionChange(self, hwnd, msg, wparam, lparam):
         eventstring = WTS_WPARAM_DICT.get(wparam, None)
@@ -117,7 +119,7 @@ class ChangeNotifier:
             WTSFreeMemory(pBuffer)
             self.TriggerEvent(eventstring, [userName])
         return 1
-
+    
     @eg.LogIt
     def Register(self):
         success = WTSRegisterSessionNotification(

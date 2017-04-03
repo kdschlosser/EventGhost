@@ -91,8 +91,6 @@ class System(eg.PluginBase):
     images = {}
     
     def __init__(self):
-        text = self.text
-        
         self.AddEvents(*EVENT_LIST)
         Device.AddActions(self)
         Desktop.AddActions(self)
@@ -120,7 +118,6 @@ class System(eg.PluginBase):
         # start the session change notifications (only on Win XP and above)
         if eg.WindowsVersion.IsXP():
             import Session
-            
             self.sessionChangeNotifier = Session.ChangeNotifier(self)
         
         self.StartHookCode()
@@ -130,7 +127,6 @@ class System(eg.PluginBase):
         # Use VistaVolume.dll from stridger for sound volume control on Vista
         if eg.WindowsVersion.IsVista():
             import VistaVolEvents as vistaVolumeDll
-            
             vistaVolumeDll.RegisterVolumeHandler(self.VolumeEvent)
             vistaVolumeDll.RegisterMuteHandler(self.MuteEvent)
             
@@ -166,7 +162,8 @@ class System(eg.PluginBase):
             
             def GetMute2(self, deviceId=0):
                 try:
-                    # deviceId = SoundMixer.GetDeviceId(deviceId, True).encode(eg.systemEncoding)
+                    # deviceId = SoundMixer.GetDeviceId(deviceId, True)
+                    # .encode(eg.systemEncoding)
                     deviceId = SoundMixer.GetDeviceId(deviceId, True)
                     newvalue = None
                     try:
@@ -179,11 +176,13 @@ class System(eg.PluginBase):
             
             def SetMasterVolume2(self, value=200, deviceId=0):
                 deviceId = SoundMixer.GetDeviceId(deviceId, True)
-                value = float(value) if isinstance(value,
-                    (int, float)) else float(eg.ParseString(value))
+                value = (
+                    float(value) if isinstance(value, (int, float))
+                    else float(eg.ParseString(value))
+                )
                 newvalue = None
                 try:
-                    if value >= 0 and value <= 100:
+                    if 0.0 <= value >= 100:
                         vistaVolumeDll.SetMasterVolume(value / 100.0, deviceId)
                     eg.Utils.time.sleep(0.1)  # workaround
                     newvalue = vistaVolumeDll.GetMasterVolume(deviceId) * 100.0
@@ -203,8 +202,10 @@ class System(eg.PluginBase):
                     elif old + value >= 100:
                         vistaVolumeDll.SetMasterVolume(1.0, deviceId)
                     else:
-                        vistaVolumeDll.SetMasterVolume((old + value) / 100.0,
-                            deviceId)
+                        vistaVolumeDll.SetMasterVolume(
+                            (old + value) / 100.0,
+                            deviceId
+                        )
                     eg.Utils.time.sleep(0.1)  # workaround
                     newvalue = vistaVolumeDll.GetMasterVolume(deviceId) * 100.0
                 except:
@@ -287,7 +288,3 @@ class System(eg.PluginBase):
                 self.TriggerEvent("Volume", volume)
         except:
             pass
-
-
-
-

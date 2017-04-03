@@ -93,4 +93,3 @@ class NetworkDriveInvokeChkDsk(NetworkDriveBase):
     
     def _run(self, drive):
         return drive.Chkdsk
-

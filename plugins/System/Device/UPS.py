@@ -58,7 +58,7 @@ class UPSStatus(UPSBase):
             'Undefined',
             'Partially Charged'
         ]
-
+        
         return [status[battery.BatteryStatus], battery.BatteryStatus]
 
 
