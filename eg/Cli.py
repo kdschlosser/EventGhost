@@ -139,15 +139,18 @@ if args.isMain:
                     e.InstallPlugin(args.pluginFile)
                 else:
                     e.BringToFront()
+                ctypes.windll.kernel32.ExitProcess(0)
+
             except pywintypes.com_error as err:
-                if err[0] in (-2147024156, -2147467259):
+                if err[0] == -2146959355:
                     msg = (
                         "Unable to run elevated and unelevated simultaneously."
                     )
                 elif err[2]:
                     msg = "%s:\n\n%s" % (str(err[2][1]), str(err[2][2]))
+                    ctypes.windll.user32.MessageBoxA(0, msg, "EventGhost", 48)
+                    ctypes.windll.kernel32.ExitProcess(0)
                 else:
                     msg = "Failed to launch for unknown reasons: %s" % err
-                ctypes.windll.user32.MessageBoxA(0, msg, "EventGhost", 48)
-            finally:
-                ctypes.windll.kernel32.ExitProcess(0)
+                    ctypes.windll.user32.MessageBoxA(0, msg, "EventGhost", 48)
+                    ctypes.windll.kernel32.ExitProcess(0)
