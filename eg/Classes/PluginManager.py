@@ -18,35 +18,114 @@
 
 import os
 from os.path import exists, isdir, join
+from cStringIO import StringIO
+from types import ClassType
+from threading import Event
 
 # Local imports
 import eg
+import PluginRepository
+
+
+class PluginData:
+    name = None
+    description = None
+    kind = ""
+    author = ""
+    version = ""
+    icon = None
+    canMultiLoad = False
+    createMacrosOnAdd = False
+    url = None
+    help = None
+    guid = None
+
 
 class PluginManager:
     def __init__(self):
         self.database = {}
         self.ScanAllPlugins()
 
-    def GetPluginInfo(self, ident):
-        if ident in self.database:
-            return self.database[ident]
-        else:
-            for guid, info in self.database.iteritems():
-                if info.pluginName == ident:
-                    return info
-        return None
+    def GetPlugin(self, guid, version):
+        if guid in self.database:
+            plugin_info = self.database[guid]
+            if guid in eg.CORE_PLUGIN_GUIDS:
+                return plugin_info
+            if version == plugin_info.version:
+                return plugin_info
 
-    def GetPluginInfoList(self):
+        if version is None:
+            version = PluginRepository.send(
+                get_newest_version=dict(guid=guid)
+            )
+
+        plugin_data = PluginRepository.send(
+            get_plugin=dict(guid=guid, version=version)
+        )
+
+        eg_plugin = StringIO()
+        eg_plugin.write(plugin_data)
+        event = Event()
+
+        def Do():
+            eg.PluginInstall.Import(eg_plugin)
+            eg_plugin.close()
+            self.ScanAllPlugins()
+            event.set()
+
+        eg.AsTasklet(Do)()
+
+        while not event.isSet():
+            event.wait(0.01)
+
+        return self.database[guid]
+
+    def GetPluginInfo(self, guid, version):
+        if guid in self.database:
+            plugin_info = self.database[guid]
+            if version == plugin_info.version:
+                return plugin_info
+
+        plugin_info = PluginRepository.send(
+                get_plugin_info=dict(guid=guid, version=version)
+            )
+
+        return ClassType('PluginInfo', (PluginData,), plugin_info)
+
+    def GetPluginList(self):
         """
         Get a list of all PluginInfo for all plugins in the plugin directory
         """
-        self.ScanAllPlugins()
-        infoList = self.database.values()
-        infoList.sort(key=lambda pluginInfo: pluginInfo.name.lower())
-        return infoList
+        plugin_list = PluginRepository.send(get_plugin_list=None)
+        plugin_list.sort(key=lambda pluginInfo: pluginInfo['name'].lower())
 
-    def OpenPlugin(self, ident, evalName, args, treeItem=None):
-        moduleInfo = self.GetPluginInfo(ident)
+        for i, plugin_info in enumerate(plugin_list[:]):
+            class PluginInfo:
+                name = plugin_info['name']
+                icon = plugin_info['icon']
+                kind = plugin_info['kind']
+                guid = plugin_info['guid']
+                valid = True
+                path = plugin_info['guid']
+                url = ''
+
+
+            plugin_list[i] = ClassType(
+                'PluginInfo',
+                (PluginInfo,),
+                {}
+            )
+
+        return plugin_list
+
+    def GetPluginVersionList(self, guid):
+        version_list = PluginRepository.send(
+            get_plugin_version_list=dict(guid=guid)
+        )
+        return version_list
+
+    def OpenPlugin(self, guid, version, evalName, args, treeItem=None):
+        moduleInfo = self.GetPlugin(guid, version)
         if moduleInfo is None:
             # we don't have such plugin
             clsInfo = NonexistentPluginInfo(ident, evalName)

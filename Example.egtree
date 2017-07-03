@@ -1,642 +1,636 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<EventGhost Name="Configuration Tree" Version="1392" Guid="{7AD4EBCE-2775-4417-B088-C62BBFEF3F01}" Time="1209908057.33">
-    <Autostart Name="Autostart">
-        <Plugin File="X10" Identifier="X10">
-            gAJLAl1xAChLAUsCSwNLBEsFSwZLB0sISwlLCksLSwxLDUsOSw9LEGVYAwAAAFgxMHEBh3ECLg==
-        </Plugin>
-        <Plugin File="ZoomPlayer" Identifier="ZoomPlayer">
-            gAIoWAkAAABsb2NhbGhvc3RxAE2hEoiJdHEBLg==
-        </Plugin>
-        <Plugin File="Winamp" Identifier="Winamp">
+<EventGhost Version="WIP" Guid="{C6EEE6B1-D907-4610-99B4-88137B548E46}" Time="1499073540.97">
+    <Autostart Name="Autostart" XML_Guid="{CD75F3CC-B9D4-4161-9259-E4D0A9E19C97}" Expanded="True">
+        <Plugin XML_Guid="{F7A11483-B617-45BF-9E2D-4E6BF9936846}" Identifier="Winamp" Guid="{4A22DD6A-5E2C-4500-90B4-47F5C58FD9CA}" File="Winamp" Version="1.4.2">
             gAIpLg==
         </Plugin>
-        <Plugin File="Task" Identifier="Task">
+        <Plugin XML_Guid="{14E92C5A-EBE3-4937-9DD3-0662F1B1FEA3}" Identifier="Task" Guid="{D1748551-C605-4423-B392-FB77E6842437}" File="Task" Version="1.0.4">
             gAIpLg==
         </Plugin>
-        <Action>
-            EventGhost.EnableExclusive(XmlIdLink(218))
+        <Action XML_Guid="{3ACBA3C9-C93E-4F9B-93D8-4E4A08905840}">
+            EventGhost.EnableExclusive(XmlIdLink(217))
         </Action>
     </Autostart>
-    <Macro Name="Start Zoom Player">
-        <Event Name="DVD" />
-        <Action>
-            EventGhost.JumpIfLongPress(3.0, XmlIdLink(134))
+    <Macro Name="Start Zoom Player" XML_Guid="{04827CBE-F5E8-45C6-85E1-C435A5668E3C}">
+        <Event Name="DVD" XML_Guid="{055F17E7-512E-44AF-A38A-14D2A8A0A29B}" />
+        <Action XML_Guid="{62E3B040-E350-4E03-B374-ACF72DC3D9BB}">
+            EventGhost.JumpIfLongPress(3.0, XmlIdLink(133))
         </Action>
-        <Action>
+        <Action XML_Guid="{368C9846-E41C-4F2E-8752-83FD6E32F6B3}">
             System.Execute(u'{eg.folderPath.ProgramFiles}\\Zoom Player\\zplayer.exe', u'/TCP: 4769', 0, False, 2, u'')
         </Action>
-        <Action>
-            ZoomPlayer.fnBringToFront()
+        <Action XML_Guid="{3FB1F5FE-2E6D-4A5C-9C06-6FFC13B5C2BF}">
+            EventGhost.PythonCommand('ZoomPlayer.fnBringToFront()')
         </Action>
     </Macro>
-    <Macro Name="Start Winamp">
-        <Event Name="Music" />
-        <Action>
+    <Macro Name="Start Winamp" XML_Guid="{48BFB483-4978-49F1-B0FB-DCF778C81FE8}">
+        <Event Name="Music" XML_Guid="{7D07F922-0CE6-4D5C-A550-9126C01C715C}" />
+        <Action XML_Guid="{A0942E7E-E765-471E-B576-7CE4AC21C12E}">
             System.Execute(u'{eg.folderPath.ProgramFiles}\\Winamp\\winamp.exe', u'', 0, False, 2, u'')
         </Action>
     </Macro>
-    <Macro Name="Switch to mode: Zoom Player">
-        <Event Name="Task.Activated.zplayer" />
-        <Action>
-            EventGhost.EnableExclusive(XmlIdLink(31))
+    <Macro Name="Switch to mode: Zoom Player" XML_Guid="{A7167FEA-21D1-4996-9B4B-8143E3832E99}">
+        <Event Name="Task.Activated.zplayer" XML_Guid="{1FE8009A-726C-4FEB-9D1A-9C9C93A1B3B0}" />
+        <Action XML_Guid="{7AAEBB02-040A-4DDD-A730-82F79759D696}">
+            EventGhost.EnableExclusive(XmlIdLink(30))
         </Action>
     </Macro>
-    <Macro Name="Switch to mode: Winamp">
-        <Event Name="Task.Activated.winamp" />
-        <Action>
-            EventGhost.EnableExclusive(XmlIdLink(136))
+    <Macro Name="Switch to mode: Winamp" XML_Guid="{0BC2642C-E748-4805-8F5E-B028944814E4}">
+        <Event Name="Task.Activated.winamp" XML_Guid="{B4355B02-3D64-48A3-8958-750288D36926}" />
+        <Action XML_Guid="{89852794-6334-4062-980A-DD5933904778}">
+            EventGhost.EnableExclusive(XmlIdLink(135))
         </Action>
     </Macro>
-    <Macro Name="Switch to mode: Mouse Emulation">
-        <Event Name="Setup" />
-        <Action>
-            EventGhost.EnableExclusive(XmlIdLink(183))
+    <Macro Name="Switch to mode: Mouse Emulation" XML_Guid="{E3893116-7766-4C69-A957-4500F6E0A948}">
+        <Event Name="Setup" XML_Guid="{BA4F51F1-2F58-4521-9A7B-C4652D2FFA32}" />
+        <Action XML_Guid="{FF96FAB7-C210-4B58-86E9-7A4C7238CD25}">
+            EventGhost.EnableExclusive(XmlIdLink(182))
         </Action>
     </Macro>
-    <Macro Name="Switch to mode: Keyboard Emulation">
-        <Event Name="TXT" />
-        <Event Name="Task.Deactivated.zplayer" />
-        <Event Name="Task.Deactivated.winamp" />
-        <Action>
-            EventGhost.EnableExclusive(XmlIdLink(218))
+    <Macro Name="Switch to mode: Keyboard Emulation" XML_Guid="{29DB59B5-2BED-42D9-961D-76DDD2C5CFCB}">
+        <Event Name="TXT" XML_Guid="{025F012C-AA3C-45D0-9940-06B611C4E24B}" />
+        <Event Name="Task.Deactivated.zplayer" XML_Guid="{382A2E75-591C-43DB-8091-7B6899AC8FC0}" />
+        <Event Name="Task.Deactivated.winamp" XML_Guid="{3005C784-AA88-4C5B-8811-78C8583ADB6F}" />
+        <Action XML_Guid="{E090EABE-3DE6-46CB-BF88-262FC800CB47}">
+            EventGhost.EnableExclusive(XmlIdLink(217))
         </Action>
     </Macro>
-    <Folder Name="Context Folder">
-        <Folder Name="Zoom Player" id="31" Enabled="False">
-            <Macro Name="Context Navigator">
-                <Event Name="X10.Rename" />
-                <Event Name="Menu" />
-                <Action>
-                    ZoomPlayer.fnContextNav()
+    <Folder Name="Context Folder" XML_Guid="{0DDDE7A1-D44D-4D85-8BD5-0522A5B1112F}">
+        <Folder Name="Zoom Player" id="30" Enabled="False" XML_Guid="{CC82D01D-4691-4DAC-918D-91AFB6F80D39}">
+            <Macro Name="Context Navigator" XML_Guid="{DAB30557-A06A-4C99-86CF-5A04D7108508}">
+                <Event Name="X10.Rename" XML_Guid="{05BB654C-1EF3-4040-940A-EAAABD7A52B4}" />
+                <Event Name="Menu" XML_Guid="{2077F506-88F5-4BC5-AFB5-A2621D474F69}" />
+                <Action XML_Guid="{F0C62522-4169-4B23-B3DD-6EF493BD30F7}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnContextNav()')
                 </Action>
             </Macro>
-            <Macro Name="Cursor Up">
-                <Event Name="Up" />
-                <Action>
-                    ZoomPlayer.Up()
+            <Macro Name="Cursor Up" XML_Guid="{41B42856-1940-49D4-A0E1-F55C4B3949D9}">
+                <Event Name="Up" XML_Guid="{116D3915-0B74-4F81-AB0E-48E60E9421B0}" />
+                <Action XML_Guid="{7FDF2DBA-76B9-4D41-9CA8-30E228C78B63}">
+                    EventGhost.PythonCommand('ZoomPlayer.Up()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{ABAC02F3-57A9-410C-A96E-08B1951AD7C7}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Down">
-                <Event Name="Down" />
-                <Action>
-                    ZoomPlayer.Down()
+            <Macro Name="Cursor Down" XML_Guid="{EAF0776D-16C2-4EB2-81F4-843C168F21A1}">
+                <Event Name="Down" XML_Guid="{13DDEE9E-88D3-4AD2-BF4B-CB46167E90F3}" />
+                <Action XML_Guid="{56AB2164-D6BA-4622-AC1D-0414084230DE}">
+                    EventGhost.PythonCommand('ZoomPlayer.Down()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{CD356514-AFAB-476A-89B6-1E24D0C5B9EF}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Left">
-                <Event Name="Left" />
-                <Action>
-                    ZoomPlayer.Left()
+            <Macro Name="Cursor Left" XML_Guid="{63D4B3F8-2E56-4A21-BAE6-EE06E4A246C1}">
+                <Event Name="Left" XML_Guid="{C02C0D0D-987C-4CB1-8185-E9AEF058E381}" />
+                <Action XML_Guid="{A2F15185-6680-481E-9BA4-694524F92B49}">
+                    EventGhost.PythonCommand('ZoomPlayer.Left()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{A5873B6C-03F5-435B-9A5D-2FC4BA579CB2}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Right">
-                <Event Name="Right" />
-                <Action>
-                    ZoomPlayer.Right()
+            <Macro Name="Cursor Right" XML_Guid="{0D3D6D3C-89E2-47D0-87BE-41002A12E4C4}">
+                <Event Name="Right" XML_Guid="{3C923392-8929-4F47-8D40-5E8F4039A76B}" />
+                <Action XML_Guid="{DD9CA14D-706B-4469-A5E2-0AC29FBCD564}">
+                    EventGhost.PythonCommand('ZoomPlayer.Right()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{22D14CCB-6970-4DD2-81D8-642618F7C6B0}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Ok">
-                <Event Name="Ok" />
-                <Action>
-                    ZoomPlayer.Enter()
+            <Macro Name="Ok" XML_Guid="{15B0C6B5-9085-4203-99CE-1EACCD4E2325}">
+                <Event Name="Ok" XML_Guid="{EF052BAD-219C-4620-8E3C-552B4A38577D}" />
+                <Action XML_Guid="{718A873F-F10B-4942-8EE6-B9CC00EF735D}">
+                    EventGhost.PythonCommand('ZoomPlayer.Enter()')
                 </Action>
             </Macro>
-            <Macro Name="Play">
-                <Event Name="Play" />
-                <Action>
-                    ZoomPlayer.fnPlay()
+            <Macro Name="Play" XML_Guid="{955081F3-82E7-48F4-A5BF-4DEFFECDB783}">
+                <Event Name="Play" XML_Guid="{6624E4E8-739E-4FDD-9406-AC7FF28363F6}" />
+                <Action XML_Guid="{4637CE4C-5D73-404A-B045-B3B2E4B71A70}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnPlay()')
                 </Action>
             </Macro>
-            <Macro Name="Pause">
-                <Event Name="Pause" />
-                <Action>
-                    ZoomPlayer.fnPause()
+            <Macro Name="Pause" XML_Guid="{C19DBEA9-39C0-486E-8926-D0EFADFC2145}">
+                <Event Name="Pause" XML_Guid="{AFAEA247-1E07-4079-984C-592500D4A9E0}" />
+                <Action XML_Guid="{4F07CE9D-B67E-4747-BC17-EEB72D9028A0}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnPause()')
                 </Action>
             </Macro>
-            <Macro Name="Stop">
-                <Event Name="Stop" />
-                <Action>
-                    ZoomPlayer.fnStop()
+            <Macro Name="Stop" XML_Guid="{9014A1EE-ED38-44B5-B705-808D83DC81B5}">
+                <Event Name="Stop" XML_Guid="{A9621FEF-E47F-47A8-A795-2A42B9C7AB89}" />
+                <Action XML_Guid="{5637E0F1-36A1-4923-B2E9-C671996A0F60}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnStop()')
                 </Action>
             </Macro>
-            <Macro Name="Fast Forward">
-                <Event Name="Forward" />
-                <Action>
-                    ZoomPlayer.fnFastForward()
+            <Macro Name="Fast Forward" XML_Guid="{8121B890-9910-454C-BAE5-EA3945D47B20}">
+                <Event Name="Forward" XML_Guid="{0D38DC87-9FE2-4F30-AAC9-DFB46A5E4E43}" />
+                <Action XML_Guid="{AFFF0611-06BB-4FF5-9C9C-D2879E46591E}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnFastForward()')
                 </Action>
             </Macro>
-            <Macro Name="Fast Rewind">
-                <Event Name="Rewind" />
-                <Action>
-                    ZoomPlayer.fnRewind()
+            <Macro Name="Fast Rewind" XML_Guid="{5B5DEEF6-DFA1-484D-BB25-D78D3202C7C8}">
+                <Event Name="Rewind" XML_Guid="{83DDC43B-0AF5-4083-90F2-D5EA709DAED5}" />
+                <Action XML_Guid="{0A8DAE53-51D2-44BE-ADE5-3DE1D2BB9257}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnRewind()')
                 </Action>
             </Macro>
-            <Macro Name="Num1">
-                <Event Name="Num1" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'1')
+            <Macro Name="Num1" XML_Guid="{9BC4902A-AB92-4E5F-9C55-A1AB39C5B4AB}">
+                <Event Name="Num1" XML_Guid="{8B36E761-0209-4C46-9700-68457039FB80}" />
+                <Action XML_Guid="{4F4AFD47-D051-4D69-BC94-2091463B7A51}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'1')")
                 </Action>
             </Macro>
-            <Macro Name="Num2">
-                <Event Name="Num2" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'2')
+            <Macro Name="Num2" XML_Guid="{3D3AA346-EAFD-471F-BB40-636A494555FA}">
+                <Event Name="Num2" XML_Guid="{9174A5B9-DED0-4650-81A0-174A3006AFE5}" />
+                <Action XML_Guid="{C133EFA7-3CDB-47D7-810C-D97A7EFCE8CE}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'2')")
                 </Action>
             </Macro>
-            <Macro Name="Num3">
-                <Event Name="Num3" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'3')
+            <Macro Name="Num3" XML_Guid="{DFDE8A01-4B56-4A51-B83B-41686045097A}">
+                <Event Name="Num3" XML_Guid="{FE86E754-7940-46D4-8142-CB7DE968079C}" />
+                <Action XML_Guid="{8BD3A1B5-559C-4FE4-83A9-E40827D7BC02}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'3')")
                 </Action>
             </Macro>
-            <Macro Name="Num4">
-                <Event Name="Num4" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'4')
+            <Macro Name="Num4" XML_Guid="{3FEDCD7D-987B-4E87-9A59-DA865FBCB925}">
+                <Event Name="Num4" XML_Guid="{FF0D73F9-0177-4DBF-BB2D-9E1E50864E55}" />
+                <Action XML_Guid="{0B2FE6ED-2F41-4FF3-B14A-88E4B3996C3A}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'4')")
                 </Action>
             </Macro>
-            <Macro Name="Num5">
-                <Event Name="Num5" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'5')
+            <Macro Name="Num5" XML_Guid="{B2002912-5E49-4600-BB8C-AA3BBED65215}">
+                <Event Name="Num5" XML_Guid="{9729835F-3539-4A9D-8B28-F400EE858D2E}" />
+                <Action XML_Guid="{BFE9A4F9-66F0-4AB8-B270-7D8352D9E6FC}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'5')")
                 </Action>
             </Macro>
-            <Macro Name="Num6">
-                <Event Name="Num6" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'6')
+            <Macro Name="Num6" XML_Guid="{48BBF3A3-8017-4CB7-ACE3-ABF9D8CE893C}">
+                <Event Name="Num6" XML_Guid="{3573A2EF-7139-4CAB-8EDA-3E429E4F511B}" />
+                <Action XML_Guid="{CF47ED69-4211-4E68-ADD2-C5A9FE027023}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'6')")
                 </Action>
             </Macro>
-            <Macro Name="Num7">
-                <Event Name="Num7" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'7')
+            <Macro Name="Num7" XML_Guid="{D2D2F688-35E9-441D-93AD-D0CB6C72DB5D}">
+                <Event Name="Num7" XML_Guid="{F9C9BFBA-B11D-43AF-825C-9342E9C6BE13}" />
+                <Action XML_Guid="{735D2369-8422-40F5-B608-BBE4D8B14581}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'7')")
                 </Action>
             </Macro>
-            <Macro Name="Num8">
-                <Event Name="Num8" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'8')
+            <Macro Name="Num8" XML_Guid="{4FBA8DFE-10E2-4684-AAE7-E9E90FFD9394}">
+                <Event Name="Num8" XML_Guid="{C086AF92-4FEA-4DED-8579-B89BAB387977}" />
+                <Action XML_Guid="{DE4D6C5D-5755-446B-BFA5-6E99B8571A7A}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'8')")
                 </Action>
             </Macro>
-            <Macro Name="Num9">
-                <Event Name="Num9" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'9')
+            <Macro Name="Num9" XML_Guid="{B458BC06-BBAA-4ECB-AA7C-7C4D2BC01702}">
+                <Event Name="Num9" XML_Guid="{6962924B-7E49-472F-A7D8-E9BCAB51025A}" />
+                <Action XML_Guid="{A1F4515A-152A-4E50-B44A-D3464A4E2224}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'9')")
                 </Action>
             </Macro>
-            <Macro Name="Num0">
-                <Event Name="Num0" />
-                <Action>
-                    ZoomPlayer.exDVDNumPad(u'0')
+            <Macro Name="Num0" XML_Guid="{55FBDF2D-7D0C-4ACD-9E49-92FA4A08A142}">
+                <Event Name="Num0" XML_Guid="{5E3263F2-FBF6-4927-8D46-84904862A759}" />
+                <Action XML_Guid="{B0DC8F13-BC24-4D27-BB5B-36BFC7E30B99}">
+                    EventGhost.PythonCommand("ZoomPlayer.exDVDNumPad(u'0')")
                 </Action>
             </Macro>
-            <Macro Name="Next Track">
-                <Event Name="NextTrack" />
-                <Action>
-                    ZoomPlayer.fnNextTrack()
+            <Macro Name="Next Track" XML_Guid="{C1D7F93D-9F95-4380-BC68-4A88F478FAF6}">
+                <Event Name="NextTrack" XML_Guid="{666D5DAC-7D1E-4785-ACD7-AED494396F87}" />
+                <Action XML_Guid="{A6246CED-AED5-4EF7-91FA-D70B6F74AF2D}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnNextTrack()')
                 </Action>
             </Macro>
-            <Macro Name="Previous Track">
-                <Event Name="PreviousTrack" />
-                <Action>
-                    ZoomPlayer.fnPrevTrack()
+            <Macro Name="Previous Track" XML_Guid="{E0CC013B-3D98-486C-BE08-01FB6B52B9D2}">
+                <Event Name="PreviousTrack" XML_Guid="{18027C82-209B-4226-BC5D-F15EE12AF83F}" />
+                <Action XML_Guid="{77CB433B-982D-44D7-99A0-4560383AD177}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnPrevTrack()')
                 </Action>
             </Macro>
-            <Macro Name="DVD Menu">
-                <Event Name="DVDMenu" />
-                <Action Name="because not every DVD has a title menu">
+            <Macro Name="DVD Menu" XML_Guid="{2193517B-09B6-4B98-A4B6-84BF207FC82D}">
+                <Event Name="DVDMenu" XML_Guid="{92A7D490-C1E1-4EF0-805D-33F66C8E5C2A}" />
+                <Action Name="because not every DVD has a title menu" XML_Guid="{583A0687-556D-466D-AF67-F6D8305F281B}">
                     EventGhost.Comment()
                 </Action>
-                <Action Name="and we want to do it with just one key">
+                <Action Name="and we want to do it with just one key" XML_Guid="{F20ABA9C-9531-40CC-B917-AB06FA589959}">
                     EventGhost.Comment()
                 </Action>
-                <Action Name="we simply use both actions. One of it will ">
+                <Action Name="we simply use both actions. One of it will " XML_Guid="{FDF65AC9-7708-43C1-BA7C-6F01CF7E25D2}">
                     EventGhost.Comment()
                 </Action>
-                <Action Name="succeed everytime.">
+                <Action Name="succeed everytime." XML_Guid="{F1B56313-96BD-4ECD-B3C3-32E25A5AB50D}">
                     EventGhost.Comment()
                 </Action>
-                <Action>
-                    ZoomPlayer.fnDVDRootMenu()
+                <Action XML_Guid="{4C0928F8-1D2D-462F-A13C-D8616828BD54}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnDVDRootMenu()')
                 </Action>
-                <Action>
-                    ZoomPlayer.fnDVDTitleMenu()
+                <Action XML_Guid="{3910ED2B-175E-4377-B973-2E3161381A07}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnDVDTitleMenu()')
                 </Action>
             </Macro>
-            <Macro Name="DVD Audio">
-                <Event Name="DVDAudio" />
-                <Action>
-                    ZoomPlayer.fnDVDAudioMenu()
+            <Macro Name="DVD Audio" XML_Guid="{6AC5220A-FCE3-4E84-8799-71ADD555CDA3}">
+                <Event Name="DVDAudio" XML_Guid="{A2C203A6-52D8-4254-B3BF-5B6B76F13CD9}" />
+                <Action XML_Guid="{7268908B-008E-4C34-9CF8-CCDCC8C14AD1}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnDVDAudioMenu()')
                 </Action>
             </Macro>
-            <Macro Name="Zoom In">
-                <Event Name="ChannelUp" />
-                <Action>
-                    ZoomPlayer.fnZoomIn()
+            <Macro Name="Zoom In" XML_Guid="{1A2C7F72-2BCA-4B8E-919C-2B3D59F87358}">
+                <Event Name="ChannelUp" XML_Guid="{9A363FEA-3087-41AD-B11D-EEB36A7D3F0B}" />
+                <Action XML_Guid="{FBC2BC3F-FE2B-4010-BB8D-92CCD754BFE8}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnZoomIn()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{D886A2BF-A054-4673-BE1E-B2EC6EE2D7B3}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Zoom Out">
-                <Event Name="ChannelDown" />
-                <Action>
-                    ZoomPlayer.fnZoomOut()
+            <Macro Name="Zoom Out" XML_Guid="{A96DFE7A-292D-4249-83A0-5DAC706B15A5}">
+                <Event Name="ChannelDown" XML_Guid="{F6C45FCD-794A-481F-BA29-5F3AFF488A3C}" />
+                <Action XML_Guid="{E98978E0-9D6C-4A4F-B273-BE23A7956AE1}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnZoomOut()')
                 </Action>
-                <Action>
+                <Action XML_Guid="{8165F367-CC46-4469-BB01-95572B079844}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Toggle Controlbar">
-                <Event Name="EditImage" />
-                <Action>
-                    ZoomPlayer.fnBar()
+            <Macro Name="Toggle Controlbar" XML_Guid="{76492A91-BDEA-4B6F-91A0-7AC17C366404}">
+                <Event Name="EditImage" XML_Guid="{40541B32-7440-4A32-91ED-0B3EFC27BF45}" />
+                <Action XML_Guid="{9207242A-280F-4691-9DEC-DC0CE826305D}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnBar()')
                 </Action>
             </Macro>
-            <Macro Name="Toggle Fullscreen">
-                <Event Name="Fullscreen" />
-                <Action>
-                    ZoomPlayer.fnFullScreen()
+            <Macro Name="Toggle Fullscreen" XML_Guid="{671BC37F-2EC7-45FA-A823-A562BB93C5A0}">
+                <Event Name="Fullscreen" XML_Guid="{EA0FC34D-354F-4AB8-86CB-068637C644E2}" />
+                <Action XML_Guid="{60B0E92C-2A6B-417C-AECE-B5C74044778F}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnFullScreen()')
                 </Action>
             </Macro>
-            <Macro Name="Exit Zoom Player">
-                <Event Name="Power" />
-                <Action>
-                    ZoomPlayer.fnExit()
+            <Macro Name="Exit Zoom Player" XML_Guid="{40A59F3D-6CC0-44D4-85CF-6358D70A9888}">
+                <Event Name="Power" XML_Guid="{CE2A1226-9537-4265-B6D9-93E571D3769D}" />
+                <Action XML_Guid="{33D928E9-EA21-4EC6-8282-CDE053270092}">
+                    EventGhost.PythonCommand('ZoomPlayer.fnExit()')
                 </Action>
             </Macro>
-            <Macro Name="Forced Restart" id="134">
-                <Action Name="Taskkill ZoomPlayer">
+            <Macro Name="Forced Restart" id="133" XML_Guid="{996A2E06-2AB5-45B9-95C7-DE664C20ADB6}">
+                <Action Name="Taskkill ZoomPlayer" XML_Guid="{A39C8DEB-3BD5-4FEF-BFD7-BEBF07380197}">
                     System.Execute(u'{eg.folderPath.System}\\taskkill.exe', u'/F /IM zplayer.exe /T', 1, True, 2, u'')
                 </Action>
             </Macro>
         </Folder>
-        <Folder Name="Winamp" id="136" Enabled="False">
-            <Macro Name="Play">
-                <Event Name="Play" />
-                <Event Name="Ok" />
-                <Action>
+        <Folder Name="Winamp" id="135" Enabled="False" XML_Guid="{3525FB0E-F016-4FCC-B6A5-06E07E3E2A65}">
+            <Macro Name="Play" XML_Guid="{6E738613-AA70-47AC-A1F5-A1D6DC6F6EA4}">
+                <Event Name="Play" XML_Guid="{C3148F46-2AF2-4980-B60A-4E85C2C0655A}" />
+                <Event Name="Ok" XML_Guid="{A3A669CD-46A8-48EE-8EB2-9C5D6A5C1806}" />
+                <Action XML_Guid="{873FA3DB-A06F-4D52-9FB2-B31A41CCC4CA}">
                     Winamp.TogglePlay()
                 </Action>
             </Macro>
-            <Macro Name="Stop">
-                <Event Name="Stop" />
-                <Action>
+            <Macro Name="Stop" XML_Guid="{2D0CC6C3-3E8B-46DA-AB99-05F6AFEEA836}">
+                <Event Name="Stop" XML_Guid="{5042678D-96CB-4442-8E6E-3B1A38C7967C}" />
+                <Action XML_Guid="{09959842-989F-48D0-A5EC-C6375D2AF911}">
                     Winamp.Stop()
                 </Action>
             </Macro>
-            <Macro Name="Pause">
-                <Event Name="Pause" />
-                <Action>
+            <Macro Name="Pause" XML_Guid="{33581768-9D9B-4F4A-A6D2-11AA28B3EDB3}">
+                <Event Name="Pause" XML_Guid="{271CC006-302F-4C55-A3EB-A675CA55DEA6}" />
+                <Action XML_Guid="{D05109B8-1A80-40EB-8DF4-822030704E82}">
                     Winamp.Pause()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Up">
-                <Event Name="Up" />
-                <Action>
+            <Macro Name="Cursor Up" XML_Guid="{AEFE959B-F9F7-4742-880B-04D619EB1B99}">
+                <Event Name="Up" XML_Guid="{E9B83BB0-0C98-441F-B2EE-8E47D9365843}" />
+                <Action XML_Guid="{CBED75C2-57D8-4F7E-B4BA-152821A6BBDC}">
                     Winamp.PreviousTrack()
                 </Action>
-                <Action>
+                <Action XML_Guid="{D0BF0422-1FEF-463D-9010-8D2AE4E088DC}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Down">
-                <Event Name="Down" />
-                <Action>
+            <Macro Name="Cursor Down" XML_Guid="{1FC329B5-66D5-4E0D-BF5C-B32A7D176D14}">
+                <Event Name="Down" XML_Guid="{2438688B-A5CA-4C50-83CA-D98DF4164260}" />
+                <Action XML_Guid="{30453F4B-6A6D-46B9-ABE6-81B3E7916AEB}">
                     Winamp.NextTrack()
                 </Action>
-                <Action>
+                <Action XML_Guid="{0545B4B1-58DE-4B22-BF66-E89F4B01BEB0}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Left">
-                <Event Name="Left" />
-                <Action>
+            <Macro Name="Cursor Left" XML_Guid="{26A4B7B6-A6E3-49CA-8F8E-1EFAE660B5EE}">
+                <Event Name="Left" XML_Guid="{CE3AF5F5-0840-427B-9CA1-131028EC2AE4}" />
+                <Action XML_Guid="{63487BF8-65D6-4ADB-8956-4A050AC87367}">
                     Winamp.FastRewind()
                 </Action>
-                <Action>
+                <Action XML_Guid="{D98580C8-D0D4-4D93-9814-ED9CB339334F}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Cursor Right">
-                <Event Name="Right" />
-                <Action>
+            <Macro Name="Cursor Right" XML_Guid="{C24D05BB-E9A7-4904-AC57-8A6D43C99DA3}">
+                <Event Name="Right" XML_Guid="{B03A34C7-11FA-4542-9AD1-E3B2A14CABEB}" />
+                <Action XML_Guid="{DFFA8744-833A-4334-B1C8-1EA0A61B226C}">
                     Winamp.FastForward()
                 </Action>
-                <Action>
+                <Action XML_Guid="{A1F640AA-3E49-4B5F-BF69-D816E5478ED0}">
                     EventGhost.AutoRepeat()
                 </Action>
             </Macro>
-            <Macro Name="Next Track">
-                <Event Name="NextTrack" />
-                <Action>
+            <Macro Name="Next Track" XML_Guid="{47C7AD02-EBBC-41AD-8652-21A3B3C89C79}">
+                <Event Name="NextTrack" XML_Guid="{D0343687-4D54-4A30-9084-DB2EB94C7E0D}" />
+                <Action XML_Guid="{A26B5E15-FB58-4CF7-9F01-BAC86323502E}">
                     Winamp.NextTrack()
                 </Action>
             </Macro>
-            <Macro Name="Previous Track">
-                <Event Name="PreviousTrack" />
-                <Action>
+            <Macro Name="Previous Track" XML_Guid="{F84DDD6B-7A92-4816-B73C-7AA20443F456}">
+                <Event Name="PreviousTrack" XML_Guid="{BEEEF2DD-7A0B-431A-8FD6-3BD80EF8401A}" />
+                <Action XML_Guid="{C3B29640-5AFB-4D4A-89FB-1692789CB68D}">
                     Winamp.PreviousTrack()
                 </Action>
             </Macro>
-            <Macro Name="Visualization">
-                <Event Name="Fullscreen" />
-                <Action>
+            <Macro Name="Visualization" XML_Guid="{FC6D9851-861B-4995-B998-28C8C619E21E}">
+                <Event Name="Fullscreen" XML_Guid="{E7E556CD-633B-439B-BBB7-9C8473F418E1}" />
+                <Action XML_Guid="{0C9F17A7-11F4-485C-9B2B-4E3FF291DFC6}">
                     Winamp.ExVis()
                 </Action>
             </Macro>
-            <Macro Name="Exit">
-                <Event Name="Power" />
-                <Action>
+            <Macro Name="Exit" XML_Guid="{7F489BAD-3882-4547-BEFC-1DCD3C6521A4}">
+                <Event Name="Power" XML_Guid="{95D4E085-F3A0-413A-A2AF-1F805577F4FB}" />
+                <Action XML_Guid="{3681282C-06C0-431A-9517-1E8D08FC1400}">
                     Winamp.Exit()
                 </Action>
             </Macro>
-            <Macro Name="Volume Up">
-                <Event Name="VolumeUp" />
-                <Action>
+            <Macro Name="Volume Up" XML_Guid="{2CF7C47D-5023-459B-A18D-34F2B8D54019}">
+                <Event Name="VolumeUp" XML_Guid="{185D73A3-BB0F-4E37-8AEB-A0B22380D8D4}" />
+                <Action XML_Guid="{A06401B0-14FF-40F9-8F97-9AFA84A067C0}">
                     Winamp.VolumeUp()
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.33000000000000002, 0.050000000000000003, 0.050000000000000003, 3.0)
+                <Action XML_Guid="{E7C7AA93-78C1-4BAF-B73F-AF681365E5F7}">
+                    EventGhost.AutoRepeat(0.33, 0.05, 0.05, 3.0)
                 </Action>
             </Macro>
-            <Macro Name="Volume Down">
-                <Event Name="VolumeDown" />
-                <Action>
+            <Macro Name="Volume Down" XML_Guid="{537FC86C-D13C-41CC-909B-5AA5EF109503}">
+                <Event Name="VolumeDown" XML_Guid="{A66CC930-F0B7-4A97-885A-9CB226332861}" />
+                <Action XML_Guid="{B49970FB-4379-489B-8171-AACC463EA26D}">
                     Winamp.VolumeDown()
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.33000000000000002, 0.050000000000000003, 0.050000000000000003, 3.0)
+                <Action XML_Guid="{8E21847F-C02A-4318-AE53-BC526509E216}">
+                    EventGhost.AutoRepeat(0.33, 0.05, 0.05, 3.0)
                 </Action>
             </Macro>
         </Folder>
-        <Folder Name="Mouse Emulation" id="183" Enabled="False">
-            <Macro Name="Mouse Move Up">
-                <Event Name="Up" />
-                <Event Name="Num2" />
-                <Action>
+        <Folder Name="Mouse Emulation" id="182" Enabled="False" XML_Guid="{B5335998-D7F5-4679-B5B5-77DF6B66D8D6}">
+            <Macro Name="Mouse Move Up" XML_Guid="{C453D039-7C7E-4F48-83FA-E5FCC3BF854E}">
+                <Event Name="Up" XML_Guid="{3F46FA8D-E0E2-48C5-854F-55D8AFCF9D27}" />
+                <Event Name="Num2" XML_Guid="{6496B1ED-1FB6-43C0-A6F6-3138C9ECAC64}" />
+                <Action XML_Guid="{156701BB-D6CF-40AF-A00A-58FA9A2C663A}">
                     Mouse.GoDirection(0)
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move RightUp">
-                <Event Name="Num3" />
-                <Action>
+            <Macro Name="Mouse Move RightUp" XML_Guid="{4AC2E1F2-CBE8-418F-A319-14EAF4552E62}">
+                <Event Name="Num3" XML_Guid="{8E22BA34-3C56-4D5B-880A-64635ACCF408}" />
+                <Action XML_Guid="{0C951D8A-C0A9-4870-AEA9-DF427AA82F78}">
                     Mouse.GoDirection(45)
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move Right">
-                <Event Name="Right" />
-                <Event Name="Num6" />
-                <Action>
+            <Macro Name="Mouse Move Right" XML_Guid="{E1888619-A792-4548-B05E-3054A48F1722}">
+                <Event Name="Right" XML_Guid="{72A2E84D-4877-4379-8335-994B306EE075}" />
+                <Event Name="Num6" XML_Guid="{466E32A7-B28C-4033-A348-DA3F11782646}" />
+                <Action XML_Guid="{E001EFF8-743D-4EE4-8C0C-FF9BCA85A457}">
                     Mouse.GoDirection(90)
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move RightDown">
-                <Event Name="Num9" />
-                <Action>
+            <Macro Name="Mouse Move RightDown" XML_Guid="{3EE2C030-8486-4F11-B13F-1D4EE6161307}">
+                <Event Name="Num9" XML_Guid="{D9393D83-1425-45D0-A03F-8C3FE46FEB29}" />
+                <Action XML_Guid="{65CF324A-34E6-4815-A5D2-A1D730D9AADC}">
                     Mouse.GoDirection(u'135')
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move Down">
-                <Event Name="Down" />
-                <Event Name="Num8" />
-                <Action>
+            <Macro Name="Mouse Move Down" XML_Guid="{35226FF3-2D96-4967-A272-F82E6BD77AA8}">
+                <Event Name="Down" XML_Guid="{B61A35AD-EBFE-4C25-A133-9935EE94CC0B}" />
+                <Event Name="Num8" XML_Guid="{472CDAD5-77CB-4CC9-BADA-B98DC2E75A55}" />
+                <Action XML_Guid="{88D0B7B5-D1A7-4423-8DF9-CBA5CB1FC8CA}">
                     Mouse.GoDirection(u'180')
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move LeftDown">
-                <Event Name="Num7" />
-                <Action>
+            <Macro Name="Mouse Move LeftDown" XML_Guid="{F9C613EC-E3F4-48E0-9AC7-BA7E427D4B3B}">
+                <Event Name="Num7" XML_Guid="{B53F150E-5529-48FD-B868-F3501B97047A}" />
+                <Action XML_Guid="{0A77B77E-6469-4BDB-90E7-70DC734DC901}">
                     Mouse.GoDirection(225)
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move Left">
-                <Event Name="Left" />
-                <Event Name="Num4" />
-                <Action>
+            <Macro Name="Mouse Move Left" XML_Guid="{56A25119-AF16-421D-9FA5-4DDE16BE3A75}">
+                <Event Name="Left" XML_Guid="{F8D6F189-7E1A-4069-BA70-5BBAE120D006}" />
+                <Event Name="Num4" XML_Guid="{203587E4-EB78-4616-9C12-CFBB231E9D32}" />
+                <Action XML_Guid="{878D1DC2-9E4B-4CD3-A016-8707C3936388}">
                     Mouse.GoDirection(270)
                 </Action>
             </Macro>
-            <Macro Name="Mouse Move LeftUp">
-                <Event Name="Num1" />
-                <Action>
+            <Macro Name="Mouse Move LeftUp" XML_Guid="{13D23124-E8BF-481B-8CC0-78D2C9395D88}">
+                <Event Name="Num1" XML_Guid="{E6F0EEFA-953B-4563-B056-162AAC77B530}" />
+                <Action XML_Guid="{8DEC08C9-6741-4A49-A9DC-2C45F17BEAEF}">
                     Mouse.GoDirection(315)
                 </Action>
             </Macro>
-            <Macro Name="Left Mouse Button">
-                <Event Name="X10.Rename" />
-                <Action>
+            <Macro Name="Left Mouse Button" XML_Guid="{9FD572BD-FFC8-4EB9-8E16-DB1A0AFAAE25}">
+                <Event Name="X10.Rename" XML_Guid="{294912DC-AC6D-4A7E-A77E-EA4EBBF5C510}" />
+                <Action XML_Guid="{07697F06-D2EA-4740-8FAD-BF087FC86A98}">
                     Mouse.LeftButton()
                 </Action>
             </Macro>
-            <Macro Name="Right Mouse Button">
-                <Event Name="X10.Snapshot" />
-                <Action>
+            <Macro Name="Right Mouse Button" XML_Guid="{6C878333-8B9B-45C1-BFEA-DC81F8572AE0}">
+                <Event Name="X10.Snapshot" XML_Guid="{6BF592A4-9F52-48AB-948C-27563FBFA117}" />
+                <Action XML_Guid="{4628B843-207E-42F7-8DA1-7EA351240E04}">
                     Mouse.RightButton()
                 </Action>
             </Macro>
         </Folder>
-        <Folder Name="Keyboard Emulation" id="218">
-            <Macro Name="Up">
-                <Event Name="Up" />
-                <Action>
+        <Folder Name="Keyboard Emulation" id="217" XML_Guid="{408AA6AB-1DA2-49B8-8A4B-592DA303B00C}">
+            <Macro Name="Up" XML_Guid="{11FBB01F-1552-4DC8-BFFB-74FB1B4A6A16}">
+                <Event Name="Up" XML_Guid="{88680EAA-AF43-4D96-A44C-005AA7B598FE}" />
+                <Action XML_Guid="{AA7A4B23-387D-4733-BDD6-66632F7BD3A4}">
                     Window.SendKeys(u'{Up}')
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+                <Action XML_Guid="{E3CADF3D-6E5D-4794-AE62-BB55D1816F86}">
+                    EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
                 </Action>
             </Macro>
-            <Macro Name="Down">
-                <Event Name="Down" />
-                <Action>
+            <Macro Name="Down" XML_Guid="{615E9B4B-3CD7-43A6-BC02-A193741324FD}">
+                <Event Name="Down" XML_Guid="{3675C4EC-67DC-4B3B-9CE8-C10543D68513}" />
+                <Action XML_Guid="{94EC7AC3-3248-445C-A30B-2A3F65130674}">
                     Window.SendKeys(u'{Down}')
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+                <Action XML_Guid="{A1BCDDDC-0AA4-42DF-B24A-C38D52625B47}">
+                    EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
                 </Action>
             </Macro>
-            <Macro Name="Right">
-                <Event Name="Right" />
-                <Action>
+            <Macro Name="Right" XML_Guid="{5F1FECC0-587A-4B24-8B43-BF1844336DC2}">
+                <Event Name="Right" XML_Guid="{7ABA2DD8-48DC-4962-AB09-BEA8C5E041B1}" />
+                <Action XML_Guid="{40584164-3FCE-408D-BC77-F213C773C309}">
                     Window.SendKeys(u'{Right}')
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+                <Action XML_Guid="{5C94841B-ACBF-4C54-B770-D4508155F48C}">
+                    EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
                 </Action>
             </Macro>
-            <Macro Name="Left">
-                <Event Name="Left" />
-                <Action>
+            <Macro Name="Left" XML_Guid="{65C2FC0F-28B8-4C17-888A-C11381E3B1DE}">
+                <Event Name="Left" XML_Guid="{63F0B08A-622D-4851-8937-2E5B55D6F0BB}" />
+                <Action XML_Guid="{ECB6CA50-9F61-4FDC-876C-214F69435598}">
                     Window.SendKeys(u'{Left}')
                 </Action>
-                <Action>
-                    EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+                <Action XML_Guid="{6DA38A19-1C5B-4DF0-A095-6D1F3B5FEB30}">
+                    EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
                 </Action>
             </Macro>
-            <Macro Name="Ok -&gt; Enter Key">
-                <Event Name="Ok" />
-                <Action>
+            <Macro Name="Ok -&gt; Enter Key" XML_Guid="{2211B38B-6E97-4BFF-AF35-0A5F89B1D3B3}">
+                <Event Name="Ok" XML_Guid="{1C4234BB-4C64-4A18-999B-B9D5BD46EEB1}" />
+                <Action XML_Guid="{68B8F0D3-2242-4893-8440-0C598459B3F2}">
                     Window.SendKeys(u'{Enter}')
                 </Action>
             </Macro>
-            <Macro Name="Delete -&gt; Escape Key">
-                <Event Name="Delete" />
-                <Action>
+            <Macro Name="Delete -&gt; Escape Key" XML_Guid="{2F096495-C44A-4B32-9CA5-7E9FD26304F2}">
+                <Event Name="Delete" XML_Guid="{85C31628-4957-49A3-8933-1DC44A529E59}" />
+                <Action XML_Guid="{8EE9F5DD-E300-4875-B72E-4BFBE7A6E91A}">
                     Window.SendKeys(u'{Esc}')
                 </Action>
             </Macro>
-            <Macro Name="Power -&gt; Alt+F4">
-                <Event Name="Power" />
-                <Action>
+            <Macro Name="Power -&gt; Alt+F4" XML_Guid="{0FD1F982-C7D4-49AC-8A46-23076BBF7C22}">
+                <Event Name="Power" XML_Guid="{A63123C0-6E63-47EE-815C-8132D19E2615}" />
+                <Action XML_Guid="{7DEC8AB9-5391-48AA-A5E4-C5CA855CE033}">
                     Window.SendKeys(u'{Alt+F4}')
                 </Action>
             </Macro>
-            <Macro Name="Forward -&gt; Tabulator">
-                <Event Name="Forward" />
-                <Action>
+            <Macro Name="Forward -&gt; Tabulator" XML_Guid="{87131EDF-7F18-4088-9C5E-6BC37B01D9A5}">
+                <Event Name="Forward" XML_Guid="{98D4F08D-2900-4420-82E8-51EB4B8834C6}" />
+                <Action XML_Guid="{B2727DFB-12C7-4AE9-B215-B882CDE1C1EE}">
                     Window.SendKeys(u'{Tab}')
                 </Action>
             </Macro>
-            <Macro Name="Rewind -&gt; Shift+Tabulator">
-                <Event Name="Rewind" />
-                <Action>
+            <Macro Name="Rewind -&gt; Shift+Tabulator" XML_Guid="{BF9B901B-8B22-4C3C-9016-4A8868BBB30B}">
+                <Event Name="Rewind" XML_Guid="{1C441D33-463B-469D-A57E-2BF361DB4124}" />
+                <Action XML_Guid="{748C580A-384E-41ED-919D-284C4AB9A95B}">
                     Window.SendKeys(u'{Shift+Tab}')
                 </Action>
             </Macro>
-            <Macro Name="ChannelUp -&gt; Plus">
-                <Event Name="ChannelUp" />
-                <Action>
+            <Macro Name="ChannelUp -&gt; Plus" XML_Guid="{412CCC18-4561-4692-B6CA-C1CAF89541B1}">
+                <Event Name="ChannelUp" XML_Guid="{47F9DB2A-5D4B-449A-9661-BF4D20492FCB}" />
+                <Action XML_Guid="{C0CDEEB7-719B-48B1-9EB6-363DFB135D0C}">
                     Window.SendKeys(u'+')
                 </Action>
             </Macro>
-            <Macro Name="ChannelDown -&gt; Minus">
-                <Event Name="ChannelDown" />
-                <Action>
+            <Macro Name="ChannelDown -&gt; Minus" XML_Guid="{5CEB20B4-EF89-41E6-84BB-34DA63894C0E}">
+                <Event Name="ChannelDown" XML_Guid="{0BE66504-109A-4C6A-8F42-1CE6C9209B06}" />
+                <Action XML_Guid="{033A8E26-648A-45F2-8730-58FB4ABAAB04}">
                     Window.SendKeys(u'-')
                 </Action>
             </Macro>
-            <Macro Name="Rename -&gt; Start Menu">
-                <Event Name="Rename" />
-                <Action>
+            <Macro Name="Rename -&gt; Start Menu" XML_Guid="{25B10A3F-651E-4D3A-8E13-1C936AE4A1C9}">
+                <Event Name="Rename" XML_Guid="{A36BC64B-3E2B-4941-BEE2-B81BD35C8F89}" />
+                <Action XML_Guid="{2EE451A1-05E0-4545-B213-0CEABA7E87E4}">
                     Window.SendKeys(u'{Win}')
                 </Action>
             </Macro>
-            <Macro Name="Play -&gt; Space">
-                <Event Name="Play" />
-                <Action>
+            <Macro Name="Play -&gt; Space" XML_Guid="{144B1014-64BF-4534-AB2D-E31DF4D17301}">
+                <Event Name="Play" XML_Guid="{5343A63B-7B38-4DC6-91A1-A12AC90288AB}" />
+                <Action XML_Guid="{3CB834D6-807D-4E06-80B1-B5B3F2D6E6B1}">
                     Window.SendKeys(u'{Space}')
                 </Action>
             </Macro>
         </Folder>
     </Folder>
-    <Folder Name="Volume Control">
-        <Macro Name="Mute Volume">
-            <Event Name="Mute" />
-            <Action>
+    <Folder Name="Volume Control" XML_Guid="{697E92C6-71C3-4F15-A450-94209A86E187}">
+        <Macro Name="Mute Volume" XML_Guid="{8B23D149-B7FA-470E-ACF2-76EE068F6D34}">
+            <Event Name="Mute" XML_Guid="{C08CFE99-10CE-4C8A-B1C0-D3E09FB7AC56}" />
+            <Action XML_Guid="{7D4316FF-133D-4B97-BDB2-24C4182C917A}">
                 System.ToggleMute()
             </Action>
         </Macro>
-        <Macro Name="Decrease Volume">
-            <Event Name="VolumeDown" />
-            <Action>
+        <Macro Name="Decrease Volume" XML_Guid="{47EBA242-F8B8-444E-96B0-78D9E94DD5D8}">
+            <Event Name="VolumeDown" XML_Guid="{DC2D2339-135A-49A6-B337-BBEC35FD61A0}" />
+            <Action XML_Guid="{A33112E6-95B0-4FE0-AAD7-702E5891FF28}">
                 System.ChangeMasterVolumeBy(-2.0)
             </Action>
-            <Action>
-                EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+            <Action XML_Guid="{828242D1-9EA0-46FC-AA9A-DBF99B7EAEF1}">
+                EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
             </Action>
         </Macro>
-        <Macro Name="Increase Volume">
-            <Event Name="VolumeUp" />
-            <Action>
+        <Macro Name="Increase Volume" XML_Guid="{F59EB8DC-35F5-4839-AEC2-4433506B2CA3}">
+            <Event Name="VolumeUp" XML_Guid="{5C0FF04F-7F4E-4A80-A17C-50B473B68E9B}" />
+            <Action XML_Guid="{CE7B90C5-28C3-4E6D-B0C0-F5E659A4E7EE}">
                 System.ChangeMasterVolumeBy(2.0)
             </Action>
-            <Action>
-                EventGhost.AutoRepeat(0.59999999999999998, 0.29999999999999999, 0.01, 3.0)
+            <Action XML_Guid="{8A967703-BE78-4EDD-9E06-CB3A192A7B2B}">
+                EventGhost.AutoRepeat(0.6, 0.3, 0.01, 3.0)
             </Action>
         </Macro>
     </Folder>
-    <Folder Name="Other Examples">
-        <Folder Name="State Folder Example">
-            <Folder Name="Folder1" id="276">
-                <Macro Name="Enable other Folder">
-                    <Event Name="Blue" />
-                    <Action>
-                        EventGhost.EnableExclusive(XmlIdLink(281))
+    <Folder Name="Other Examples" XML_Guid="{BC031E85-A3EB-4425-B1C0-D295E24A2E9C}">
+        <Folder Name="State Folder Example" XML_Guid="{854B0E35-1050-41B2-ACB5-366C62B3D98D}">
+            <Folder Name="Folder1" id="275" XML_Guid="{B6C40829-14DE-432A-81D7-E003D8345FD5}">
+                <Macro Name="Enable other Folder" XML_Guid="{53CD4A22-37B2-4AC6-850F-898A515152A6}">
+                    <Event Name="Blue" XML_Guid="{4791A3D8-4871-402C-8E97-DDD85E7AA97C}" />
+                    <Action XML_Guid="{A159C410-200F-48E2-AE12-3EA388AA17B1}">
+                        EventGhost.EnableExclusive(XmlIdLink(279))
                     </Action>
                 </Macro>
             </Folder>
-            <Folder Name="Folder2" id="281" Enabled="False">
-                <Macro Name="Enable other Folder">
-                    <Event Name="Blue" />
-                    <Action>
-                        EventGhost.EnableExclusive(XmlIdLink(286))
+            <Folder Name="Folder2" id="279" Enabled="False" XML_Guid="{C9938C4F-3CE8-4375-BFD7-E2EB63448FB0}">
+                <Macro Name="Enable other Folder" XML_Guid="{42F83E99-C4EF-4CA6-BECB-DA4B04282881}">
+                    <Event Name="Blue" XML_Guid="{34AE39A8-BAF8-4BA7-9E8C-729578BA671A}" />
+                    <Action XML_Guid="{48159223-D30F-4CAD-B005-967C6699E5A6}">
+                        EventGhost.EnableExclusive(XmlIdLink(283))
                     </Action>
                 </Macro>
             </Folder>
-            <Folder Name="Folder3" id="286" Enabled="False">
-                <Macro Name="Enable other Folder">
-                    <Event Name="Blue" />
-                    <Action>
-                        EventGhost.EnableExclusive(XmlIdLink(276))
+            <Folder Name="Folder3" id="283" Enabled="False" XML_Guid="{D2AEFDFF-9235-4206-99CE-BC4EFE93CCBB}">
+                <Macro Name="Enable other Folder" XML_Guid="{DDDC868D-2F8A-4288-AD9D-914E2FEFBCE2}">
+                    <Event Name="Blue" XML_Guid="{4334605F-DACB-4711-B7A3-25035FE369B5}" />
+                    <Action XML_Guid="{A5AB9234-4511-4723-838D-CD6967973DCB}">
+                        EventGhost.EnableExclusive(XmlIdLink(275))
                     </Action>
                 </Macro>
             </Folder>
         </Folder>
-        <Folder Name="State Macro Example">
-            <Macro Name="State1" id="292" Enabled="False">
-                <Event Name="Green" />
-                <Action>
-                    EventGhost.DisableItem(XmlIdLink(292))
+        <Folder Name="State Macro Example" XML_Guid="{8B2DA596-0102-4D1B-8AEA-B273F2CF38A3}">
+            <Macro Name="State1" id="288" Enabled="False" XML_Guid="{99FF1667-02FC-4BC6-95A1-B79CC74DCC01}">
+                <Event Name="Green" XML_Guid="{37FE964D-4CDF-4EB1-97AB-E8937BECCA12}" />
+                <Action XML_Guid="{48DAEEB6-1641-4B54-9A4F-DB15688D0B8C}">
+                    EventGhost.DisableItem(XmlIdLink(288))
                 </Action>
-                <Action>
-                    EventGhost.EnableItem(XmlIdLink(298))
+                <Action XML_Guid="{427290C7-893E-4B3C-B4E3-195B9C004E29}">
+                    EventGhost.EnableItem(XmlIdLink(293))
                 </Action>
-                <Action Enabled="False">
+                <Action Enabled="False" XML_Guid="{68B28F19-29D8-4D9C-821B-2484BA34F478}">
                     System.MonitorPowerOff()
                 </Action>
             </Macro>
-            <Macro Name="State2" id="298">
-                <Event Name="Green" />
-                <Action>
-                    EventGhost.EnableItem(XmlIdLink(292))
+            <Macro Name="State2" id="293" XML_Guid="{B9A0F5BA-C834-44D8-AD6D-7466B18B6A68}">
+                <Event Name="Green" XML_Guid="{1DAFDCA9-BBFD-4ED3-9F54-C9C8D4CDADF2}" />
+                <Action XML_Guid="{EDF76370-6BC5-46DC-B526-25CB5B74852B}">
+                    EventGhost.EnableItem(XmlIdLink(288))
                 </Action>
-                <Action>
-                    EventGhost.DisableItem(XmlIdLink(298))
+                <Action XML_Guid="{BBF54480-406A-4557-A5E8-B31FD1C7FECA}">
+                    EventGhost.DisableItem(XmlIdLink(293))
                 </Action>
-                <Action>
+                <Action XML_Guid="{FE01594E-D3A2-439F-B168-A2B362FC47A1}">
                     System.MonitorPowerOn()
                 </Action>
             </Macro>
         </Folder>
-        <Folder Name="State Macro Example 2">
-            <Macro Name="Macro1" id="305" Enabled="False">
-                <Event Name="Yellow" />
-                <Action>
-                    EventGhost.EnableExclusive(XmlIdLink(309))
+        <Folder Name="State Macro Example 2" XML_Guid="{5AFE7AAA-EDA9-46E1-9366-ED4EE2C51762}">
+            <Macro Name="Macro1" id="299" Enabled="False" XML_Guid="{65B998CA-F5BB-4EC3-BC2A-A31E5210D4F4}">
+                <Event Name="Yellow" XML_Guid="{A83091A7-7AAC-477D-9238-24B2C8270452}" />
+                <Action XML_Guid="{4E2A7E63-4F5B-407D-A6E6-74C43166A0D4}">
+                    EventGhost.EnableExclusive(XmlIdLink(302))
                 </Action>
             </Macro>
-            <Macro Name="Macro2" id="309">
-                <Event Name="Yellow" />
-                <Action>
-                    EventGhost.EnableExclusive(XmlIdLink(313))
-                </Action>
-            </Macro>
-            <Macro Name="Macro3" id="313" Enabled="False">
-                <Event Name="Yellow" />
-                <Action>
+            <Macro Name="Macro2" id="302" XML_Guid="{C493EF8A-2150-49B4-8DE7-B7151B129A04}">
+                <Event Name="Yellow" XML_Guid="{EA793575-0044-4065-B259-D9DB72FD449B}" />
+                <Action XML_Guid="{F094D112-1016-4EE6-83B8-FBCCDBC3CFE8}">
                     EventGhost.EnableExclusive(XmlIdLink(305))
+                </Action>
+            </Macro>
+            <Macro Name="Macro3" id="305" Enabled="False" XML_Guid="{69CAD83A-BD99-4838-894D-E8A61794988C}">
+                <Event Name="Yellow" XML_Guid="{C50344C5-4E4B-4CAD-A990-FF78A76B63D2}" />
+                <Action XML_Guid="{E4BB18FD-DFF2-4DBF-80E1-C695ED684752}">
+                    EventGhost.EnableExclusive(XmlIdLink(299))
                 </Action>
             </Macro>
         </Folder>

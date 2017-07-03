@@ -133,17 +133,19 @@ class AddPluginDialog(eg.TaskletDialog):
         self.typeIds = typeIds
         itemToSelect = typeIds[KIND_TAGS[0]]
 
-        for info in eg.pluginManager.GetPluginInfoList():
-            if info.kind in ("hidden", "core"):
-                continue
-            if info.icon and info.icon != eg.Icons.PLUGIN_ICON:
-                idx = imageList.Add(
-                    eg.Icons.PluginSubIcon(info.icon).GetBitmap()
-                )
-            else:
-                idx = 0
+        for info in eg.pluginManager.GetPluginList():
+            # if info.kind in ("hidden", "core"):
+            #     continue
+            # if info.icon:
+            #     info.icon = eg.Icons.StringIcon(info.icon)
+            #     idx = imageList.Add(
+            #         info.icon.GetBitmap()
+            #    )
+            # else:
+            idx = 0
 
             treeId = treeCtrl.AppendItem(typeIds[info.kind], info.name, idx)
+            treeCtrl.SetItemHasChildren(treeId, True)
             if not info.valid:
                 treeCtrl.SetItemTextColour(treeId, eg.colour.pluginError)
             treeCtrl.SetPyData(treeId, info)
@@ -160,8 +162,8 @@ class AddPluginDialog(eg.TaskletDialog):
 
         def OnCmdExport(dummyEvent=None):
             info = self.treeCtrl.GetPyData(self.treeCtrl.GetSelection())
-            if info:
-                eg.PluginInstall.Export(info)
+            eg.PluginInstall.Export(info)
+
         menu = wx.Menu()
         menuId = wx.NewId()
         menu.Append(menuId, eg.text.MainFrame.Menu.Export)
@@ -219,9 +221,16 @@ class AddPluginDialog(eg.TaskletDialog):
             self.SetPosition(Config.position)
         treeCtrl.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnSelectionChanged)
         treeCtrl.Bind(wx.EVT_TREE_ITEM_ACTIVATED, self.OnItemActivated)
+        treeCtrl.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpand)
+        treeCtrl.Bind(wx.EVT_TREE_ITEM_COLLAPSING, self.OnItemCollapse)
         treeCtrl.SelectItem(itemToSelect)
 
         while self.Affirmed():
+            if self.resultData is not None:
+                self.resultData = eg.pluginManager.GetPlugin(
+                    self.resultData.guid,
+                    self.resultData.version
+                )
             if self.CheckMultiload():
                 self.SetResult(self.resultData)
         Config.size = self.GetSizeTuple()
@@ -236,11 +245,68 @@ class AddPluginDialog(eg.TaskletDialog):
     def OnItemActivated(self, event):
         item = self.treeCtrl.GetSelection()
         info = self.treeCtrl.GetPyData(item)
-        if info is not None:
+
+        if self.treeCtrl.GetItemParent(item) == self.treeCtrl.GetRootItem():
+            event.Skip()
+        elif self.treeCtrl.ItemHasChildren(item):
+            if self.treeCtrl.IsExpanded(item):
+                self.Collapse(item)
+            else:
+                self.Expand(item, info)
+
+        elif info is not None:
             #self.SetResult("huhu")
             self.OnOK(wx.CommandEvent())
             return
-        event.Skip()
+
+    def Expand(self, item, info):
+        self.treeCtrl.Unbind(
+            wx.EVT_TREE_ITEM_EXPANDING,
+            handler=self.OnItemExpand
+        )
+
+        versions = getattr(info, 'versions', None)
+
+        if versions is None:
+            versions = eg.pluginManager.GetPluginVersionList(info.guid)
+            setattr(info, 'versions', versions)
+
+        for version in versions:
+            child = self.treeCtrl.AppendItem(item, version)
+            self.treeCtrl.SetPyData(child, info)
+            self.treeCtrl.Expand(item)
+
+        self.treeCtrl.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.OnItemExpand)
+
+    def Collapse(self, item):
+        self.treeCtrl.Unbind(
+            wx.EVT_TREE_ITEM_COLLAPSING,
+            handler=self.OnItemCollapse
+        )
+        self.treeCtrl.Collapse(item)
+        self.treeCtrl.Freeze()
+        self.treeCtrl.DeleteChildren(item)
+        self.treeCtrl.SetItemHasChildren(item, True)
+
+        self.treeCtrl.Thaw()
+        self.treeCtrl.Bind(wx.EVT_TREE_ITEM_COLLAPSING, self.OnItemCollapse)
+
+    def OnItemExpand(self, event):
+        item = event.GetItem()
+        info = self.treeCtrl.GetPyData(item)
+
+        if self.treeCtrl.GetItemParent(item) == self.treeCtrl.GetRootItem():
+            event.Skip()
+        elif not self.treeCtrl.IsExpanded(item):
+            self.Expand(item, info)
+
+    def OnItemCollapse(self, event):
+        item = event.GetItem()
+
+        if self.treeCtrl.GetItemParent(item) == self.treeCtrl.GetRootItem():
+            event.Skip()
+        elif self.treeCtrl.IsExpanded(item):
+            self.Collapse(item)
 
     def OnItemRightClick(self, event):
         """
@@ -249,7 +315,14 @@ class AddPluginDialog(eg.TaskletDialog):
         item = event.GetItem()
         self.treeCtrl.SelectItem(item)
         info = self.treeCtrl.GetPyData(item)
-        if info:
+
+        if self.treeCtrl.GetItemParent(item) == self.treeCtrl.GetRootItem():
+            event.Skip()
+
+        elif (
+            not self.treeCtrl.ItemHasChildren(item) and
+            info.guid in eg.pluginManager.database
+        ):
             self.PopupMenu(self.contextMenu)
 
     def OnSelectionChanged(self, event):
@@ -257,25 +330,48 @@ class AddPluginDialog(eg.TaskletDialog):
         Handle the wx.EVT_TREE_SEL_CHANGED events.
         """
         item = event.GetItem()
-        self.resultData = info = self.treeCtrl.GetPyData(item)
-        if info is None:
-            name = self.treeCtrl.GetItemText(item)
-            description = Text.noInfo
+
+        info = self.treeCtrl.GetPyData(item)
+        if self.treeCtrl.GetItemParent(item) == self.treeCtrl.GetRootItem():
+            self.nameText.SetLabel(self.treeCtrl.GetItemText(item))
+            self.descrBox.SetPage(eg.Utils.AppUrl('', ''))
             self.authorLabel.SetLabel("")
             self.authorText.SetLabel("")
             self.versionLabel.SetLabel("")
             self.versionText.SetLabel("")
             self.okButton.Enable(False)
+            self.resultData = None
+            event.Skip()
+
+        elif self.treeCtrl.ItemHasChildren(item):
+            self.nameText.SetLabel(info.name)
+            self.descrBox.SetPage(eg.Utils.AppUrl('', ''))
+            self.authorLabel.SetLabel("")
+            self.authorText.SetLabel("")
+            self.versionLabel.SetLabel("")
+            self.versionText.SetLabel("")
+            self.okButton.Enable(False)
+            self.resultData = None
             event.Skip()
         else:
-            name = info.name
-            description = info.description
-            self.descrBox.SetBasePath(info.path)
+            if hasattr(info, 'description'):
+                plugin_info = info
+            else:
+                plugin_info = eg.pluginManager.GetPluginInfo(
+                    info.guid,
+                    self.treeCtrl.GetItemText(item)
+                )
+                self.treeCtrl.SetPyData(item, plugin_info)
+
+            self.nameText.SetLabel(plugin_info.name)
+            self.descrBox.SetPage(
+                eg.Utils.AppUrl(plugin_info.description, info.url)
+            )
+            self.descrBox.SetBasePath('')
             self.authorLabel.SetLabel(Text.author)
-            self.authorText.SetLabel(info.author.replace("&", "&&"))
+            self.authorText.SetLabel(plugin_info.author.replace("&", "&&"))
             self.versionLabel.SetLabel(Text.version)
-            self.versionText.SetLabel(info.version)
+            self.versionText.SetLabel(plugin_info.version)
             self.okButton.Enable(True)
-        self.nameText.SetLabel(name)
-        url = info.url if info else None
-        self.descrBox.SetPage(eg.Utils.AppUrl(description, url))
+
+            self.resultData = plugin_info

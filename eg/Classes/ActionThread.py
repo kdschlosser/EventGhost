@@ -76,7 +76,7 @@ class ActionThread(eg.ThreadWorker):
         self.corePluginInfos = []
         for guid in eg.CORE_PLUGIN_GUIDS:
             try:
-                pluginInfo = eg.pluginManager.OpenPlugin(guid, None, ())
+                pluginInfo = eg.pluginManager.OpenPlugin(guid, None, None, ())
                 pluginInfo.instance.__start__()
                 pluginInfo.isStarted = True
                 self.corePluginInfos.append(pluginInfo)

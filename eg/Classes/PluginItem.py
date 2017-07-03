@@ -44,8 +44,10 @@ class PluginItem(ActionItem):
         evalName = node.attrib.get('identifier', None)
         self.pluginName = node.attrib.get('file', None)
         guid = node.attrib.get('guid', self.pluginName)
+        version = node.attrib.get('version', '1.0')
         self.info = info = eg.pluginManager.OpenPlugin(
             guid,
+            version,
             evalName,
             args,
             self,
@@ -131,6 +133,7 @@ class PluginItem(ActionItem):
         if guid:
             attr.append(('Guid', guid))
         attr.append(('File', self.pluginName))
+        attr.append(('Version', self.executable.info.version))
         text = base64.b64encode(pickle.dumps(self.info.args, 2))
         return attr, text
 
