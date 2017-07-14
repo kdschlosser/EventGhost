@@ -54,6 +54,7 @@ class CheckUpdate:
 class MessageDialog(eg.Dialog):
     def __init__(self, version, url):
         self.url = url
+        self.version = version
         eg.Dialog.__init__(self, None, -1, eg.APP_NAME)
         bmp = wx.ArtProvider.GetBitmap(
             wx.ART_INFORMATION,
@@ -99,6 +100,9 @@ class MessageDialog(eg.Dialog):
         self.Close()
 
     def OnOk(self, event):
+        if 'beta' not in self.version:
+            version = self.version.lstrip('v').split('.')
+
         webbrowser.open(self.url, True, True)
         self.Close()
 

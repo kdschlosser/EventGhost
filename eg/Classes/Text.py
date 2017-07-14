@@ -117,7 +117,6 @@ class Default:
             SaveAs = "Save &As..."
             Options = "O&ptions..."
             Restart = "&Restart"
-            RestartAsAdmin = "Restart as Administrator"
             Exit = "E&xit"
 
             EditMenu = "&Edit"
@@ -174,7 +173,7 @@ class Default:
 
         class SaveChanges:
             mesg = (
-                "Configuration contains unsaved changes.\n\n"
+                "Configuration contains unsaved changed.\n\n"
                 "Do you want to save before continuing?"
             )
             saveButton = "&Save"

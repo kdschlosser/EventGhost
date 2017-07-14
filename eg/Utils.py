@@ -394,11 +394,11 @@ def IsVista():
     """
     warnings.warn(
         "eg.Utils.IsVista() is deprecated. "
-        "Use eg.WindowsVersion >= 'Vista' instead",
+        "Use eg.WindowsVersion.IsVista() instead",
         DeprecationWarning,
         stacklevel=2
     )
-    return eg.WindowsVersion >= 'Vista'
+    return eg.WindowsVersion.IsVista()
 
 def IsXP():
     """
@@ -406,11 +406,11 @@ def IsXP():
     """
     warnings.warn(
         "eg.Utils.IsXP() is deprecated. "
-        "Use eg.WindowsVersion >= 'XP' instead",
+        "Use eg.WindowsVersion.IsXP() instead",
         DeprecationWarning,
         stacklevel=2
     )
-    return eg.WindowsVersion >= 'XP'
+    return eg.WindowsVersion.IsXP()
 
 def LogIt(func):
     """

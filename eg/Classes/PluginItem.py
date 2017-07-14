@@ -94,7 +94,6 @@ class PluginItem(ActionItem):
         self.executable = None
         self.info = None
 
-    @eg.AssertInActionThread
     def Execute(self):
         if not self.isEnabled:
             return None, None

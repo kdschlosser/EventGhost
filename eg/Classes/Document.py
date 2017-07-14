@@ -129,9 +129,6 @@ class Document(object):
         else:
             return wx.ID_NO
 
-    def IsDirty(self):
-        return self.isDirty
-
     @eg.LogItWithReturn
     def Close(self):
         try:

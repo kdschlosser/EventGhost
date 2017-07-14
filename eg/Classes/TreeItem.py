@@ -154,6 +154,7 @@ class TreeItem(object):
         for key, value in kwargs.items():
             node.attrib[key] = value
         self = cls(parent, node)
+        eg.currentItem = self
         parent.AddChild(self, pos)
         return self
 
@@ -172,7 +173,6 @@ class TreeItem(object):
     def DropTest(self, dropNode):
         return self.dropBehaviour.get(dropNode.xmlTag, HINT_NO_DROP)
 
-    @eg.AssertInActionThread
     def Execute(self):
         return None, None
 

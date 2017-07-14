@@ -100,7 +100,6 @@ class ActionItem(TreeItem):
             return HINT_MOVE_BEFORE_OR_AFTER
         return HINT_NO_DROP
 
-    @eg.AssertInActionThread
     def Execute(self):
         if not self.isEnabled:
             return
@@ -197,7 +196,6 @@ class ActionItem(TreeItem):
 
     @eg.AssertInActionThread
     def SetArguments(self, args):
-        eg.currentItem = self
         if self.args != args:
             self.args = args
             try:

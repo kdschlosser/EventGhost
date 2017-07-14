@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of EventGhost.
-# Copyright © 2005-2016 EventGhost Project <http://www.eventghost.org/>
+# Copyright © 2005-2016 EventGhost Project <http://www.eventghost.net/>
 #
 # EventGhost is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
@@ -16,26 +16,165 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
+import eg
 import wx
-from ast import literal_eval
 from time import localtime, strftime
 
-# Local imports
-import eg
+
+class EventLog(object):
+
+    def __init__(self):
+        self.itemId = None
+        self.maxlength = 2000
+        self.data = []
+        self.log = None
+
+    def SetItemId(self, itemId):
+        self.itemId = itemId
+
+        if self.log is not None:
+            self.log.SetItemId(itemId)
+
+    def IsShown(self):
+        return self.log is not None
+
+    def CloseLog(self, dummyEvent=None):
+        self.Show(False)
+
+    def GetSizeTuple(self):
+        if self.log is not None:
+            return self.log.GetSizeTuple()
+
+    def Show(self, flag=True):
+        if flag:
+            if self.log is None:
+                self.log = EventFrame(
+                    self.itemId,
+                    self.data[:]
+                )
+                eg.Bind('Close.Event.Logs', self.CloseLog)
+                eg.Bind('Scroll.Event.Logs', self.log.Scroll)
+                eg.Bind('Update.Event.Logs', self.log.CalculateSize)
+                eg.Bind('SetIndent.Event.Logs', self.log.logCtrl.SetIndent)
+                eg.Bind('SetTime.Event.Logs', self.log.logCtrl.SetTimeLogging)
+
+                self.log.Show()
+        else:
+            if self.log is not None:
+                eg.Unbind('Close.Event.Logs', self.CloseLog)
+                eg.Unbind('Scroll.Event.Logs', self.log.Scroll)
+                eg.Unbind('Update.Event.Logs', self.log.CalculateSize)
+                eg.Unbind('SetIndent.Event.Logs', self.log.logCtrl.SetIndent)
+                eg.Unbind('SetTime.Event.Logs', self.log.logCtrl.SetTimeLogging)
+
+                self.log.Show(False)
+                self.log.Destroy()
+                self.log = None
+
+    def WriteLine(self, line, icon, wRef, when, indent):
+        if len(self.data) >= self.maxlength:
+            self.data.pop(0)
+        self.data.append((line, icon, wRef, when, indent))
+        if self.log is not None:
+            self.log.logCtrl.WriteLine(line, icon, wRef, when, indent)
+            self.log.logCtrl.Update()
+
 
 EVENT_ICON = eg.EventItem.icon
 ERROR_ICON = eg.Icons.ERROR_ICON
+
+
+class EventFrame(wx.Frame):
+
+    def __init__(self, itemId, data):
+        self.itemId = itemId
+        wx.Frame.__init__(
+            self,
+            eg.document.frame.logCtrl,
+            style=(
+                wx.FRAME_NO_TASKBAR |
+                wx.FRAME_FLOAT_ON_PARENT |
+                wx.BORDER_NONE |
+                wx.CLIP_CHILDREN
+            )
+        )
+
+        self.data = data
+        self.logCtrl = LogCtrl(self, data)
+
+        eg.document.frame.Bind(wx.EVT_SCROLL, self.CalculateSize)
+        eg.document.frame.Bind(wx.EVT_SIZE, self.CalculateSize)
+        eg.document.frame.Bind(wx.EVT_MOVE, self.CalculateSize)
+        self.Bind(wx.EVT_SIZE, self.CalculateSize)
+        self.CalculateSize()
+
+    def Scroll(self, itemId):
+        if itemId == self.itemId:
+            self.CalculateSize()
+
+    def SetItemId(self, itemId):
+        self.itemId = itemId
+        self.CalculateSize()
+
+    def CalculateSize(self, evt=None):
+        try:
+            rect = eg.document.frame.logCtrl.GetItemRect(self.itemId)
+        except wx.PyDeadObjectError:
+            return
+
+        l_x, l_y = eg.document.frame.ClientToScreen(
+            eg.document.frame.logCtrl.GetPositionTuple()
+        )
+        l_w, l_h = eg.document.frame.logCtrl.GetClientSize()
+        topItem = eg.document.frame.logCtrl.GetTopItem()
+        bottomItem = eg.document.frame.logCtrl.GetCountPerPage() + topItem
+
+        x_Pos = rect.x + l_x
+        y_Pos = rect.y + l_y + rect.height
+
+        item_count = self.logCtrl.GetItemCount()
+        if item_count < 8:
+            item_count = 8
+
+        w_Ctrl = rect.width + 6
+        h_Ctrl = rect.height * item_count
+
+        y_ParentEnd = l_y + l_h
+        y_End = y_Pos + h_Ctrl
+
+        if topItem < self.itemId < bottomItem:
+            h_Ctrl = min([y_ParentEnd - y_Pos, y_End - y_Pos])
+        elif topItem >= self.itemId:
+            h_Ctrl = max([h_Ctrl - ((topItem - self.itemId) * rect.height), 0])
+
+        if self.GetPositionTuple() != (x_Pos, y_Pos):
+            self.SetPosition((x_Pos, y_Pos))
+        if self.GetSizeTuple() != (w_Ctrl, h_Ctrl):
+            self.SetSize((w_Ctrl, h_Ctrl))
+        self.logCtrl.SetColumnWidth(0, w_Ctrl - 1)
+
+        if evt is not None:
+            try:
+                evt.Skip()
+            except AttributeError:
+                pass
+
 
 class LogCtrl(wx.ListCtrl):
     """
     Implementation of a ListCtrl with a circular buffer.
     """
-    def __init__(self, parent):
-        self.maxlength = 2000
-        self.removeOnMax = 200
-        self.eventLogs = {}
-        self.indent = ""
-        self.OnGetItemText = self.OnGetItemTextWithTime
+    def __init__(self, parent, data):
+        self.data = data
+        self.indent = eg.document.frame.logCtrl.indent
+        self.logTimes = eg.document.frame.logCtrl.logTimes
+        if self.logTimes:
+            self.OnGetItemText = self.OnGetItemTextWithTime
+        else:
+            self.OnGetItemText = self.OnGetItemTextNormal
+        self.__inSelection = False
+        self.isOdd = False
+
         wx.ListCtrl.__init__(
             self,
             parent,
@@ -50,7 +189,14 @@ class LogCtrl(wx.ListCtrl):
         )
         if eg.config.useFixedFont:
             df = self.GetFont()
-            font = wx.Font(df.GetPointSize(), wx.DEFAULT, wx.NORMAL, wx.NORMAL, False, "Courier New")
+            font = wx.Font(
+                df.GetPointSize(),
+                wx.DEFAULT,
+                wx.NORMAL,
+                wx.NORMAL,
+                False,
+                "Courier New"
+            )
             self.SetFont(font)
 
         self.SetImageList(eg.Icons.gImageList, wx.IMAGE_LIST_SMALL)
@@ -85,10 +231,6 @@ class LogCtrl(wx.ListCtrl):
         self.Bind(wx.EVT_MENU, self.OnCmdCopy, id=wx.ID_COPY)
         menu.AppendSeparator()
         menuId = wx.NewId()
-        menu.Append(menuId, eg.text.MainFrame.Menu.Replay)
-        self.Bind(wx.EVT_MENU, self.OnCmdReplay, id=menuId)
-        menu.AppendSeparator()
-        menuId = wx.NewId()
         menu.Append(menuId, eg.text.MainFrame.Menu.ClearLog)
         self.Bind(wx.EVT_MENU, self.OnCmdClearLog, id=menuId)
         self.contextMenu = menu
@@ -100,57 +242,23 @@ class LogCtrl(wx.ListCtrl):
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
-        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
-        parent.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        parent.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
-
-        eg.Bind('Remove.Event.Logs', self.RemoveEventLog)
-
         accel_entries = [
             wx.AcceleratorEntry(wx.ACCEL_CTRL, ord('A'), wx.ID_SELECTALL)
         ]
         accel = wx.AcceleratorTable(accel_entries)
         self.SetAcceleratorTable(accel)
 
-        self.logTimes = True
-        self.__inSelection = False
-        self.isOdd = False
-        self.data = []
-        eg.log.SetCtrl(self)
-        wx.CallAfter(self.SetData, eg.log.GetData())
+        self.SetItemCount(len(data))
+
+        if eg.document.visibleLogItem:
+            self.EnsureVisible(eg.document.visibleLogItem)
+        else:
+            self.EnsureVisible(len(self.data) - 1)
 
     if eg.debugLevel:
         @eg.LogIt
         def __del__(self):
             pass
-
-    def OnMouseWheel(self, evt):
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
-        evt.Skip()
-
-    def OnLeftDown(self, evt):
-        x, y = evt.GetPosition()
-        l_x, l_y = eg.document.frame.ClientToScreen(self.GetPositionTuple())
-        l_c_w, l_c_h = self.GetClientSize()
-        l_w, l_h = self.GetSizeTuple()
-
-        stop_x = l_x + l_w
-        stop_y = l_y + l_c_h
-
-        start_x = l_x + l_c_w
-        stary_y = l_y
-
-        print x, y, start_x, stary_y, stop_x, stop_y
-
-        if stop_x > x > start_x and stop_y > y > stary_y:
-            self.CaptureMouse()
-        evt.Skip()
-
-    def OnLeftUp(self, evt):
-        if self.HasCapture():
-            self.ReleaseMouse()
-            wx.CallAfter(eg.Notify, 'Update.Event.Logs')
-        evt.Skip()
 
     def CanCut(self):
         return False
@@ -160,12 +268,6 @@ class LogCtrl(wx.ListCtrl):
 
     def CanPaste(self):
         return False
-
-    @eg.LogIt
-    def Destroy(self):
-        eg.Unbind('Remove.Event.Logs', self.RemoveEventLog)
-        eg.Notify('Close.Event.Logs')
-        eg.log.SetCtrl(None)
 
     def FocusLastItem(self):
         if self.GetFocusedItem() == -1:
@@ -180,8 +282,6 @@ class LogCtrl(wx.ListCtrl):
         self.SetItemCount(0)
         self.DeleteAllItems()
         del self.data[:]
-        eg.log.data.clear()
-        eg.Print(eg.text.MainFrame.Logger.welcomeText)
         self.FocusLastItem()
         self.Scroll()
         self.Refresh()
@@ -224,82 +324,15 @@ class LogCtrl(wx.ListCtrl):
             wx.TheClipboard.Close()
             wx.TheClipboard.Flush()
 
-    def OnCmdReplay(self, dummyEvent=None):
-        item = self.GetFirstSelected()
-        while item != -1:
-            text, icon = self.GetItemData(item)[:2]
-            if icon == eg.Icons.EVENT_ICON:
-                parts = text.split(" ", 1)
-                e = parts[0]
-                prefix, suffix = e.split(".", 1) if "." in e else [e, ""]
-                payload = literal_eval(parts[1]) if len(parts) == 2 else None
-                eg.TriggerEvent(suffix, payload, prefix)
-            item = self.GetNextSelected(item)
-
     def OnCmdSelectAll(self, dummyEvent=None):
         for idx in range(self.GetItemCount()):
             self.Select(idx)
-
-    def RemoveEventLog(self, item):
-        event = self.eventLogs.pop(item)
-        item_height = self.GetItemRect(item).height
-        log_height = event.log.GetSizeTuple()[1]
-        remove_entries = log_height / item_height
-
-        self.Freeze()
-        for _ in range(remove_entries):
-            self.DeleteItem(item + 1)
-            self.data.pop(item + 1)
-            for idx in self.eventLogs.keys():
-                if idx > item:
-                    self.UpdateEventLog(idx, idx - 1)
-        self.Thaw()
-        event.log.Show(False)
-        event.log.SetItemId(None)
-        self.Scroll()
-        self.Update()
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
-
-    def AddEventLog(self, item, event):
-        self.eventLogs[item] = event
-        item_height = self.GetItemRect(item).height
-        event.log.SetItemId(item)
-        event.log.Show(True)
-        log_height = event.log.GetSizeTuple()[1]
-        add_entries = log_height / item_height
-
-        self.Freeze()
-        for _ in range(add_entries):
-            self.data.insert(item + 1, self.data[item])
-            for idx in self.eventLogs.keys():
-                if idx > item:
-                    self.UpdateEventLog(idx, idx + 1)
-
-        self.SetItemCount(len(self.data))
-        self.Thaw()
-        self.Scroll()
-        self.Update()
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
-
-    def UpdateEventLog(self, old_index, new_index):
-        if old_index in self.eventLogs:
-            event = self.eventLogs.pop(old_index)
-            if old_index == 0:
-                self.RemoveEventLog(0)
-            else:
-                event.log.SetItemId(new_index)
-                self.eventLogs[new_index] = event
 
     def OnDoubleClick(self, event):
         item, flags = self.HitTest(event.GetPosition())
         if flags & wx.LIST_HITTEST_ONITEM:
             icon, wref = self.GetItemData(item)[1:3]
-            if icon == eg.EventItem.icon:
-                if wref.log.IsShown():
-                    self.RemoveEventLog(item)
-                else:
-                    self.AddEventLog(item, wref)
-            elif wref is not None:
+            if icon != eg.EventItem.icon and wref is not None:
                 node = wref()
                 if node is not None and not node.isDeleted:
                     node.Select()
@@ -356,7 +389,7 @@ class LogCtrl(wx.ListCtrl):
         # create our own data format and use it in a
         # custom data object
         customData = wx.CustomDataObject(wx.CustomDataFormat("DragItem"))
-        customData.SetData(text.string.encode("utf-8"))
+        customData.SetData(text.encode("utf-8"))
 
         # And finally, create the drop source and begin the drag
         # and drop operation
@@ -374,31 +407,14 @@ class LogCtrl(wx.ListCtrl):
         val = self.GetTopItem() + self.GetCountPerPage() + 2
         return len(self.data) <= val
 
-    @eg.AssertInMainThread
-    def SetData(self, data):
-        # self.Freeze()
-        for item in data:
-            self.data += [item]
-
-        self.SetItemCount(len(self.data))
-
-        if eg.document.visibleLogItem:
-            self.EnsureVisible(eg.document.visibleLogItem)
-        else:
-            self.EnsureVisible(len(self.data) - 1)
-
-        # self.Thaw()
-
     def SetIndent(self, shouldIndent):
-        eg.Notify('SetIndent.Event.Logs', shouldIndent)
         if shouldIndent:
-            self.indent = "   "
+            self.indent = "    "
         else:
             self.indent = ""
         self.Refresh()
 
     def SetTimeLogging(self, flag):
-        eg.Notify('SetTime.Event.Logs', flag)
         self.logTimes = flag
         if flag:
             self.OnGetItemText = self.OnGetItemTextWithTime
@@ -407,19 +423,11 @@ class LogCtrl(wx.ListCtrl):
         self.Refresh()
 
     @eg.AssertInMainThread
-    def WriteLine(self, line, icon, wRef, when, indent):
-        data = self.data
-        if len(data) >= self.maxlength:
-            self.Freeze()
-            for _ in range(self.removeOnMax):
-                self.DeleteItem(0)
-                data.pop(0)
-                for i in self.eventLogs.keys():
-                    self.UpdateEventLog(i, i - 1)
-            self.Thaw()
-
-        data.append((line, icon, wRef, when, indent))
-        self.SetItemCount(len(data))
+    def WriteLine(self):
+        self.Freeze()
+        while self.GetItemCount() >= len(self.data):
+            self.DeleteItem(0)
+        self.Thaw()
+        self.SetItemCount(len(self.data))
         self.Scroll()
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
         self.Update()

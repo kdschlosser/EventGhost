@@ -29,7 +29,6 @@ class ActionThread(eg.ThreadWorker):
     @staticmethod
     def ExecuteTreeItem(obj, event):
         eg.SetProcessingState(2, event)
-        eg.event = event
         if isinstance(obj, eg.MacroItem):
             eg.programCounter = (obj, 0)
             eg.RunProgram()
@@ -72,7 +71,6 @@ class ActionThread(eg.ThreadWorker):
 
     @eg.LogItWithReturn
     def StartSession(self, filename):
-        eg.eventTable.clear()
         self.corePluginInfos = []
         for guid in eg.CORE_PLUGIN_GUIDS:
             try:

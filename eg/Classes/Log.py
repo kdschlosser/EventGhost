@@ -67,7 +67,10 @@ class Log(object):
 
         class StdErr:
             def write(self, data):
-                log.Write(data, ERROR_ICON)
+                try:
+                    log.Write(data, ERROR_ICON)
+                except:
+                    oldStdErr.write(data)
                 if eg.debugLevel:
                     try:
                         oldStdErr.write(data)
@@ -80,26 +83,26 @@ class Log(object):
         if eg.debugLevel == 2:
             if hasattr(_oldStdErr, "_displayMessage"):
                 _oldStdErr._displayMessage = False
-        if eg.debugLevel:
-            import platform
-            import warnings
-            warnings.simplefilter('error', UnicodeWarning)
-            self.PrintDebugNotice("----------------------------------------")
-            self.PrintDebugNotice("        {0} started".format(eg.APP_NAME))
-            self.PrintDebugNotice("----------------------------------------")
-            self.PrintDebugNotice(eg.APP_NAME, "Version:", eg.Version.string)
-            self.PrintDebugNotice("Machine type:", platform.machine())
-            self.PrintDebugNotice("Processor:", platform.processor())
-            self.PrintDebugNotice("Architecture:", platform.architecture())
-            self.PrintDebugNotice(
-                "Python:",
-                platform.python_branch(),
-                platform.python_version(),
-                platform.python_implementation(),
-                platform.python_build(),
-                "[{0}]".format(platform.python_compiler())
-            )
-            self.PrintDebugNotice("----------------------------------------")
+        # if eg.debugLevel:
+        #     import platform
+        #     import warnings
+        #     warnings.simplefilter('error', UnicodeWarning)
+        #     self.PrintDebugNotice("----------------------------------------")
+        #     self.PrintDebugNotice("        {0} started".format(eg.APP_NAME))
+        #     self.PrintDebugNotice("----------------------------------------")
+        #     self.PrintDebugNotice(eg.APP_NAME, "Version:", eg.Version.string)
+        #     self.PrintDebugNotice("Machine type:", platform.machine())
+        #     self.PrintDebugNotice("Processor:", platform.processor())
+        #     self.PrintDebugNotice("Architecture:", platform.architecture())
+        #     self.PrintDebugNotice(
+        #         "Python:",
+        #         platform.python_branch(),
+        #         platform.python_version(),
+        #         platform.python_implementation(),
+        #         platform.python_build(),
+        #         "[{0}]".format(platform.python_compiler())
+        #     )
+        #     self.PrintDebugNotice("----------------------------------------")
 
         # redirect all wxPython error messages to our log
         class MyLog(wx.PyLog):
@@ -140,7 +143,7 @@ class Log(object):
                 mesg = eventstring + ' ' + repr(payload)
         else:
             mesg = eventstring
-        self.Write(mesg + "\n", eg.EventItem.icon, eventstring)
+        self.Write(mesg + "\n", eg.EventItem.icon, event)
 
     def NativeLogOn(self, value):
         self.NativeLog = value
@@ -228,6 +231,8 @@ class Log(object):
             self.ctrl = DummyLogCtrl()
 
     def Write(self, text, icon, wRef=None):
+        event = eg.event
+
         try:
             lines = (self.buffer + text).split("\n")
         except UnicodeDecodeError:
@@ -236,10 +241,21 @@ class Log(object):
         data = self.data
         when = time()
         for line in lines[:-1]:
-            data.append((line, icon, wRef, when, eg.indent))
-            wx.CallAfter(self._WriteLine, line, icon, wRef, when, eg.indent)
-            if len(data) >= self.maxlength:
-                data.popleft()
+            if (wRef is not None and wRef == event) or event is None:
+                data.append((line, icon, wRef, when, eg.indent))
+                wx.CallAfter(
+                    self._WriteLine,
+                    line,
+                    icon,
+                    wRef,
+                    when,
+                    eg.indent
+                )
+
+                if len(data) >= self.maxlength:
+                    data.popleft()
+            else:
+                event.log.WriteLine(line, icon, wRef, when, eg.indent)
 
     def _Print(self, args, sep=" ", end="\n", icon=INFO_ICON, source=None):
         if source is not None:
