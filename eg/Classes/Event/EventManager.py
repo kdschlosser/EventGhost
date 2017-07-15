@@ -99,7 +99,7 @@ class EventManager(object):
         return event
 
     @eg.LogIt
-    def UnRegisterEvent(self, macro, eventString):
+    def UnregisterEvent(self, macro, eventString):
         event = self.GetEvent(eventString)
         event.UnregisterMacro(macro)
 
