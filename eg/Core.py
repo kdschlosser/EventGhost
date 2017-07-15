@@ -170,7 +170,7 @@ def Exit():
     sys.exit()
 
 def HasActiveHandler(eventstring):
-    for eventHandler in eg.eventTable.get(eventstring, []):
+    for eventHandler in eg.EventManager.GetEvent(eventstring).macros:
         obj = eventHandler
         while obj:
             if not obj.isEnabled:
