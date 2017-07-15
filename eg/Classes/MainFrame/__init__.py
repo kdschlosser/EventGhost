@@ -285,6 +285,7 @@ class MainFrame(wx.Frame):
         Append("Options", "\tCtrl+P")
         menu.AppendSeparator()
         Append("Restart", "\tShift+Ctrl+~")
+        Append("RestartAsAdmin")
         menu.AppendSeparator()
         Append("Exit")
 
@@ -757,7 +758,7 @@ class MainFrame(wx.Frame):
     def UpdateRatio(self):
         self.logCtrl.SetColumnWidth(
             0,
-            self.logCtrl.GetSizeTuple()[0] - self.corConst
+            self.logCtrl.GetClientSizeTuple()[0] + 4#  - self.corConst
         )
         if not eg.config.propResize:
             return
@@ -806,7 +807,7 @@ class MainFrame(wx.Frame):
                     self.auiManager.LoadPerspective(s, True)
                     self.logCtrl.SetColumnWidth(
                         0,
-                        self.logCtrl.GetSizeTuple()[0] - self.corConst
+                        self.logCtrl.GetClientSizeTuple()[0] + 4#  - self.corConst
                     )
         self.mainSizeFlag = True
         if not self.IsMaximized() and not self.IsIconized():
@@ -844,6 +845,9 @@ class MainFrame(wx.Frame):
 
     def OnCmdRestart(self):
         eg.app.Restart()
+
+    def OnCmdRestartAsAdmin(self):
+        eg.app.RestartAsAdmin()
 
     def OnCmdExit(self):
         eg.app.Exit()

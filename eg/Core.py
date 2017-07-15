@@ -45,29 +45,27 @@ from os.path import exists, join
 # Local imports
 import eg
 import Init
+import NamedPipe
 
-def p(msg):
-    sys.stderr.write(str(msg) + '\n')
-
-p(1)
+Init.InitPathsAndBuiltins()
 
 eg.APP_NAME = "EventGhost"
 eg.CORE_PLUGIN_GUIDS = (
-    "{9D499A2C-72B6-40B0-8C8C-995831B10BB4}", # "EventGhost"
-    "{A21F443B-221D-44E4-8596-E1ED7100E0A4}", # "System"
-    "{E974D074-B0A3-4D0C-BBD1-992475DDD69D}", # "Window"
+    "{9D499A2C-72B6-40B0-8C8C-995831B10BB4}",  # "EventGhost"
+    "{A21F443B-221D-44E4-8596-E1ED7100E0A4}",  # "System"
+    "{E974D074-B0A3-4D0C-BBD1-992475DDD69D}",  # "Window"
     "{6B1751BF-F94E-4260-AB7E-64C0693FD959}",  # "Mouse"
 )
 
+
+eg.namedPipe = NamedPipe.Server()
+
+if eg.Cli.args.isMain:
+    eg.namedPipe.start()
+
 eg.ID_TEST = wx.NewId()
 eg.mainDir = eg.Cli.mainDir
-eg.imagesDir = join(eg.mainDir, "images")
-eg.languagesDir = join(eg.mainDir, "languages")
-eg.sitePackagesDir = join(
-    eg.mainDir,
-    "lib%d%d" % sys.version_info[:2],
-    "site-packages"
-)
+
 eg.revision = 2000  # Deprecated
 eg.startupArguments = eg.Cli.args
 eg.debugLevel = eg.startupArguments.debugLevel
@@ -84,17 +82,13 @@ eg.lastFoundWindows = []
 eg.currentItem = None
 eg.actionGroup = eg.Bunch()
 eg.actionGroup.items = []
-eg.folderPath = eg.FolderPath()
 eg.GUID = eg.GUID()
-
-p(2)
 
 def _CommandEvent():
     """Generate new (CmdEvent, Binder) tuple
         e.g. MooCmdEvent, EVT_MOO = EgCommandEvent()
     """
     evttype = wx.NewEventType()
-
 
     class _Event(wx.PyCommandEvent):
         def __init__(self, id, **kw):
@@ -109,9 +103,7 @@ def _CommandEvent():
         def SetValue(self, value):
             self.value = value
 
-
     return _Event, wx.PyEventBinder(evttype, 1)
-
 
 eg.CommandEvent = _CommandEvent
 eg.ValueChangedEvent, eg.EVT_VALUE_CHANGED = eg.CommandEvent()
@@ -119,55 +111,16 @@ eg.ValueChangedEvent, eg.EVT_VALUE_CHANGED = eg.CommandEvent()
 eg.pyCrustFrame = None
 eg.dummyAsyncoreDispatcher = None
 
-eg.corePluginDir = join(eg.mainDir, "plugins")
-
-if eg.startupArguments.configDir is None:
-    eg.configDir = join(eg.folderPath.RoamingAppData, eg.APP_NAME)
-    eg.localPluginDir = join(eg.folderPath.ProgramData, eg.APP_NAME,
-        "plugins")
-else:
-    eg.configDir = eg.startupArguments.configDir
-    if eg.startupArguments.usePluginDir:
-        eg.localPluginDir = join(
-            eg.folderPath.ProgramData,
-            eg.APP_NAME,
-            "plugins"
-        )
-    else:
-        eg.localPluginDir = eg.corePluginDir
-
-eg.pluginDirs = [eg.corePluginDir, eg.localPluginDir]
-
-p(3)
-
-if not exists(eg.configDir):
-    try:
-        os.makedirs(eg.configDir)
-    except:
-        pass
-
-if eg.startupArguments.isMain:
-    if exists(eg.configDir):
-        os.chdir(eg.configDir)
-    else:
-        os.chdir(eg.mainDir)
-
-Init.InitPathsAndBuiltins()
 from eg.WinApi.Dynamic import GetCurrentProcessId  # NOQA
-
-
 eg.processId = GetCurrentProcessId()
 Init.InitPil()
-
-p(4)
 
 class Exception(Exception):
     def __unicode__(self):
         try:
             return "\n".join([unicode(arg) for arg in self.args])
         except UnicodeDecodeError:
-            return "\n".join(
-                [str(arg).decode('mbcs') for arg in self.args])
+            return "\n".join([str(arg).decode('mbcs') for arg in self.args])
 
 
 class StopException(Exception):
@@ -186,7 +139,6 @@ def Bind(notification, listener):
         notificationHandler = eg.notificationHandlers[notification]
     notificationHandler.listeners.append(listener)
 
-
 def CallWait(func, *args, **kwargs):
     result = [None]
     event = threading.Event()
@@ -201,13 +153,11 @@ def CallWait(func, *args, **kwargs):
     event.wait()
     return result[0]
 
-
 def DummyFunc(*dummyArgs, **dummyKwargs):
     """
     Just a do-nothing-function, that accepts arbitrary arguments.
     """
     pass
-
 
 def Exit():
     """
@@ -218,7 +168,6 @@ def Exit():
     because the SystemExit exception is catched for a PythonScript.)
     """
     sys.exit()
-
 
 def HasActiveHandler(eventstring):
     for eventHandler in eg.eventTable.get(eventstring, []):
@@ -231,7 +180,6 @@ def HasActiveHandler(eventstring):
             return True
     return False
 
-
 def MessageBox(message, caption=eg.APP_NAME, style=wx.OK, parent=None):
     if parent is None:
         style |= wx.STAY_ON_TOP
@@ -240,26 +188,24 @@ def MessageBox(message, caption=eg.APP_NAME, style=wx.OK, parent=None):
     dialog.Destroy()
     return result
 
-
 def Notify(notification, value=None):
     if notification in eg.notificationHandlers:
         for listener in eg.notificationHandlers[notification].listeners:
             listener(value)
 
-
 # pylint: disable-msg=W0613
 def RegisterPlugin(
-    name=None,
-    description=None,
-    kind="other",
-    author="[unknown author]",
-    version="[unknown version]",
-    icon=None,
-    canMultiLoad=False,
-    createMacrosOnAdd=False,
-    url=None,
-    help=None,
-    guid=None,
+    name = None,
+    description = None,
+    kind = "other",
+    author = "[unknown author]",
+    version = "[unknown version]",
+    icon = None,
+    canMultiLoad = False,
+    createMacrosOnAdd = False,
+    url = None,
+    help = None,
+    guid = None,
     **kwargs
 ):
     """
@@ -295,8 +241,6 @@ def RegisterPlugin(
        backward compatible.
     """
     pass
-
-
 # pylint: enable-msg=W0613
 
 def RestartAsyncore():
@@ -311,9 +255,7 @@ def RestartAsyncore():
         oldDispatcher.close()
     if oldDispatcher is None:
         # create a global asyncore loop thread
-        threading.Thread(target=asyncore.loop,
-            name="AsyncoreThread").start()
-
+        threading.Thread(target=asyncore.loop, name="AsyncoreThread").start()
 
 def RunProgram():
     eg.stopExecutionFlag = False
@@ -338,7 +280,6 @@ def RunProgram():
             eg.programCounter = item.parent.GetNextChild(idx)
     eg.indent = 0
 
-
 def StopMacro(ignoreReturn=False):
     """
     Instructs EventGhost to stop executing the current macro after the
@@ -348,17 +289,14 @@ def StopMacro(ignoreReturn=False):
     if ignoreReturn:
         del eg.programReturnStack[:]
 
-
 def Unbind(notification, listener):
     eg.notificationHandlers[notification].listeners.remove(listener)
-
 
 def Wait(secs, raiseException=True):
     while secs > 0.0:
         if eg.stopExecutionFlag:
             if raiseException:
-                raise eg.StopException(
-                    "Execution interrupted by the user.")
+                raise eg.StopException("Execution interrupted by the user.")
             else:
                 return False
         if secs > 0.1:
@@ -367,7 +305,6 @@ def Wait(secs, raiseException=True):
             time.sleep(secs)
         secs -= 0.1
     return True
-
 
 # now assign all the functions above to `eg`
 eg.Bind = Bind
@@ -387,25 +324,14 @@ eg.StopMacro = StopMacro
 eg.Unbind = Unbind
 eg.Wait = Wait
 
-p(5)
-
 eg.messageReceiver = eg.MainMessageReceiver()
-p(6)
-
 eg.app = eg.App()
-p(7)
 
 # we can't import the Icons module earlier, because wx.App must exist
 import Icons  # NOQA
-
-
 eg.Icons = Icons
 
-p(30)
-
 eg.log = eg.Log()
-p(31)
-
 eg.Print = eg.log.Print
 eg.PrintError = eg.log.PrintError
 eg.PrintNotice = eg.log.PrintNotice
@@ -413,16 +339,11 @@ eg.PrintTraceback = eg.log.PrintTraceback
 eg.PrintDebugNotice = eg.log.PrintDebugNotice
 eg.PrintStack = eg.log.PrintStack
 
-p(8)
 eg.config = eg.Config()
 eg.debugLevel = int(eg.config.logDebug) or eg.debugLevel
 
-p(9)
-
 def TracebackHook(tType, tValue, traceback):
     eg.log.PrintTraceback(excInfo=(tType, tValue, traceback))
-
-
 sys.excepthook = TracebackHook
 
 eg.colour = eg.Colour()
@@ -435,13 +356,10 @@ eg.eventThread = eg.EventThread()
 eg.pluginManager = eg.PluginManager()
 eg.scheduler = eg.Scheduler()
 
-p(10)
 eg.TriggerEvent = eg.eventThread.TriggerEvent
 eg.TriggerEnduringEvent = eg.eventThread.TriggerEnduringEvent
 
 from eg.WinApi.SendKeys import SendKeysParser  # NOQA
-
-
 eg.SendKeys = SendKeysParser()
 
 setattr(eg, "PluginClass", eg.PluginBase)
@@ -459,4 +377,3 @@ eg.wit = None
 
 eg.Init = Init
 eg.Init.Init()
-p(11)

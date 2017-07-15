@@ -117,6 +117,7 @@ class Default:
             SaveAs = "Save &As..."
             Options = "O&ptions..."
             Restart = "&Restart"
+            RestartAsAdmin = "Restart as Administrator"
             Exit = "E&xit"
 
             EditMenu = "&Edit"
@@ -142,6 +143,7 @@ class Default:
             IndentLog = "&Indent Log"
             LogTime = "Time&stamp Log"
             ClearLog = "Clear &Log"
+            ClearAllLog = "Clear &All Logs"
 
             ConfigurationMenu = "&Configuration"
             AddPlugin = "Add Plugin..."
@@ -173,7 +175,7 @@ class Default:
 
         class SaveChanges:
             mesg = (
-                "Configuration contains unsaved changed.\n\n"
+                "Configuration contains unsaved changes.\n\n"
                 "Do you want to save before continuing?"
             )
             saveButton = "&Save"

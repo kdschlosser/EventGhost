@@ -20,7 +20,7 @@ import codecs
 import sys
 import wx
 from collections import deque
-from threading import currentThread
+from threading import currentThread, Lock
 from time import strftime, time
 from traceback import extract_tb, format_exception_only, format_stack
 from types import UnicodeType
@@ -47,6 +47,7 @@ class DummyLogCtrl(object):
 
 class Log(object):
     def __init__(self):
+        self._lock = Lock()
         self.logListeners = []
         self.eventListeners = []
         self.NativeLog = True
@@ -67,10 +68,7 @@ class Log(object):
 
         class StdErr:
             def write(self, data):
-                try:
-                    log.Write(data, ERROR_ICON)
-                except:
-                    oldStdErr.write(data)
+                log.Write(data, ERROR_ICON)
                 if eg.debugLevel:
                     try:
                         oldStdErr.write(data)
@@ -83,26 +81,26 @@ class Log(object):
         if eg.debugLevel == 2:
             if hasattr(_oldStdErr, "_displayMessage"):
                 _oldStdErr._displayMessage = False
-        # if eg.debugLevel:
-        #     import platform
-        #     import warnings
-        #     warnings.simplefilter('error', UnicodeWarning)
-        #     self.PrintDebugNotice("----------------------------------------")
-        #     self.PrintDebugNotice("        {0} started".format(eg.APP_NAME))
-        #     self.PrintDebugNotice("----------------------------------------")
-        #     self.PrintDebugNotice(eg.APP_NAME, "Version:", eg.Version.string)
-        #     self.PrintDebugNotice("Machine type:", platform.machine())
-        #     self.PrintDebugNotice("Processor:", platform.processor())
-        #     self.PrintDebugNotice("Architecture:", platform.architecture())
-        #     self.PrintDebugNotice(
-        #         "Python:",
-        #         platform.python_branch(),
-        #         platform.python_version(),
-        #         platform.python_implementation(),
-        #         platform.python_build(),
-        #         "[{0}]".format(platform.python_compiler())
-        #     )
-        #     self.PrintDebugNotice("----------------------------------------")
+        if eg.debugLevel:
+            import platform
+            import warnings
+            warnings.simplefilter('error', UnicodeWarning)
+            self.PrintDebugNotice("----------------------------------------")
+            self.PrintDebugNotice("        {0} started".format(eg.APP_NAME))
+            self.PrintDebugNotice("----------------------------------------")
+            self.PrintDebugNotice(eg.APP_NAME, "Version:", eg.Version.string)
+            self.PrintDebugNotice("Machine type:", platform.machine())
+            self.PrintDebugNotice("Processor:", platform.processor())
+            self.PrintDebugNotice("Architecture:", platform.architecture())
+            self.PrintDebugNotice(
+                "Python:",
+                platform.python_branch(),
+                platform.python_version(),
+                platform.python_implementation(),
+                platform.python_build(),
+                "[{0}]".format(platform.python_compiler())
+            )
+            self.PrintDebugNotice("----------------------------------------")
 
         # redirect all wxPython error messages to our log
         class MyLog(wx.PyLog):
@@ -231,6 +229,7 @@ class Log(object):
             self.ctrl = DummyLogCtrl()
 
     def Write(self, text, icon, wRef=None):
+        self._lock.acquire()
         event = eg.event
 
         try:
@@ -255,7 +254,15 @@ class Log(object):
                 if len(data) >= self.maxlength:
                     data.popleft()
             else:
-                event.log.WriteLine(line, icon, wRef, when, eg.indent)
+                wx.CallAfter(
+                    event.log.WriteLine,
+                    line,
+                    icon,
+                    wRef,
+                    when,
+                    eg.indent
+                )
+        self._lock.release()
 
     def _Print(self, args, sep=" ", end="\n", icon=INFO_ICON, source=None):
         if source is not None:

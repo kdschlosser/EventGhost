@@ -91,6 +91,9 @@ class LogCtrl(wx.ListCtrl):
         menuId = wx.NewId()
         menu.Append(menuId, eg.text.MainFrame.Menu.ClearLog)
         self.Bind(wx.EVT_MENU, self.OnCmdClearLog, id=menuId)
+        menuId = wx.NewId()
+        menu.Append(menuId, eg.text.MainFrame.Menu.ClearAllLog)
+        self.Bind(wx.EVT_MENU, self.OnCmdClearAllLog, id=menuId)
         self.contextMenu = menu
 
         self.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
@@ -101,9 +104,7 @@ class LogCtrl(wx.ListCtrl):
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
-        parent.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
-        parent.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
-
+        self.Bind(wx.EVT_SIZE, self.OnSize)
         eg.Bind('Remove.Event.Logs', self.RemoveEventLog)
 
         accel_entries = [
@@ -124,32 +125,12 @@ class LogCtrl(wx.ListCtrl):
         def __del__(self):
             pass
 
-    def OnMouseWheel(self, evt):
+    def OnSize(self, evt):
         wx.CallAfter(eg.Notify, 'Update.Event.Logs')
         evt.Skip()
 
-    def OnLeftDown(self, evt):
-        x, y = evt.GetPosition()
-        l_x, l_y = eg.document.frame.ClientToScreen(self.GetPositionTuple())
-        l_c_w, l_c_h = self.GetClientSize()
-        l_w, l_h = self.GetSizeTuple()
-
-        stop_x = l_x + l_w
-        stop_y = l_y + l_c_h
-
-        start_x = l_x + l_c_w
-        stary_y = l_y
-
-        print x, y, start_x, stary_y, stop_x, stop_y
-
-        if stop_x > x > start_x and stop_y > y > stary_y:
-            self.CaptureMouse()
-        evt.Skip()
-
-    def OnLeftUp(self, evt):
-        if self.HasCapture():
-            self.ReleaseMouse()
-            wx.CallAfter(eg.Notify, 'Update.Event.Logs')
+    def OnMouseWheel(self, evt):
+        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
         evt.Skip()
 
     def CanCut(self):
@@ -176,7 +157,12 @@ class LogCtrl(wx.ListCtrl):
     def GetItemData(self, item):
         return self.data[item]
 
+    def OnCmdClearAllLog(self, dummyEvent=None):
+        eg.Notify('Clear.Event.Logs')
+        self.OnCmdClearLog()
+
     def OnCmdClearLog(self, dummyEvent=None):
+        eg.Notify('Close.Event.Logs')
         self.SetItemCount(0)
         self.DeleteAllItems()
         del self.data[:]
@@ -242,12 +228,9 @@ class LogCtrl(wx.ListCtrl):
 
     def RemoveEventLog(self, item):
         event = self.eventLogs.pop(item)
-        item_height = self.GetItemRect(item).height
-        log_height = event.log.GetSizeTuple()[1]
-        remove_entries = log_height / item_height
 
         self.Freeze()
-        for _ in range(remove_entries):
+        for _ in range(6):
             self.DeleteItem(item + 1)
             self.data.pop(item + 1)
             for idx in self.eventLogs.keys():
@@ -262,14 +245,11 @@ class LogCtrl(wx.ListCtrl):
 
     def AddEventLog(self, item, event):
         self.eventLogs[item] = event
-        item_height = self.GetItemRect(item).height
         event.log.SetItemId(item)
         event.log.Show(True)
-        log_height = event.log.GetSizeTuple()[1]
-        add_entries = log_height / item_height
 
         self.Freeze()
-        for _ in range(add_entries):
+        for _ in range(6):
             self.data.insert(item + 1, self.data[item])
             for idx in self.eventLogs.keys():
                 if idx > item:

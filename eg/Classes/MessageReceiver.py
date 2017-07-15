@@ -21,16 +21,8 @@ import eg
 from eg.WinApi.Dynamic import (
     byref, cast, CreateWindowEx, CW_USEDEFAULT, DefWindowProc, DestroyWindow,
     GetModuleHandle, LPCTSTR, RegisterClass, UnregisterClass, WinError,
-    WM_SIZE, WM_USER, WNDCLASS, WNDPROC, WS_OVERLAPPEDWINDOW, FindWindow, ATOM,
-    HWND, UINT
+    WM_SIZE, WM_USER, WNDCLASS, WNDPROC, WS_OVERLAPPEDWINDOW,
 )
-
-from eg.WinApi.Dynamic import _user32 as USER32
-
-GetClassLongW = USER32.GetClassLongW
-GetClassLongW.restype = ATOM
-GetClassLongW.argtypes = [HWND, UINT]
-GetClassLong = GetClassLongW
 
 class MessageReceiver(eg.ThreadWorker):
     """
@@ -52,7 +44,6 @@ class MessageReceiver(eg.ThreadWorker):
         self.classAtom = RegisterClass(byref(wndclass))
         if not self.classAtom:
             raise WinError()
-        
         self.wndclass = wndclass
         self.hwnd = None
         self.nextWmUserMsg = WM_USER + 1000

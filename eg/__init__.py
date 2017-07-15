@@ -26,15 +26,74 @@ import sys
 import pywintypes  # NOQA
 import pythoncom  # NOQA
 import win32api  # NOQA
-import threading
+import threading  # NOQA
 
 # Local imports
 import Cli
 from Utils import *  # NOQA
-from Classes.WindowsVersion import WindowsVersion
+from Classes.WindowsVersion import WindowsVersion  # NOQA
 
 
 class DynamicModule(object):
+    def __init__(self):
+        mod = sys.modules[__name__]
+        self.__dict__ = mod.__dict__
+        self.__orignal_module__ = mod
+        sys.modules[__name__] = self
+
+        import __builtin__
+        __builtin__.eg = self
+
+    def __getattr__(self, name):
+        if name.startswith('Event'):
+            mod = __import__("eg.Classes.Event." + name, None, None, [name], 0)
+        else:
+            mod = __import__("eg.Classes." + name, None, None, [name], 0)
+        self.__dict__[name] = attr = getattr(mod, name)
+        return attr
+
+    def __repr__(self):
+        return "<dynamic-module '%s'>" % self.__name__
+
+    def RaiseAssignments(self):
+        """
+        After this method is called, creation of new attributes will raise
+        AttributeError.
+
+        This is meanly used to find unintended assignments while debugging.
+        """
+        def __setattr__(self, name, value):
+            attrs = (
+                'programReturnStack',
+                'programCounter',
+                'eventString',
+                'result',
+                'indent',
+                'stopExecutionFlag'
+            )
+            if name not in self.__dict__ and name not in attrs:
+                raise AttributeError("Assignment to new attribute %s" % name)
+            object.__setattr__(self, name, value)
+        self.__class__.__setattr__ = __setattr__
+
+    def Main(self):
+        if Cli.args.install:
+            return
+        if Cli.args.translate:
+            eg.LanguageEditor()
+        elif Cli.args.pluginFile:
+            eg.PluginInstall.Import(Cli.args.pluginFile)
+            return
+        else:
+            eg.Init.InitGui()
+        if eg.debugLevel:
+            try:
+                eg.Init.ImportAll()
+            except:
+                eg.PrintDebugNotice(sys.exc_info()[1])
+        eg.Tasklet(eg.app.MainLoop)().run()
+        stackless.run()
+
     @property
     def programReturnStack(self):
         event = self.event
@@ -138,65 +197,6 @@ class DynamicModule(object):
             self.EventManager.stopExecutionFlag = value
         else:
             event.stopExecutionFlag = value
-
-    def __init__(self):
-        mod = sys.modules[__name__]
-        self.__dict__ = mod.__dict__
-        self.__orignal_module__ = mod
-        sys.modules[__name__] = self
-
-        import __builtin__
-        __builtin__.eg = self
-
-    def __getattr__(self, name):
-        if name.startswith('Event'):
-            mod = __import__("eg.Classes.Event." + name, None, None, [name], 0)
-        else:
-            mod = __import__("eg.Classes." + name, None, None, [name], 0)
-        self.__dict__[name] = attr = getattr(mod, name)
-        return attr
-
-    def __repr__(self):
-        return "<dynamic-module '%s'>" % self.__name__
-
-    def RaiseAssignments(self):
-        """
-        After this method is called, creation of new attributes will raise
-        AttributeError.
-
-        This is meanly used to find unintended assignments while debugging.
-        """
-        def __setattr__(self, name, value):
-            attrs = (
-                'programReturnStack',
-                'programCounter',
-                'eventString',
-                'result',
-                'indent',
-                'stopExecutionFlag'
-            )
-            if name not in self.__dict__ and name not in attrs:
-                raise AttributeError("Assignment to new attribute %s" % name)
-            object.__setattr__(self, name, value)
-        self.__class__.__setattr__ = __setattr__
-
-    def Main(self):
-        if Cli.args.install:
-            return
-        if Cli.args.translate:
-            eg.LanguageEditor()
-        elif Cli.args.pluginFile:
-            eg.PluginInstall.Import(Cli.args.pluginFile)
-            return
-        else:
-            eg.Init.InitGui()
-        if eg.debugLevel:
-            try:
-                eg.Init.ImportAll()
-            except:
-                eg.PrintDebugNotice(sys.exc_info()[1])
-        eg.Tasklet(eg.app.MainLoop)().run()
-        stackless.run()
 
 
 eg = DynamicModule()

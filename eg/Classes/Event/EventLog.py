@@ -28,6 +28,7 @@ class EventLog(object):
         self.maxlength = 2000
         self.data = []
         self.log = None
+        eg.Bind('Clear.Event.Logs', self.ClearLog)
 
     def SetItemId(self, itemId):
         self.itemId = itemId
@@ -35,15 +36,16 @@ class EventLog(object):
         if self.log is not None:
             self.log.SetItemId(itemId)
 
+    def ClearLog(self, dummyEvent=None):
+        del self.data[:]
+        if self.log is not None:
+            self.log.logCtrl.OnCmdClearLog()
+
     def IsShown(self):
         return self.log is not None
 
     def CloseLog(self, dummyEvent=None):
-        self.Show(False)
-
-    def GetSizeTuple(self):
-        if self.log is not None:
-            return self.log.GetSizeTuple()
+        eg.Notify('Remove.Event.Logs', self.itemId)
 
     def Show(self, flag=True):
         if flag:
@@ -57,6 +59,7 @@ class EventLog(object):
                 eg.Bind('Update.Event.Logs', self.log.CalculateSize)
                 eg.Bind('SetIndent.Event.Logs', self.log.logCtrl.SetIndent)
                 eg.Bind('SetTime.Event.Logs', self.log.logCtrl.SetTimeLogging)
+
 
                 self.log.Show()
         else:
@@ -131,27 +134,40 @@ class EventFrame(wx.Frame):
 
         x_Pos = rect.x + l_x
         y_Pos = rect.y + l_y + rect.height
+        w_Ctrl = l_w + 2
+        h_Ctrl = (rect.height * 6) + 3
 
         item_count = self.logCtrl.GetItemCount()
-        if item_count < 8:
-            item_count = 8
+        if item_count <= 6:
+            col_width = w_Ctrl - 17
+        else:
+            col_width = w_Ctrl - 17
 
-        w_Ctrl = rect.width + 6
-        h_Ctrl = rect.height * item_count
+        if self.itemId + 7 >= bottomItem:
+            h_Ctrl -= ((self.itemId + 7) - bottomItem) * rect.height
 
-        y_ParentEnd = l_y + l_h
-        y_End = y_Pos + h_Ctrl
+        elif topItem > self.itemId + 1:
+            h_Ctrl -= (topItem - self.itemId) * rect.height
+            mult = [5, 4, 3, 2, 1, 1]
+            try:
+                y_Pos += rect.height * mult[int(h_Ctrl / rect.height)]
+            except IndexError:
+                h_Ctrl = 0
 
-        if topItem < self.itemId < bottomItem:
-            h_Ctrl = min([y_ParentEnd - y_Pos, y_End - y_Pos])
-        elif topItem >= self.itemId:
-            h_Ctrl = max([h_Ctrl - ((topItem - self.itemId) * rect.height), 0])
+        if h_Ctrl > 0:
+            if not self.IsShown():
+                self.Show()
+                eg.document.frame.logCtrl.SetFocus()
 
-        if self.GetPositionTuple() != (x_Pos, y_Pos):
-            self.SetPosition((x_Pos, y_Pos))
-        if self.GetSizeTuple() != (w_Ctrl, h_Ctrl):
-            self.SetSize((w_Ctrl, h_Ctrl))
-        self.logCtrl.SetColumnWidth(0, w_Ctrl - 1)
+            if self.GetPositionTuple() != (x_Pos, y_Pos):
+                self.SetPosition((x_Pos, y_Pos))
+            if self.GetSizeTuple() != (w_Ctrl, h_Ctrl):
+                self.SetSize((w_Ctrl, h_Ctrl))
+
+            self.logCtrl.SetColumnWidth(0, col_width)
+        else:
+            if self.IsShown():
+                self.Hide()
 
         if evt is not None:
             try:
@@ -166,6 +182,7 @@ class LogCtrl(wx.ListCtrl):
     """
     def __init__(self, parent, data):
         self.data = data
+        self.parent = parent
         self.indent = eg.document.frame.logCtrl.indent
         self.logTimes = eg.document.frame.logCtrl.logTimes
         if self.logTimes:
@@ -423,10 +440,13 @@ class LogCtrl(wx.ListCtrl):
         self.Refresh()
 
     @eg.AssertInMainThread
-    def WriteLine(self):
+    def WriteLine(self, *args):
+        self.data += [args]
         self.Freeze()
         while self.GetItemCount() >= len(self.data):
             self.DeleteItem(0)
+            self.data.pop(0)
+
         self.Thaw()
         self.SetItemCount(len(self.data))
         self.Scroll()
