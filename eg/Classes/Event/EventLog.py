@@ -55,7 +55,6 @@ class EventLog(object):
                     self.data[:]
                 )
                 eg.Bind('Close.Event.Logs', self.CloseLog)
-                eg.Bind('Scroll.Event.Logs', self.log.Scroll)
                 eg.Bind('Update.Event.Logs', self.log.CalculateSize)
                 eg.Bind('SetIndent.Event.Logs', self.log.logCtrl.SetIndent)
                 eg.Bind('SetTime.Event.Logs', self.log.logCtrl.SetTimeLogging)
@@ -65,7 +64,6 @@ class EventLog(object):
         else:
             if self.log is not None:
                 eg.Unbind('Close.Event.Logs', self.CloseLog)
-                eg.Unbind('Scroll.Event.Logs', self.log.Scroll)
                 eg.Unbind('Update.Event.Logs', self.log.CalculateSize)
                 eg.Unbind('SetIndent.Event.Logs', self.log.logCtrl.SetIndent)
                 eg.Unbind('SetTime.Event.Logs', self.log.logCtrl.SetTimeLogging)
@@ -110,10 +108,6 @@ class EventFrame(wx.Frame):
         eg.document.frame.Bind(wx.EVT_MOVE, self.CalculateSize)
         self.Bind(wx.EVT_SIZE, self.CalculateSize)
         self.CalculateSize()
-
-    def Scroll(self, itemId):
-        if itemId == self.itemId:
-            self.CalculateSize()
 
     def SetItemId(self, itemId):
         self.itemId = itemId

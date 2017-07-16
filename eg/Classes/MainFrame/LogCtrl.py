@@ -17,6 +17,7 @@
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
 import wx
+import threading
 from ast import literal_eval
 from time import localtime, strftime
 
@@ -25,6 +26,29 @@ import eg
 
 EVENT_ICON = eg.EventItem.icon
 ERROR_ICON = eg.Icons.ERROR_ICON
+
+
+class ScrollThread(threading.Thread):
+
+    def __init__(self, logCtrl):
+        self._logCtrl = logCtrl
+        self._event = threading.Event()
+        threading.Thread.__init__(self, name='EventGhost.LogCtrl.Scroll')
+
+    def run(self):
+        top_item = self._logCtrl.GetTopItem()
+
+        while not self._event.isSet():
+            new_top_item = self._logCtrl.GetTopItem()
+            if top_item != new_top_item:
+                top_item = new_top_item
+                eg.Notify('Update.Event.Logs')
+            self._event.wait(0.05)
+
+    def stop(self):
+        self._event.set()
+        self.join(1.0)
+
 
 class LogCtrl(wx.ListCtrl):
     """
@@ -103,7 +127,6 @@ class LogCtrl(wx.ListCtrl):
         self.Bind(wx.EVT_SET_FOCUS, self.OnSetFocus)
         self.Bind(wx.EVT_KILL_FOCUS, self.OnKillFocus)
 
-        self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         eg.Bind('Remove.Event.Logs', self.RemoveEventLog)
 
@@ -117,8 +140,11 @@ class LogCtrl(wx.ListCtrl):
         self.__inSelection = False
         self.isOdd = False
         self.data = []
+        self._scroll_thread = ScrollThread(self)
+
         eg.log.SetCtrl(self)
         wx.CallAfter(self.SetData, eg.log.GetData())
+        wx.CallAfter(self._scroll_thread.start)
 
     if eg.debugLevel:
         @eg.LogIt
@@ -126,11 +152,7 @@ class LogCtrl(wx.ListCtrl):
             pass
 
     def OnSize(self, evt):
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
-        evt.Skip()
-
-    def OnMouseWheel(self, evt):
-        wx.CallAfter(eg.Notify, 'Update.Event.Logs')
+        eg.Notify('Update.Event.Logs')
         evt.Skip()
 
     def CanCut(self):
@@ -144,6 +166,7 @@ class LogCtrl(wx.ListCtrl):
 
     @eg.LogIt
     def Destroy(self):
+        self._scroll_thread.stop()
         eg.Unbind('Remove.Event.Logs', self.RemoveEventLog)
         eg.Notify('Close.Event.Logs')
         eg.log.SetCtrl(None)
