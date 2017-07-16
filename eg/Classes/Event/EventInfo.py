@@ -45,6 +45,7 @@ class EventInfo(object):
         self.stop = None
         self.result = None
         self.payload = None
+        self.payloads = ()
         self.isEnded = None
         self.programCounter = None
         self.skipEvent = False
@@ -166,15 +167,21 @@ class EventInfo(object):
             del(eg.EventManager.threads[threading.currentThread()])
 
     @eg.LogIt
-    def Execute(self, payload):
+    def Execute(self):
+        payload = self.payloads[:1]
+        self.payloads = self.payloads[1:]
+
         t = threading.Thread(
             name=self.string,
             target=self._Execute,
-            args=(payload,)
+            args=payload
         )
         t.setDaemon(True)
         eg.EventManager.threads[t] = self
         t.start()
+
+    def SetPayload(self, payload):
+        self.payloads += (payload,)
 
     def AddUpFunc(self, func, *args, **kwargs):
         if self.isEnded:

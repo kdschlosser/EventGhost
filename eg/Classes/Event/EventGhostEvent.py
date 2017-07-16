@@ -26,18 +26,13 @@ class EventGhostEvent(object):
             eventString = prefix + '.' + suffix
         else:
             eventString = prefix
-    
+
         try:
             event = eg.EventManager.GetEvent(eventString)
         except eg.EventManager.EventError.NotFound:
             event = eg.EventManager.AddEvent(prefix, suffix, plugin=source)
-        execute = event.Execute
-        
-        def Execute():
-            event.Execute = execute
-            event.Execute(payload)
 
-        event.Execute = Execute
+        event.SetPayload(payload)
 
         return event
 
