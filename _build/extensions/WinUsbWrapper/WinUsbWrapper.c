@@ -57,7 +57,7 @@ BOOL WINAPI DllMain(HINSTANCE hModule, DWORD dwReason, LPVOID lpvReserved)
 }
 
 
-ULONG Reader(PThreadParams params)
+DWORD WINAPI Reader(PThreadParams params)
 {
 	BOOL bResult = FALSE;
 	HANDLE deviceHandle = NULL;
@@ -172,6 +172,7 @@ PThreadParams Start(HWND notifyWnd, UINT msg, WCHAR* devicePath, UINT chunkSize,
 	threadParams->msg = msg;
 	threadParams->chunkSize = chunkSize;
 	threadParams->suppressRepeat = suppressRepeat;
+#pragma warning(disable:4024)
 	threadParams->thread = CreateThread(NULL, 0, Reader, threadParams, 0, NULL);
 	if (!threadParams->thread)
 	{
