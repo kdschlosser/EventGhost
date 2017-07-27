@@ -61,7 +61,7 @@ class App(wx.App):
         if not eg.startupArguments.translate:
             def DoOnClose():
                 eg.PrintDebugNotice("Triggering OnClose")
-                egEvent = eg.eventThread.TriggerEvent("OnClose")
+                egEvent = eg.TriggerEvent("OnClose")
                 while not egEvent.isEnded:
                     self.Yield()
             wx.CallAfter(DoOnClose)
@@ -82,7 +82,7 @@ class App(wx.App):
         if self.endSession:
             return
         self.endSession = True
-        egEvent = eg.eventThread.TriggerEvent("OnEndSession")
+        egEvent = eg.TriggerEvent("OnEndSession")
         while not egEvent.isEnded:
             self.Yield()
         eg.document.Close()

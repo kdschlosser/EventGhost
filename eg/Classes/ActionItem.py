@@ -113,6 +113,8 @@ class ActionItem(TreeItem):
             return
         eg.indent += 1
         try:
+            if action.plugin is None:
+                return
             if not action.plugin.info.isStarted:
                 self.PrintError(
                     eg.text.Error.pluginNotActivated % action.plugin.name
@@ -172,9 +174,11 @@ class ActionItem(TreeItem):
             name = executable.GetLabel(*self.args)
         except:
             name = executable.name
-        pluginInfo = executable.plugin.info
-        if pluginInfo.kind != "core":
-            name = pluginInfo.label + ": " + name
+
+        if executable.plugin is not None:
+            pluginInfo = executable.plugin.info
+            if pluginInfo.kind != "core":
+                name = pluginInfo.label + ": " + name
         return name
 
     def GetTypeName(self):

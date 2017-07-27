@@ -21,12 +21,10 @@ Definition of the abstract plugin class.
 """
 
 import wx
-from threading import Lock
 
 # Local imports
 import eg
 
-gTriggerEventLock = Lock()
 
 class PluginBase(object):
     """
@@ -256,17 +254,16 @@ class PluginBase(object):
         :meth:`!TriggerEvent` or :meth:`!TriggerEnduringEvent`. This will
         ensure, that only one event per plugin can be active at the same time.
         """
-        with gTriggerEventLock:
-            info = self.info
-            info.lastEvent.SetShouldEnd()
-            event = eg.TriggerEnduringEvent(
-                suffix,
-                payload,
-                info.eventPrefix,
-                self
-            )
-            info.lastEvent = event
-            return event
+        info = self.info
+        info.lastEvent.SetShouldEnd()
+        event = eg.TriggerEnduringEvent(
+            suffix,
+            payload,
+            info.eventPrefix,
+            self
+        )
+        info.lastEvent = event
+        return event
 
     def TriggerEvent(self, suffix, payload=None):
         """
@@ -281,9 +278,9 @@ class PluginBase(object):
         an event with a longer duration, it has to use
         :meth:`!TriggerEnduringEvent`.
         """
-        with gTriggerEventLock:
-            info = self.info
-            info.lastEvent.SetShouldEnd()
-            event = eg.TriggerEvent(suffix, payload, info.eventPrefix, self)
-            info.lastEvent = event
-            return event
+
+        info = self.info
+        info.lastEvent.SetShouldEnd()
+        event = eg.TriggerEvent(suffix, payload, info.eventPrefix, self)
+        info.lastEvent = event
+        return event

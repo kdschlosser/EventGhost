@@ -69,7 +69,8 @@ class DynamicModule(object):
                 'eventString',
                 'result',
                 'indent',
-                'stopExecutionFlag'
+                'stopExecutionFlag',
+                'currentItem'
             )
             if name not in self.__dict__ and name not in attrs:
                 raise AttributeError("Assignment to new attribute %s" % name)
@@ -197,6 +198,39 @@ class DynamicModule(object):
             self.EventManager.stopExecutionFlag = value
         else:
             event.stopExecutionFlag = value
+
+    @property
+    def currentItem(self):
+        event = self.event
+        if event is None:
+            return self.EventManager.currentItem
+        else:
+            return event.currentItem
+
+    @currentItem.setter
+    def currentItem(self, value):
+        event = self.event
+        if event is None:
+            self.EventManager.currentItem = value
+        else:
+            event.currentItem = value
+
+    @property
+    def lastFoundWindows(self):
+        event = self.event
+        if event is None:
+            return self.EventManager.lastFoundWindows
+        else:
+            return event.lastFoundWindows
+
+    @lastFoundWindows.setter
+    def lastFoundWindows(self, value):
+        event = self.event
+        if event is None:
+            self.EventManager.lastFoundWindows[:] = value
+        else:
+            event.lastFoundWindows[:] = value
+
 
 
 eg = DynamicModule()

@@ -28,13 +28,13 @@ class ActionThread(eg.ThreadWorker):
 
     @staticmethod
     def ExecuteTreeItem(obj, event):
-        eg.SetProcessingState(2, event)
+        # eg.SetProcessingState(2, event)
         if isinstance(obj, eg.MacroItem):
             eg.programCounter = (obj, 0)
             eg.RunProgram()
         elif isinstance(obj, eg.ActionItem):
             obj.Execute()
-        eg.SetProcessingState(1, event)
+        # eg.SetProcessingState(1, event)
 
     def HandleAction(self, action):
         try:
@@ -105,6 +105,7 @@ class ActionThread(eg.ThreadWorker):
 
     @eg.LogIt
     def StopSession(self):
+        eg.Notify('Events.Shutdown')
         eg.document.autostartMacro.UnloadPlugins()
         for pluginInfo in self.corePluginInfos:
             try:

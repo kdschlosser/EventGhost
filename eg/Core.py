@@ -34,13 +34,11 @@
 
 import asyncore
 import locale
-import os
 import socket
 import sys
 import threading
 import time
 import wx
-from os.path import exists, join
 
 # Local imports
 import eg
@@ -78,11 +76,10 @@ eg.globals.eg = eg
 eg.notificationHandlers = {}
 eg.pluginList = []
 eg.mainThread = threading.currentThread()
-eg.lastFoundWindows = []
-eg.currentItem = None
 eg.actionGroup = eg.Bunch()
 eg.actionGroup.items = []
 eg.GUID = eg.GUID()
+eg.eventRunningDialog = None
 
 def _CommandEvent():
     """Generate new (CmdEvent, Binder) tuple
@@ -170,14 +167,18 @@ def Exit():
     sys.exit()
 
 def HasActiveHandler(eventstring):
-    for eventHandler in eg.EventManager.GetEvent(eventstring).macros:
-        obj = eventHandler
-        while obj:
-            if not obj.isEnabled:
-                break
-            obj = obj.parent
-        else:
-            return True
+    try:
+        for eventHandler in eg.EventManager.GetEvent(eventstring).macros:
+            obj = eventHandler
+            while obj:
+                if not obj.isEnabled:
+                    break
+                obj = obj.parent
+            else:
+                return True
+    except eg.EventManager.EventError.NotFound:
+        pass
+
     return False
 
 def MessageBox(message, caption=eg.APP_NAME, style=wx.OK, parent=None):
@@ -257,13 +258,18 @@ def RestartAsyncore():
         # create a global asyncore loop thread
         threading.Thread(target=asyncore.loop, name="AsyncoreThread").start()
 
-def RunProgram():
+def RunProgram(update_icon=None):
     eg.stopExecutionFlag = False
     del eg.programReturnStack[:]
+    import time
+
     while eg.programCounter is not None:
         programCounter = eg.programCounter
         item, idx = programCounter
+        if update_icon is not None:
+            update_icon(idx)
         item.Execute()
+
         if eg.programCounter == programCounter:
             # program counter has not changed. Ask the parent for the next
             # item.
@@ -356,8 +362,30 @@ eg.eventThread = eg.EventThread()
 eg.pluginManager = eg.PluginManager()
 eg.scheduler = eg.Scheduler()
 
-eg.TriggerEvent = eg.eventThread.TriggerEvent
-eg.TriggerEnduringEvent = eg.eventThread.TriggerEnduringEvent
+
+def TriggerEnduringEvent(suffix, payload=None, prefix="Main", source=eg):
+    event = eg.EventGhostEvent(suffix, payload, prefix, source)
+    if event.source in eg.eventThread.filters:
+        for filterFunc in eg.eventThread.filters[event.source]:
+            if filterFunc(event) is True:
+                return event
+
+    event.Execute()
+    return event
+
+
+def TriggerEvent(suffix, payload=None, prefix="Main", source=eg):
+    """
+    Trigger an event
+    """
+    event = TriggerEnduringEvent(suffix, payload, prefix, source)
+    event.SetShouldEnd()
+
+    return event
+
+eg.TriggerEvent = TriggerEvent
+eg.TriggerEnduringEvent = TriggerEnduringEvent
+eg.TriggerEventWait = TriggerEvent
 
 from eg.WinApi.SendKeys import SendKeysParser  # NOQA
 eg.SendKeys = SendKeysParser()

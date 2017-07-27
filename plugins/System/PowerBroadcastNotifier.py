@@ -243,12 +243,14 @@ class PowerBroadcastNotifier:
 
         while msg is None and msgCls:
             try:
-                msg = CreatePowerClass(lParam, msgCls.pop(0))
+                cls = msgCls.pop(0)
+                msg = CreatePowerClass(lParam, cls)
+                eg.PrintDebugNotice(cls, msg, lParam)
             except ValueError:
                 continue
 
         if msg is not None:
-            eg.eventThread.TriggerEventWait(
+            eg.TriggerEvent(
                 suffix=msg,
                 prefix="System",
                 source=self.plugin

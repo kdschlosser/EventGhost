@@ -30,12 +30,9 @@ class StatusBar(wx.StatusBar):
         self.Bind(wx.EVT_IDLE, self.OnIdle)
         self.SetFieldsCount(2)
         self.SetStatusWidths([-1, 40])
-        self.icons = [
-            GetInternalBitmap("Tray1"),
-            GetInternalBitmap("Tray3"),
-            GetInternalBitmap("Tray2"),
-        ]
-        self.icon = wx.StaticBitmap(self, -1, self.icons[0], (0, 0), (16, 16))
+
+        bmp = wx.EmptyBitmap(16, 16)
+        self.icon = wx.StaticBitmap(self, -1, bmp, (0, 0), (16, 16))
         rect = self.GetFieldRect(0)
 
         checkBox = wx.CheckBox(self, -1, eg.text.MainFrame.onlyLogAssigned)
@@ -49,7 +46,7 @@ class StatusBar(wx.StatusBar):
         checkBox.SetPosition((rect.x + 2, rect.y + 2))
         checkBox.SetToolTipString(eg.text.MainFrame.onlyLogAssignedToolTip)
 
-        eg.Bind("ProcessingChange", self.OnProcessingChange)
+        eg.Bind("ProcessingChange.Bitmap", self.OnProcessingChange)
         self.Reposition()
 
     if eg.debugLevel:
@@ -59,7 +56,7 @@ class StatusBar(wx.StatusBar):
 
     @eg.LogIt
     def Destroy(self):
-        eg.Unbind("ProcessingChange", self.OnProcessingChange)
+        eg.Unbind("ProcessingChange.Bitmap", self.OnProcessingChange)
         return wx.StatusBar.Destroy(self)
 
     @eg.LogIt
@@ -71,8 +68,8 @@ class StatusBar(wx.StatusBar):
         if self.sizeChanged:
             self.Reposition()
 
-    def OnProcessingChange(self, state):
-        self.icon.SetBitmap(self.icons[state])
+    def OnProcessingChange(self, bmp):
+        self.icon.SetBitmap(bmp)
 
     def OnSize(self, dummyEvent):
         self.Reposition()  # for normal size events

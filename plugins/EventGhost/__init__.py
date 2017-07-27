@@ -657,7 +657,7 @@ class Wait(eg.ActionBase):
         seconds = "seconds"
 
     def __call__(self, waitTime):
-        eg.actionThread.Wait(waitTime)
+        eg.event.Wait(waitTime)
 
     def Configure(self, waitTime=0.0):
         panel = eg.ConfigPanel()

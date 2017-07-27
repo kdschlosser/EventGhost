@@ -116,7 +116,7 @@ class FindWindow(eg.ActionBase):
                 (stopMacro == STOP_IF_FOUND and hwnds)
             ):
                 eg.programCounter = None
-            eg.lastFoundWindows[:] = hwnds
+            eg.lastFoundWindows = hwnds
             return hwnds
         return Do
 

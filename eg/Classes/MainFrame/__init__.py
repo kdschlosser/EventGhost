@@ -313,6 +313,7 @@ class MainFrame(wx.Frame):
         menu = wx.Menu()
         menuBar.Append(menu, text.ViewMenu)
         Append("HideShowToolbar", kind=wx.ITEM_CHECK).Check(Config.showToolbar)
+        Append("EventManager")
         menu.AppendSeparator()
         Append("ExpandAll")
         Append("CollapseAll")
@@ -896,6 +897,13 @@ class MainFrame(wx.Frame):
         self.toolBar.Show(Config.showToolbar)
         self.Layout()
         self.SendSizeEvent()
+
+    def OnCmdEventManager(self):
+        if eg.eventRunningDialog is None:
+            eg.AsTasklet(eg.EventRunningDialog.GetResult)(self)
+        else:
+            eg.eventRunningDialog.Show()
+            eg.eventRunningDialog.Raise()
 
     def OnCmdExpandAll(self):
         self.treeCtrl.ExpandAll()

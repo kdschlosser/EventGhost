@@ -64,6 +64,8 @@ class EventManager(object):
     stopExecutionFlag = False
     programReturnStack = []
     eventString = None
+    currentItem = None
+    lastFoundWindows = []
 
     wildcardEvents = {}
 

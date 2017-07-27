@@ -134,6 +134,7 @@ class Default:
 
             ViewMenu = "&View"
             HideShowToolbar = "&Toolbar"
+            EventManager = "Event Manager"
             ExpandAll = "&Expand All"
             CollapseAll = "&Collapse All"
             ExpandOnEvents = "Select on E&xecution"
