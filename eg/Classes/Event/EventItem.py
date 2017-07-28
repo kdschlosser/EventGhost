@@ -39,6 +39,7 @@ class EventItem(TreeItem):
         "Event": HINT_MOVE_BEFORE_OR_AFTER,
         "Action": HINT_MOVE_AFTER,
     }
+    _registered = ()
 
     def __init__(self, parent, node):
         TreeItem.__init__(self, parent, node)
@@ -82,7 +83,10 @@ class EventItem(TreeItem):
         return Text.eventItem
 
     def RegisterEvent(self, eventString):
-        eg.EventManager.RegisterEvent(self, eventString)
+        self._registered = eg.EventManager.RegisterEvent(
+            self,
+            eventString
+        )
 
     @eg.AssertInActionThread
     def RenameTo(self, newName):
@@ -98,4 +102,4 @@ class EventItem(TreeItem):
         self.RenameTo(argString)
 
     def UnRegisterEvent(self, eventString):
-        eg.EventManager.UnregisterEvent(self, eventString)
+        eg.EventManager.UnregisterEvent(self, self._registered)

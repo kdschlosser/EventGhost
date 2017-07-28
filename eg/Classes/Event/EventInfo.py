@@ -300,17 +300,16 @@ class EventInfo(object):
         del(self.children[key])
 
     def __getitem__(self, item):
-        items = item.split('.')
-        item = items.pop(0)
+        sections = item.split('.')
+        section = sections.pop(0)
 
-        if item not in self:
-            event = EventInfo(self, item)
-            self[item] = event
-
-        if items:
-            return self.children[item]['.'.join(items)]
-        else:
-            return self.children[item]
+        try:
+            event = self.children[section]
+            while sections:
+                event = event[sections.pop(0)]
+            return event
+        except (KeyError, eg.EventManager.EventError.NotFound):
+            raise eg.EventManager.EventError.NotFound(item)
 
     def __setitem__(self, key, value):
         if key in self:
