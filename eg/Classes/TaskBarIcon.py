@@ -40,13 +40,6 @@ class TaskBarIcon(wx.TaskBarIcon):
         self.tooltip = []
         wx.TaskBarIcon.__init__(self)
 
-        self.IconBar = IconBar(
-            (127, 127, 0),
-            (255, 255, 0),
-            (0, 127, 127),
-        )
-        self.SetIconBar(0, 0, (0, 255, 255))
-
         # SetIcon *must* be called immediately after creation, as otherwise
         # it won't appear on Vista restricted user accounts. (who knows why?)
         if show:
@@ -93,14 +86,10 @@ class TaskBarIcon(wx.TaskBarIcon):
         self.SetIcon(icon, tooltip)
 
     def Close(self):
-        if eg.mainFrame is not None:
-            eg.mainFrame.Iconize(False)
-        self.Hide()
+        self.Show(False)
 
     def Hide(self):
-        if eg.mainFrame is not None:
-            eg.mainFrame.Iconize(False)
-        self.RemoveIcon()
+        self.Show(False)
 
     def OnCmdExit(self, event):
         if eg.mainFrame is None or len(eg.mainFrame.openDialogs) == 0:
@@ -159,7 +148,7 @@ class TaskBarIcon(wx.TaskBarIcon):
     def Open(self):
         self.Show()
 
-    def SetProcessingState(self, l, r, sr_on):
+    def ChangeIcon(self, l, r, sr_on):
         self.reentrantLock.acquire()
         try:
             if l == 0 and r == 0:
@@ -167,37 +156,34 @@ class TaskBarIcon(wx.TaskBarIcon):
             else:
                 state = 1
 
-            # if state == 0:
-            #     if event == self.processingEvent:
-            #         state = 1
-            #     elif event == self.currentEvent:
-            #         state = 0
-            #     else:
-            #         return
-            # elif state == 1:
-            #     self.processingEvent = None
-            #     if event.shouldEnd.isSet():
-            #         self.currentEvent = None
-            #         state = 0
-            #     else:
-            #         return
-            # elif state == 2:
-            #     self.currentEvent = event
-            #     self.processingEvent = event
-            # self.currentState = state
             self.SetIconBar(l, r, sr_on)
-            wx.CallAfter(eg.Notify, "ProcessingChange", state)
+            self.SetProcessingState(state, None)
         finally:
             self.reentrantLock.release()
+
+    def SetProcessingState(self, state, event):
+        wx.CallAfter(eg.Notify, "ProcessingChange", state)
 
     def SetToolTip(self, tooltip):
         self.tooltip = tooltip
 
         # wx.CallAfter(self.OnProcessingChange, self.currentState)
 
-    def Show(self):
-        self.SetIconBar(0, 0, (0, 255, 255))
-        # self.SetIcon(self.stateIcons[0], self.tooltip)
+    def Show(self, flag=True):
+        if flag:
+            self.IconBar = IconBar(
+                (127, 127, 0),
+                (255, 255, 0),
+                (0, 127, 127),
+            )
+            self.SetIconBar(0, 0, (0, 255, 255))
+        else:
+            del self.IconBar
+            self.IconBar = None
+
+            if eg.mainFrame is not None:
+                eg.mainFrame.Iconize(False)
+            self.RemoveIcon()
 
 
 class IconBar:

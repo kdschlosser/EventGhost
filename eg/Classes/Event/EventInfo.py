@@ -139,6 +139,7 @@ class EventThread(object):
     @property
     def percent_macros(self):
         return self._percent_macros
+    
     @property
     def id(self):
         return self.thread.ident
@@ -172,9 +173,7 @@ class EventThread(object):
             self.r = 1
 
         self.Update()
-
-        eg.SetProcessingState(self.l, self.r, colour)
-
+        eg.taskBarIcon.ChangeIcon(self.l, self.r, colour)
 
     def OnShutdown(self, evt):
         self.stop = True
