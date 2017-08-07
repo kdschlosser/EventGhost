@@ -35,14 +35,8 @@ import time
 import sys
 import inspect
 from types import ModuleType
-from os import makedirs, chdir
-from os.path import exists
-
-'''
-TODO: cteate a mechanism that will build the Classes.__init__.py file. I
-think having this done upon EG startup is the way to go so that way there is
-still a mechanism to add files at any point.
-'''
+from os import makedirs, chdir, listdir
+from os.path import exists, join, isdir, splitext
 
 __builtin__.wx = wx
 __builtin__.eg = sys.modules[__name__]
@@ -396,6 +390,21 @@ if not exists(localPluginDir):
         makedirs(localPluginDir)
     except:
         localPluginDir = corePluginDir
+
+classesDir = join(mainDir, 'eg', 'Classes')
+
+if not exists(join(classesDir, '__init__.py')):
+    with open(join(classesDir, '__init__.py'), 'w') as f:
+        for class_file in listdir(classesDir):
+            file_name, file_ext = splitext(class_file)
+            if file_name.startswith('_'):
+                continue
+            if isdir(join(classesDir, class_file)) or file_ext == '.py':
+                f.write('from {0} import {0}\n'.format(file_name))
+
+        f.write("\n__import__('pkg_resources').declare_namespace('eg')\n")
+
+del classesDir
 
 if Cli.args.isMain:
     if exists(configDir):
