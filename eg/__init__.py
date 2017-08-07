@@ -38,6 +38,12 @@ from types import ModuleType
 from os import makedirs, chdir
 from os.path import exists
 
+'''
+TODO: cteate a mechanism that will build the Classes.__init__.py file. I
+think having this done upon EG startup is the way to go so that way there is
+still a mechanism to add files at any point.
+'''
+
 __builtin__.wx = wx
 __builtin__.eg = sys.modules[__name__]
 sys.modules['eg'] = sys.modules[__name__]
