@@ -32,6 +32,7 @@ PATCHES = {
 
 RENAMED_COLOUR = None
 
+
 class ActionItem(TreeItem):
     xmlTag = "Action"
     icon = eg.Icons.ACTION_ICON
@@ -47,8 +48,9 @@ class ActionItem(TreeItem):
 
     @eg.AssertInActionThread
     def __init__(self, parent, node):
+        global RENAMED_COLOUR
+
         if RENAMED_COLOUR is None:
-            global RENAMED_COLOUR
             RENAMED_COLOUR = eg.colour.GetRenamedColor()
 
         TreeItem.__init__(self, parent, node)

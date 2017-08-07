@@ -88,9 +88,8 @@ class MainFrame(wx.Frame):
         """
         Create the MainFrame
         """
+        global ADD_ICON
         if ADD_ICON is None:
-
-            global ADD_ICON
             global ADD_PLUGIN_ICON
             global ADD_FOLDER_ICON
             global ADD_MACRO_ICON
