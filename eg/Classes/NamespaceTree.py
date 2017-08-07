@@ -22,6 +22,7 @@ import wx.gizmos
 # Local imports
 import eg
 
+
 class NamespaceTree(wx.gizmos.TreeListCtrl):
     def __init__(self, parent, namespace):
         self.namespace = namespace

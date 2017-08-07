@@ -18,6 +18,7 @@
 
 import sys
 
+
 class PluginMetaClass(type):
     """
     The metaclass of PluginBase that allows us to monitor the definition of a

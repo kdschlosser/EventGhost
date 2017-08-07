@@ -20,13 +20,16 @@ import wx
 
 # Local imports
 import eg
+from PersistentData import PersistentData
+from Dialog import Dialog
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = None
     size = (400, 300)
 
 
-class HtmlDialog(eg.Dialog):
+class HtmlDialog(Dialog):
     def __init__(
         self,
         parent=None,
@@ -36,7 +39,7 @@ class HtmlDialog(eg.Dialog):
         basePath=None,
         style=wx.OK
     ):
-        eg.Dialog.__init__(
+        Dialog.__init__(
             self,
             parent,
             -1,

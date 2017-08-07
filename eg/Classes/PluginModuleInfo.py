@@ -23,6 +23,7 @@ from os.path import exists, join
 # Local imports
 import eg
 
+
 class PluginModuleInfo(object):
     """
     Holds information of a plugin module.

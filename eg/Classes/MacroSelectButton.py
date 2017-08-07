@@ -21,6 +21,7 @@ import wx
 # Local imports
 import eg
 
+
 class MacroSelectButton(wx.Window):
     def __init__(self, parent, label, title, mesg, treeLink=None):
         if treeLink is None:

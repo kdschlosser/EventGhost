@@ -21,6 +21,7 @@ import wx
 # Local imports
 import eg
 
+
 class MessageDialog(wx.Dialog):
     """
     A replacement for wx.MessageDialog, that wraps the message, if the

@@ -23,6 +23,7 @@ import eg
 from ContainerItem import ContainerItem
 from TreeItem import HINT_MOVE_INSIDE, HINT_MOVE_BEFORE_OR_AFTER
 
+
 class MacroItem(ContainerItem):
     xmlTag = "Macro"
     icon = eg.Icons.MACRO_ICON

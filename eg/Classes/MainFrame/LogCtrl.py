@@ -24,8 +24,6 @@ from time import localtime, strftime
 # Local imports
 import eg
 
-EVENT_ICON = eg.EventItem.icon
-ERROR_ICON = eg.Icons.ERROR_ICON
 
 class LogCtrl(wx.ListCtrl):
     """
@@ -179,7 +177,7 @@ class LogCtrl(wx.ListCtrl):
             dataObjectComposite.Add(textDataObject)
             if lines == 1:
                 eventstring, icon = self.GetItemData(firstItem)[:2]
-                if icon == EVENT_ICON:
+                if icon == eg.EventItem.icon:
                     customDataObject = wx.CustomDataObject("DragEventItem")
                     customDataObject.SetData(eventstring.encode("UTF-8"))
                     dataObjectComposite.Add(customDataObject)
@@ -208,19 +206,19 @@ class LogCtrl(wx.ListCtrl):
         item, flags = self.HitTest(event.GetPosition())
         if flags & wx.LIST_HITTEST_ONITEM:
             icon, wref = self.GetItemData(item)[1:3]
-            if icon != eg.EventItem.icon and wref is not None:
+            if icon != eg.Icons.EVENT_ICON and wref is not None:
                 node = wref()
                 if node is not None and not node.isDeleted:
                     node.Select()
 
     def OnGetItemAttr(self, item):
         if item % 2 == 0:
-            if self.data[item][1] != ERROR_ICON:
+            if self.data[item][1] != eg.Icons.ERROR_ICON:
                 return self.attr1
             else:
                 return self.attr3
         else:
-            if self.data[item][1] != ERROR_ICON:
+            if self.data[item][1] != eg.Icons.ERROR_ICON:
                 return self.attr2
             else:
                 return self.attr4
@@ -259,7 +257,7 @@ class LogCtrl(wx.ListCtrl):
     def OnStartDrag(self, event):
         idx = event.GetIndex()
         itemData = self.GetItemData(idx)
-        if itemData[1] != EVENT_ICON:
+        if itemData[1] != eg.Icons.EVENT_ICON:
             return
         text = itemData[2]
         # create our own data format and use it in a

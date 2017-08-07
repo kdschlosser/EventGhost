@@ -24,6 +24,7 @@ import eg
 from ContainerItem import ContainerItem
 from TreeItem import HINT_MOVE_INSIDE
 
+
 class RootItem(ContainerItem):
     xmlTag = "EventGhost"
     icon = eg.Icons.ROOT_ICON

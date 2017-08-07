@@ -19,7 +19,8 @@
 import wx
 
 # Local imports
-import eg
+from ControlProviderMixin import ControlProviderMixin
 
-class Panel(wx.Panel, eg.ControlProviderMixin):
+
+class Panel(wx.Panel, ControlProviderMixin):
     pass

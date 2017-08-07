@@ -63,7 +63,7 @@ class GuidException(Exception):
         return 'No GUID %r exists' % self.guid
 
 
-class GUID(object):
+class _GUID(object):
 
     GuidException = GuidException
 
@@ -95,3 +95,4 @@ class GUID(object):
         except KeyError:
             raise self.GuidException(guid)
 
+GUID = _GUID()

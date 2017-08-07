@@ -20,10 +20,15 @@ import wx
 
 # Local imports
 import eg
+from PersistentData import PersistentData
+from TranslatableStrings import TranslatableStrings
+from TaskletDialog import TaskletDialog
+
 
 KIND_TAGS = ["other", "remote", "program", "external"]
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = None
     size = (640, 450)
     splitPosition = 240
@@ -31,7 +36,7 @@ class Config(eg.PersistentData):
     collapsed = set()
 
 
-class Text(eg.TranslatableStrings):
+class Text(TranslatableStrings):
     title = "Add Plugin..."
     noInfo = "No information available."
     noMultiloadTitle = "No multiload possible"
@@ -48,7 +53,7 @@ class Text(eg.TranslatableStrings):
     descriptionBox = "Description"
 
 
-class AddPluginDialog(eg.TaskletDialog):
+class AddPluginDialog(TaskletDialog):
     instance = None
 
     def CheckMultiload(self):
@@ -81,7 +86,7 @@ class AddPluginDialog(eg.TaskletDialog):
 
         self.resultData = None
 
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self,
             parent,
             -1,

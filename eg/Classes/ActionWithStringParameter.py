@@ -20,8 +20,10 @@ import wx
 
 # Local imports
 import eg
+from ActionBase import ActionBase
 
-class ActionWithStringParameter(eg.ActionBase):
+
+class ActionWithStringParameter(ActionBase):
     """
     Simple action class, that only has a single string parameter.
     """

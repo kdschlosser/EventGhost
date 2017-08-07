@@ -22,8 +22,10 @@ from types import StringTypes
 
 # Local imports
 import eg
+from TranslatableStrings import TranslatableStrings
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     title = "Find"
     searchLabel = "Fi&nd what:"
     wholeWordsOnly = "Match &whole word only"

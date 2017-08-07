@@ -18,6 +18,7 @@
 
 import wx
 
+
 class RadioBox(wx.Panel):
     def __init__(
         self,

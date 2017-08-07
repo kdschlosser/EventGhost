@@ -21,6 +21,7 @@ import wx
 # Local imports
 import eg
 
+
 class PasswordCtrl(wx.TextCtrl):
     def __init__(
         self,

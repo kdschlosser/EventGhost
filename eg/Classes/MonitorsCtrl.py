@@ -22,6 +22,7 @@ from win32api import EnumDisplayMonitors as Edm
 # Local imports
 import eg
 
+
 class MonitorsCtrl(wx.Panel):
     def __init__(
         self,
@@ -32,9 +33,12 @@ class MonitorsCtrl(wx.Panel):
         size = (-1, -1),
         style = wx.BORDER_SIMPLE,
         name = "Monitors",
-        background = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
+        background = None
 
     ):
+        if background is None:
+            background = wx.SystemSettings.GetColour(wx.SYS_COLOUR_MENU)
+
         wx.Panel.__init__(self, parent, id, pos, size, style, name)
         b1 = 2
         b2 = 3

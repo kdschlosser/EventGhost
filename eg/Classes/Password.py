@@ -29,6 +29,7 @@ from Crypto.Cipher import AES
 import eg
 from eg.WinApi.Dynamic import GetVolumeInformation, DWORD, byref
 
+
 class MasterPasswordDialog(wx.Dialog):
     def __init__(self):
         self.result = None

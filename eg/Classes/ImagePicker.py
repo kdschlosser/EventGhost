@@ -20,6 +20,7 @@ import wx
 from base64 import b64decode, b64encode
 from cStringIO import StringIO
 
+
 class ImagePicker(wx.Window):
     def __init__(self, parent, label, title="", mesg="", imageString=None):
         self.title = title

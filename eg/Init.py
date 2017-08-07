@@ -16,12 +16,10 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import sys
 import wx
 from ctypes import windll
 from time import gmtime
-from types import ModuleType
-from os import listdir, makedirs, chdir
+from os import listdir
 from os.path import join, basename, isdir, exists, splitext
 
 # Local imports
@@ -134,52 +132,6 @@ def InitGui():
 
     eg.Print(eg.text.MainFrame.Logger.welcomeText)
 
-def InitPathsAndBuiltins():
-    import cFunctions
-    import __builtin__
-
-    eg.folderPath = eg.FolderPath()
-    eg.mainDir = eg.folderPath.mainDir
-    eg.configDir = eg.folderPath.configDir
-    eg.corePluginDir = eg.folderPath.corePluginDir
-    eg.localPluginDir = eg.folderPath.localPluginDir
-    eg.imagesDir = eg.folderPath.imagesDir
-    eg.languagesDir = eg.folderPath.languagesDir
-    eg.sitePackagesDir = eg.folderPath.sitePackagesDir
-
-    if not exists(eg.configDir):
-        try:
-            makedirs(eg.configDir)
-        except:
-            pass
-
-    if not exists(eg.localPluginDir):
-        try:
-            makedirs(eg.localPluginDir)
-        except:
-            eg.localPluginDir = eg.corePluginDir
-
-    if eg.Cli.args.isMain:
-        if exists(eg.configDir):
-            chdir(eg.configDir)
-        else:
-            chdir(eg.mainDir)
-
-    __builtin__.wx = wx
-
-    corePluginPackage = ModuleType("eg.CorePluginModule")
-    corePluginPackage.__path__ = [eg.corePluginDir]
-    userPluginPackage = ModuleType("eg.UserPluginModule")
-    userPluginPackage.__path__ = [eg.localPluginDir]
-
-    sys.modules["eg.CorePluginModule"] = corePluginPackage
-    sys.modules["eg.UserPluginModule"] = userPluginPackage
-    sys.modules['eg.cFunctions'] = cFunctions
-
-    eg.pluginDirs = [eg.corePluginDir, eg.localPluginDir]
-    eg.cFunctions = cFunctions
-    eg.CorePluginModule = corePluginPackage
-    eg.UserPluginModule = userPluginPackage
 
 def InitPil():
     """

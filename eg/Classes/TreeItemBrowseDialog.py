@@ -20,22 +20,26 @@ import wx
 
 # Local imports
 import eg
+from TaskletDialog import TaskletDialog
+from FolderItem import FolderItem
+from MacroItem import MacroItem
 
-class TreeItemBrowseDialog(eg.TaskletDialog):
+
+class TreeItemBrowseDialog(TaskletDialog):
     def Configure(
         self,
         title,
         text,
         searchItem,
         resultClasses,
-        filterClasses=(eg.FolderItem, eg.MacroItem),
+        filterClasses=(FolderItem, MacroItem),
         parent=None,
     ):
         self.resultData = searchItem
         self.resultClasses = resultClasses
         self.foundId = None
         style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
-        eg.TaskletDialog.__init__(self, parent, -1, title=title, style=style)
+        TaskletDialog.__init__(self, parent, -1, title=title, style=style)
         staticText = wx.StaticText(self, -1, text)
         staticText.Wrap(430)
 

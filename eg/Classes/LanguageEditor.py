@@ -24,8 +24,10 @@ from os.path import join
 
 # Local imports
 import eg
+from PersistentData import PersistentData
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = (50, 50)
     size = (700, 433)
     splitPosition = 244

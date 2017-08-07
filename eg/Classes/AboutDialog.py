@@ -30,6 +30,9 @@ import eg
 from eg.WinApi.Dynamic import (
     MEMORYSTATUSEX, GlobalMemoryStatusEx, byref, sizeof
 )
+from TranslatableStrings import TranslatableStrings
+from TaskletDialog import TaskletDialog
+
 
 try:
     import stackless  # NOQA
@@ -37,7 +40,7 @@ try:
 except ImportError:
     is_stackless = False
 
-class Text(eg.TranslatableStrings):
+class Text(TranslatableStrings):
     Title = "About EventGhost"
     Author = "Author: %s"
     Version = "Version: %s (build %s)"
@@ -49,7 +52,7 @@ class Text(eg.TranslatableStrings):
     tabChangelog = "Changelog"
 
 
-class AboutDialog(eg.TaskletDialog):
+class AboutDialog(TaskletDialog):
     instance = None
 
     @eg.LogItWithReturn
@@ -58,7 +61,7 @@ class AboutDialog(eg.TaskletDialog):
             AboutDialog.instance.Raise()
             return
         AboutDialog.instance = self
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self,
             parent=parent,
             title=Text.Title,
@@ -171,7 +174,11 @@ class SpecialThanksPanel(HtmlPanel):
         output = StringIO()
         write = output.write
         write('<TABLE COLS=2 WIDTH="100%">')
-        for group, cols, persons in SPECIAL_THANKS_DATA:
+        spacial_thanks = (
+            (("Plugin Developers:", 2, GetPluginAuthors()),) +
+            SPECIAL_THANKS_DATA
+        )
+        for group, cols, persons in spacial_thanks:
             write('<TR><TD COLSPAN="2" ALIGN=CENTER><h5><i><u>')
             write(group)
             write('</h5></i></u></TD></TR>')
@@ -383,7 +390,7 @@ def GetRegistryValue(key, value):
     handle = _winreg.OpenKey(getattr(_winreg, key), subkey)
     try:
         val = _winreg.QueryValueEx(handle, value)[0]
-    except WindowsError, err:
+    except _winreg.error as err:
         val = None
         if err[0] == 2:
             eg.PrintError("%s: %s" % (err[1].decode(eg.systemEncoding), value))
@@ -392,7 +399,6 @@ def GetRegistryValue(key, value):
     return val
 
 SPECIAL_THANKS_DATA = (
-    ("Plugin Developers:", 2, GetPluginAuthors()),
     (
         "Translators:",
         2,

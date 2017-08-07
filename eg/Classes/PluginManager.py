@@ -21,6 +21,9 @@ from os.path import exists, isdir, join
 
 # Local imports
 import eg
+from PluginBase import PluginBase
+from PluginInstanceInfo import PluginInstanceInfo
+
 
 class PluginManager:
     def __init__(self):
@@ -106,7 +109,7 @@ class ActionsMapping(object):
         self.actions[name] = value
 
 
-class LoadErrorPlugin(eg.PluginBase):
+class LoadErrorPlugin(PluginBase):
     def __init__(self):
         raise self.Exceptions.PluginLoadError
 
@@ -114,7 +117,7 @@ class LoadErrorPlugin(eg.PluginBase):
         raise self.Exceptions.PluginLoadError
 
 
-class NonexistentPlugin(eg.PluginBase):
+class NonexistentPlugin(PluginBase):
     class text:
         pass
 
@@ -128,7 +131,7 @@ class NonexistentPlugin(eg.PluginBase):
         return '<Unknown Plugin "%s">' % self.name
 
 
-class NonexistentPluginInfo(eg.PluginInstanceInfo):
+class NonexistentPluginInfo(PluginInstanceInfo):
     def __init__(self, guid, name):
         self.guid = guid
         self.name = name

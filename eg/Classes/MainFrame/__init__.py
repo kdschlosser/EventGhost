@@ -32,13 +32,14 @@ from eg.Classes.MainFrame.TreeCtrl import TreeCtrl
 from eg.Icons import CreateBitmapOnTopOfIcon, GetInternalBitmap
 from eg.WinApi.Dynamic import GetDesktopWindow, HH_DISPLAY_TOPIC, HtmlHelp
 from eg.WinApi.Utils import BringHwndToFront
+from ..PersistentData import PersistentData
 
-ADD_ICON = eg.Icons.ADD_ICON
-ADD_PLUGIN_ICON = CreateBitmapOnTopOfIcon(ADD_ICON, eg.Icons.PLUGIN_ICON)
-ADD_FOLDER_ICON = CreateBitmapOnTopOfIcon(ADD_ICON, eg.Icons.FOLDER_ICON)
-ADD_MACRO_ICON = CreateBitmapOnTopOfIcon(ADD_ICON, eg.Icons.MACRO_ICON)
-ADD_EVENT_ICON = CreateBitmapOnTopOfIcon(ADD_ICON, eg.Icons.EVENT_ICON)
-ADD_ACTION_ICON = CreateBitmapOnTopOfIcon(ADD_ICON, eg.Icons.ACTION_ICON)
+ADD_ICON = None
+ADD_PLUGIN_ICON = None
+ADD_FOLDER_ICON = None
+ADD_MACRO_ICON = None
+ADD_EVENT_ICON = None
+ADD_ACTION_ICON = None
 
 ID_DISABLED = wx.NewId()
 ID_EXECUTE = wx.NewId()
@@ -60,7 +61,8 @@ ID = defaultdict(wx.NewId, {
 
 Text = eg.text.MainFrame
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = (50, 50)
     size = (700, 450)
     showToolbar = True
@@ -86,6 +88,38 @@ class MainFrame(wx.Frame):
         """
         Create the MainFrame
         """
+        if ADD_ICON is None:
+
+            global ADD_ICON
+            global ADD_PLUGIN_ICON
+            global ADD_FOLDER_ICON
+            global ADD_MACRO_ICON
+            global ADD_EVENT_ICON
+            global ADD_ACTION_ICON
+
+            ADD_ICON = eg.Icons.ADD_ICON
+            ADD_PLUGIN_ICON = CreateBitmapOnTopOfIcon(
+                ADD_ICON,
+                eg.Icons.PLUGIN_ICON
+            )
+            ADD_FOLDER_ICON = CreateBitmapOnTopOfIcon(
+                ADD_ICON,
+                eg.Icons.FOLDER_ICON
+            )
+            ADD_MACRO_ICON = CreateBitmapOnTopOfIcon(
+                ADD_ICON,
+                eg.Icons.MACRO_ICON
+            )
+            ADD_EVENT_ICON = CreateBitmapOnTopOfIcon(
+                ADD_ICON,
+                eg.Icons.EVENT_ICON
+            )
+            ADD_ACTION_ICON = CreateBitmapOnTopOfIcon(
+                ADD_ICON,
+                eg.Icons.ACTION_ICON
+            )
+
+
         self.document = document
         self.findDialog = None
         self.openDialogs = []

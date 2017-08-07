@@ -21,14 +21,15 @@ import wx
 
 # Local imports
 import eg
+from TaskletDialog import TaskletDialog
 
 PROMPT = "Please type your input..."
 
-class SimpleInputDialog(eg.TaskletDialog):
+class SimpleInputDialog(TaskletDialog):
     def Configure(self, prompt=None, initialValue=""):
         if prompt is None:
             prompt = PROMPT
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self, None, -1, PROMPT, style=wx.RESIZE_BORDER | wx.CAPTION
         )
         textCtrl = self.TextCtrl(initialValue, size=(300, -1))

@@ -24,8 +24,11 @@ from pkg_resources import parse_version
 
 # Local imports
 import eg
+from TranslatableStrings import TranslatableStrings
+from Dialog import Dialog
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     newVersionMesg = \
         "A new version of EventGhost has been released!\n\n"\
         "Your version:\t%s\n"\
@@ -51,10 +54,10 @@ class CheckUpdate:
         _checkUpdate(manually=True)
 
 
-class MessageDialog(eg.Dialog):
+class MessageDialog(Dialog):
     def __init__(self, version, url):
         self.url = url
-        eg.Dialog.__init__(self, None, -1, eg.APP_NAME)
+        Dialog.__init__(self, None, -1, eg.APP_NAME)
         bmp = wx.ArtProvider.GetBitmap(
             wx.ART_INFORMATION,
             wx.ART_MESSAGE_BOX,

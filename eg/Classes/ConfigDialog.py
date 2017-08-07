@@ -21,8 +21,10 @@ import wx
 # Local imports
 import eg
 from eg.Utils import SplitFirstParagraph
+from TaskletDialog import TaskletDialog
 
-class ConfigDialog(eg.TaskletDialog):
+
+class ConfigDialog(TaskletDialog):
     panel = None
     currentDialog = None
 
@@ -49,7 +51,7 @@ class ConfigDialog(eg.TaskletDialog):
         dialogStyle = wx.CAPTION | wx.CLOSE_BOX | wx.SYSTEM_MENU
         if resizable:
             dialogStyle |= wx.RESIZE_BORDER | wx.MAXIMIZE_BOX
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self, eg.document.frame, -1, title, style=dialogStyle
         )
 

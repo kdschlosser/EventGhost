@@ -18,6 +18,7 @@
 
 import sys
 import threading
+import platform
 import time
 import wx
 
@@ -25,7 +26,10 @@ import wx
 import eg
 from eg.WinApi.Dynamic import ExitProcess, SetProcessShutdownParameters
 
-IS_VISTA = eg.WindowsVersion >= 'Vista'
+ver = platform.version().split('.')
+ver = [int(ver[0]), int(ver[1])]
+
+IS_VISTA = True if ver[0] == 6 and ver[1] else True if ver[0] > 6 else False
 
 if IS_VISTA:
     from eg.WinApi.Dynamic import _user32, BOOL, HWND, LPCWSTR
@@ -43,7 +47,7 @@ class App(wx.App):
     def __init__(self):
         self.onExitFuncs = []
         wx.App.__init__(self, 0)
-        self.locale = wx.Locale(wx.Locale.GetSystemLanguage())
+        # self.locale = wx.Locale(wx.Locale.GetSystemLanguage())
         self.shouldVeto = False
         self.firstQuery = True
         self.endSession = False

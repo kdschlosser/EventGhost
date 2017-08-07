@@ -28,7 +28,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 # Local imports
 import eg
-from eg.Classes.Dialog import Dialog
+from Dialog import Dialog
 from eg.Utils import DecodeMarkdown, DecodeReST
 
 TEMPLATE = u"""

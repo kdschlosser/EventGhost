@@ -20,26 +20,30 @@ import wx
 
 # Local imports
 import eg
+from PersistentData import PersistentData
+from TranslatableStrings import TranslatableStrings
+from TaskletDialog import TaskletDialog
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = None
     size = (550, 400)
     splitPosition = 210
 
 
-class Text(eg.TranslatableStrings):
+class Text(TranslatableStrings):
     title = "Add Action..."
     descriptionLabel = "Description"
 
 
-class AddActionDialog(eg.TaskletDialog):
+class AddActionDialog(TaskletDialog):
     lastSelectedDataItem = None
 
     @eg.LogItWithReturn
     def Configure(self, parent):
         self.resultData = None
         self.lastSelectedTreeItem = None
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self,
             parent,
             -1,

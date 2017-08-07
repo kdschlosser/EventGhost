@@ -19,6 +19,7 @@
 import traceback
 from threading import Event
 from ThreadWorker import ThreadWorker
+from EventGhostEvent import EventGhostEvent
 
 # Local imports
 import eg
@@ -29,10 +30,6 @@ from eg.WinApi.Dynamic import (
     SetProcessWorkingSetSize,
 )
 
-# some shortcuts
-EventGhostEvent = eg.EventGhostEvent
-actionThread = eg.actionThread
-ActionThreadCall = actionThread.Call
 
 class EventThread(ThreadWorker):
     def __init__(self):
@@ -72,7 +69,7 @@ class EventThread(ThreadWorker):
 
     @eg.LogIt
     def StartSession(self, filename):
-        actionThread.Func(actionThread.StartSession, 120)(filename)
+        eg.actionThread.Func(eg.actionThread.StartSession, 120)(filename)
         self.TriggerEvent("OnInit")
         if self.startupEvent is not None:
             self.TriggerEvent(*self.startupEvent)
@@ -80,7 +77,7 @@ class EventThread(ThreadWorker):
 
     @eg.LogIt
     def StopSession(self):
-        actionThread.Func(actionThread.StopSession, 120)()
+        eg.actionThread.Func(eg.actionThread.StopSession, 120)()
         eg.PrintDebugNotice("StopSession done")
 
     def TriggerEnduringEvent(
@@ -97,7 +94,7 @@ class EventThread(ThreadWorker):
                     return event
 
         def Transfer():
-            ActionThreadCall(event.Execute)
+            eg.actionThread.Call(event.Execute)
         self.AppendAction(Transfer)
 
         return event
@@ -113,7 +110,7 @@ class EventThread(ThreadWorker):
                     return event
 
         def Transfer():
-            ActionThreadCall(event.Execute)
+            eg.actionThread.Call(event.Execute)
             event.SetShouldEnd()
         self.AppendAction(Transfer)
 
@@ -140,7 +137,7 @@ class EventThread(ThreadWorker):
                 executed.set()
 
         def Transfer():
-            ActionThreadCall(Execute)
+            eg.actionThread.Call(Execute)
             event.SetShouldEnd()
 
         self.AppendAction(Transfer)

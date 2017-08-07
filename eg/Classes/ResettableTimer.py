@@ -28,6 +28,7 @@ from eg.WinApi.Dynamic import (
     WaitForSingleObject,
 )
 
+
 class ResettableTimer(Thread):
     def __init__(self, callback):
         Thread.__init__(self, target=self.ThreadLoop)

@@ -25,6 +25,7 @@ import eg
 from ActionItem import ActionItem
 from TreeItem import TreeItem
 
+
 class PluginItem(ActionItem):
     xmlTag = "Plugin"
     icon = eg.Icons.PLUGIN_ICON

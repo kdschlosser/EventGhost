@@ -133,7 +133,7 @@ class SmartSpinNumCtrl(wx.Window):
         self.UpdateWidth(self.ctrl)
 
     def SetValue(self, value):
-        if isinstance(self.ctrl, eg.Classes.SpinNumCtrl.SpinNumCtrl):
+        if isinstance(self.ctrl, eg.SpinNumCtrl):
             if isinstance(value, (str, unicode)):
                 value = float(value)
             minValue, maxValue = self.ctrl.numCtrl.GetBounds()
@@ -148,7 +148,7 @@ class SmartSpinNumCtrl(wx.Window):
         return res
 
     def UpdateWidth(self, ctrl):
-        w = (self.tW, self.nW)[int(isinstance(ctrl, eg.Classes.SpinNumCtrl.SpinNumCtrl))]
+        w = (self.tW, self.nW)[int(isinstance(ctrl, eg.SpinNumCtrl))]
         parentSizer = self.GetContainingSizer()
         if parentSizer:
             parentSizer.SetItemMinSize(self, w, -1)

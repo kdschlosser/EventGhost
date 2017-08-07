@@ -75,6 +75,7 @@ from eg.WinApi.Dynamic.SetupApi import (
 )
 from eg.WinApi.IsAdmin import IsAdmin
 from eg.WinApi.PipedProcess import ExecAs
+from TranslatableStrings import TranslatableStrings
 
 DI_FLAGSEX_INSTALLEDDRIVER = 0x04000000
 
@@ -190,7 +191,8 @@ DISK_NAME="My Install Disk"
 DisplayName="$DISPLAY_NAME"
 """
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     dialogCaption = "EventGhost Plugin: %s"
     downloadMsg = (
         "EventGhost needs to download additional files before it "

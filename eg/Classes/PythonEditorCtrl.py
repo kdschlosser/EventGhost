@@ -33,6 +33,7 @@ FACES = {
     'size2': 8,
 }
 
+
 class PythonEditorCtrl(StyledTextCtrl):
     def __init__(
         self,

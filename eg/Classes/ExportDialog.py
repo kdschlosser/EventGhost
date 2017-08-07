@@ -20,18 +20,21 @@ import wx
 
 # Local imports
 import eg
+from TaskletDialog import TaskletDialog
+from TranslatableStrings import TranslatableStrings
 
-class Text:
+
+class Text(TranslatableStrings):
     mesg = "Please select the folder you want to export"
 
 text = Text
 
 
-class ExportDialog(eg.TaskletDialog):
+class ExportDialog(TaskletDialog):
     def Configure(self):
         self.foundId = None
         style = wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
-        eg.TaskletDialog.__init__(self, None, -1, title="Export", style=style)
+        TaskletDialog.__init__(self, None, -1, title="Export", style=style)
         staticText = wx.StaticText(self, -1, text.mesg)
 
         filterClasses = (eg.FolderItem, )  #eg.MacroItem)

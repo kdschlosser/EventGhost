@@ -22,6 +22,7 @@ import wx
 import eg
 from TreeItem import TreeItem
 
+
 class ContainerItem(TreeItem):
     xmlTag = "Container"
 

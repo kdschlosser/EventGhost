@@ -24,6 +24,8 @@ from types import ClassType
 import eg
 from eg.Utils import SetDefault
 from PluginModuleInfo import PluginModuleInfo
+from EventGhostEvent import EventGhostEvent
+
 
 class PluginInstanceInfo(PluginModuleInfo):
     pluginCls = None
@@ -39,7 +41,7 @@ class PluginInstanceInfo(PluginModuleInfo):
     initFailed = True
     lastException = None
     isStarted = False
-    lastEvent = eg.EventGhostEvent()
+    lastEvent = EventGhostEvent()
     eventList = None
 
     def __init__(self):

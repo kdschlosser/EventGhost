@@ -25,6 +25,7 @@ from threading import Lock
 
 # Local imports
 import eg
+from PluginMetaClass import PluginMetaClass
 
 gTriggerEventLock = Lock()
 
@@ -57,7 +58,7 @@ class PluginBase(object):
     text = None
     Exceptions = None
 
-    __metaclass__ = eg.PluginMetaClass
+    __metaclass__ = PluginMetaClass
 
     # used for automatic documentation creation
     __docsort__ = (

@@ -18,11 +18,13 @@
 
 # Local imports
 import eg
+from PluginBase import PluginBase
+from IrDecoder import IrDecoder
 
-class IrDecoderPlugin(eg.PluginBase):
+class IrDecoderPlugin(PluginBase):
     def __init__(self, sampleTime):
-        eg.PluginBase.__init__(self)
-        self.irDecoder = eg.IrDecoder(self, sampleTime)
+        PluginBase.__init__(self)
+        self.irDecoder = IrDecoder(self, sampleTime)
 
     def Map(self, what, to, timeout=None, repeatCode=None):
         self.irDecoder.mapTable[what] = (to, timeout, repeatCode)

@@ -21,6 +21,7 @@ import wx
 # Local imports
 import eg
 
+
 class SerialPortChoice(wx.Choice):
     """
     A wx.Choice control that shows all available serial ports on the system.

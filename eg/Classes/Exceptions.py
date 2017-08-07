@@ -18,8 +18,10 @@
 
 # Local imports
 import eg
+from TranslatableStrings import TranslatableStrings
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     DriverNotFound = "Driver not found!"
     DriverNotOpen = "Could not open driver!"
     DeviceNotFound = "Device not found!"

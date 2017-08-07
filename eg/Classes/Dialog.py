@@ -20,7 +20,8 @@ import wx
 
 # Local imports
 import eg
-from eg.Classes.ControlProviderMixin import ControlProviderMixin
+from ControlProviderMixin import ControlProviderMixin
+
 
 class Dialog(wx.Dialog, ControlProviderMixin):
     def __init__(self, *args, **kwargs):

@@ -25,6 +25,7 @@ from xml.etree import cElementTree as ElementTree
 
 # Local imports
 import eg
+from PersistentData import PersistentData
 
 class Document(object):
     def __init__(self):
@@ -572,7 +573,7 @@ class SaveChangesDialog(wx.Dialog):
         event.Skip()
 
 
-class TreeStateData(eg.PersistentData):
+class TreeStateData(PersistentData):
     guid = None
     time = None
     expanded = None

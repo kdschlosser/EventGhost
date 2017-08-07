@@ -23,10 +23,14 @@ from wx.combo import BitmapComboBox
 
 # Local imports
 import eg
+from TranslatableStrings import TranslatableStrings
+from TaskletDialog import TaskletDialog
+
 
 INDENT_WIDTH = 18
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     Title = "Options"
     Tab1 = "General"
     CheckPreRelease = "Always notify about new pre-releases"
@@ -50,7 +54,7 @@ class Text(eg.TranslatableStrings):
     UseFixedFont = 'Use fixed-size font in the "Log" pane'
 
 
-class OptionsDialog(eg.TaskletDialog):
+class OptionsDialog(TaskletDialog):
     instance = None
 
     @eg.LogItWithReturn
@@ -64,7 +68,7 @@ class OptionsDialog(eg.TaskletDialog):
         config = eg.config
         self.useFixedFont = config.useFixedFont
 
-        eg.TaskletDialog.__init__(
+        TaskletDialog.__init__(
             self,
             parent=parent,
             title=text.Title,

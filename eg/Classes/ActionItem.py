@@ -30,7 +30,7 @@ PATCHES = {
     "Registry.RegistryQuery": "System.RegistryQuery",
 }
 
-RENAMED_COLOUR = eg.colour.GetRenamedColor()
+RENAMED_COLOUR = None
 
 class ActionItem(TreeItem):
     xmlTag = "Action"
@@ -47,6 +47,10 @@ class ActionItem(TreeItem):
 
     @eg.AssertInActionThread
     def __init__(self, parent, node):
+        if RENAMED_COLOUR is None:
+            global RENAMED_COLOUR
+            RENAMED_COLOUR = eg.colour.GetRenamedColor()
+
         TreeItem.__init__(self, parent, node)
         text = node.text
         if not text:

@@ -27,6 +27,7 @@ from wx.html import (
 # Local imports
 from eg.Utils import DecodeMarkdown, DecodeReST
 
+
 class HtmlWindow(wxHtmlWindow):
     basePath = None
 

@@ -23,6 +23,7 @@ from time import time
 # Local imports
 import eg
 
+
 class Scheduler(threading.Thread):
     """
     Sometimes you want to execute some code at a specified time or after a

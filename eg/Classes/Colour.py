@@ -40,16 +40,18 @@ class Colour:
 
     These might get configurable in the future.
     """
-    windowText = wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOWTEXT).Get()
-    windowBackground = wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW).Get()
-    treeItem = windowText
-    pluginError = (255, 0, 0)
-    activeCaption = GetWinSysColour(COLOR_ACTIVECAPTION)
-    activeCaptionGradient = GetWinSysColour(COLOR_GRADIENTACTIVECAPTION)
-    activeCaptionTextColour = GetWinSysColour(COLOR_CAPTIONTEXT)
-    inactiveCaption = GetWinSysColour(COLOR_INACTIVECAPTION)
-    inactiveCaptionGradient = GetWinSysColour(COLOR_GRADIENTINACTIVECAPTION)
-    inactiveCaptionTextColour = GetWinSysColour(COLOR_INACTIVECAPTIONTEXT)
+
+    def __init__(self):
+        self.windowText = wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOWTEXT).Get()
+        self.windowBackground = wx.SystemSettings_GetColour(wx.SYS_COLOUR_WINDOW).Get()
+        self.treeItem = self.windowText
+        self.pluginError = (255, 0, 0)
+        self.activeCaption = GetWinSysColour(COLOR_ACTIVECAPTION)
+        self.activeCaptionGradient = GetWinSysColour(COLOR_GRADIENTACTIVECAPTION)
+        self.activeCaptionTextColour = GetWinSysColour(COLOR_CAPTIONTEXT)
+        self.inactiveCaption = GetWinSysColour(COLOR_INACTIVECAPTION)
+        self.inactiveCaptionGradient = GetWinSysColour(COLOR_GRADIENTINACTIVECAPTION)
+        self.inactiveCaptionTextColour = GetWinSysColour(COLOR_INACTIVECAPTIONTEXT)
 
     def GetOddLogColour(self):
         """

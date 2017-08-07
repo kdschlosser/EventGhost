@@ -21,18 +21,21 @@ import wx
 # Local imports
 import eg
 
+
 class ColourSelectButton(wx.BitmapButton):
     def __init__(
         self,
         parent,
         value=(255, 255, 255),
         pos=wx.DefaultPosition,
-        size=(40, wx.Button.GetDefaultSize()[1]),
+        size=None,
         style=wx.BU_AUTODRAW,
         validator=wx.DefaultValidator,
         name="ColourSelectButton",
         title = "Colour Picker"
     ):
+        if size is None:
+            size = (40, wx.Button.GetDefaultSize()[1])
         self.value = value
         self.title = title
         wx.BitmapButton.__init__(

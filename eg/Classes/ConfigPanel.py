@@ -21,8 +21,10 @@ import wx
 
 # Local imports
 import eg
+from ControlProviderMixin import ControlProviderMixin
 
-class ConfigPanel(wx.PyPanel, eg.ControlProviderMixin):
+
+class ConfigPanel(wx.PyPanel, ControlProviderMixin):
     """
     A panel with some magic.
     """

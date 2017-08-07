@@ -22,6 +22,7 @@ import wx
 import eg
 from eg.Icons import GetInternalBitmap
 
+
 class FontSelectButton(wx.BitmapButton):
     """
     A button to select a font.
@@ -31,12 +32,14 @@ class FontSelectButton(wx.BitmapButton):
         parent,
         id=-1,
         pos=wx.DefaultPosition,
-        size=(40, wx.Button.GetDefaultSize()[1]),
+        size=None,
         style=wx.BU_AUTODRAW,
         validator=wx.DefaultValidator,
         name="FontSelectButton",
         value=None
     ):
+        if size is None:
+            size = (40, wx.Button.GetDefaultSize()[1])
         self.value = value
         wx.BitmapButton.__init__(
             self,

@@ -18,6 +18,7 @@
 
 import wx
 
+
 class RadioButtonGrid(wx.Panel):
     CtrlType = wx.RadioButton
     firstCtrlStyle = wx.RB_GROUP

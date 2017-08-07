@@ -22,7 +22,7 @@ from glob import glob
 
 # Local imports
 import eg
-from eg.Classes.IrDecoder.Universal import IrProtocolBase, Universal
+from Universal import IrProtocolBase, Universal
 
 DECODERS_DIR = os.path.dirname(__file__.decode('mbcs'))
 DEBUG = eg.debugLevel

@@ -18,8 +18,11 @@
 
 # Local imports
 import eg
+from TranslatableStrings import TranslatableStrings
+from TreeItemBrowseDialog import TreeItemBrowseDialog
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     caption = "Add Actions?"
     message = (
         "EventGhost can add a folder with all actions of this plugin to your "
@@ -29,9 +32,9 @@ class Text(eg.TranslatableStrings):
     )
 
 
-class AddActionGroupDialog(eg.TreeItemBrowseDialog):
+class AddActionGroupDialog(TreeItemBrowseDialog):
     def Configure(self, parent=None):
-        eg.TreeItemBrowseDialog.Configure(
+        TreeItemBrowseDialog.Configure(
             self,
             Text.caption,
             Text.message,

@@ -23,14 +23,6 @@ from time import clock
 # Local imports
 import eg
 
-# some shortcuts to speed things up
-#pylint: disable-msg=C0103
-actionThread = eg.actionThread
-LogEvent = eg.log.LogEvent
-RunProgram = eg.RunProgram
-GetItemPath = eg.EventItem.GetPath
-config = eg.config
-#pylint: enable-msg=C0103
 
 class EventGhostEvent(object):
     """
@@ -138,21 +130,21 @@ class EventGhostEvent(object):
         for listener in eg.log.eventListeners:
             listener.LogEvent(self)
 
-        if config.onlyLogAssigned and len(activeHandlers) == 0:
+        if eg.config.onlyLogAssigned and len(activeHandlers) == 0:
             self.SetStarted()
             return
 
         # show the event in the logger
-        LogEvent(self)
+        eg.log.LogEvent(self)
 
-        activeHandlers = sorted(activeHandlers, key=GetItemPath)
+        activeHandlers = sorted(activeHandlers, key=eg.EventItem.GetPath)
 
         eg.SetProcessingState(2, self)
         for eventHandler in activeHandlers:
             try:
                 eg.programCounter = (eventHandler.parent, None)
                 eg.indent = 1
-                RunProgram()
+                eg.RunProgram()
             except:
                 eg.PrintTraceback()
             if self.skipEvent:
@@ -164,7 +156,7 @@ class EventGhostEvent(object):
         if not self.shouldEnd.isSet():
             self.shouldEnd.set()
             eg.SetProcessingState(0, self)
-            actionThread.Call(self.DoUpFuncs)
+            eg.actionThread.Call(self.DoUpFuncs)
 
     def SetStarted(self):
         if self.shouldEnd.isSet():

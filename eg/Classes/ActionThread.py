@@ -21,9 +21,10 @@ from time import clock
 # Local imports
 import eg
 
-EVENT_ICON_INDEX = eg.EventItem.icon.index
+from ThreadWorker import ThreadWorker
 
-class ActionThread(eg.ThreadWorker):
+
+class ActionThread(ThreadWorker):
     corePluginInfos = None
 
     @staticmethod

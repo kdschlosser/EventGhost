@@ -17,9 +17,9 @@
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
 # Local imports
-import eg
+from TimeCtrl import TimeCtrl
 
-class TimeCtrl_Duration(eg.TimeCtrl):
+class TimeCtrl_Duration(TimeCtrl):
     """
     Ignore key "C", "c" and "!" (set time to "Now")
     """

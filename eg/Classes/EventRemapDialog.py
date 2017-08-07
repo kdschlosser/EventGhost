@@ -20,10 +20,11 @@ import wx
 
 # Local imports
 import eg
+from Dialog import Dialog
 
-class EventRemapDialog(eg.Dialog):
+class EventRemapDialog(Dialog):
     def __init__(self, parent, mapping=None):
-        eg.Dialog.__init__(
+        Dialog.__init__(
             self, parent, style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER
         )
         listCtrl = wx.ListCtrl(self, -1, style=wx.LC_REPORT)

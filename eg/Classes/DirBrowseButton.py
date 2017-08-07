@@ -19,9 +19,10 @@
 import wx
 
 # Local imports
-import eg
+from FileBrowseButton import FileBrowseButton
 
-class DirBrowseButton(eg.FileBrowseButton):
+
+class DirBrowseButton(FileBrowseButton):
     """
     A control to allow the user to type in a filename or browse with the
     standard file dialog to select a directory.
@@ -43,7 +44,7 @@ class DirBrowseButton(eg.FileBrowseButton):
         newDirectory = False,
         name = 'dirBrowseButton'
     ):
-        eg.FileBrowseButton.__init__(
+        FileBrowseButton.__init__(
             self,
             parent,
             id,

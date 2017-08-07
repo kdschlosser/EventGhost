@@ -20,6 +20,7 @@ import webbrowser
 import wx.lib.hyperlink
 from threading import Thread
 
+
 class HyperLinkCtrl(wx.lib.hyperlink.HyperLinkCtrl):
     def GotoURL(self, URL, ReportErrors=True, NotSameWinIfPossible=False):
         Thread(

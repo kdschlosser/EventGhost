@@ -20,16 +20,21 @@ import wx
 
 # Local imports
 import eg
+from PersistentData import PersistentData
+from TranslatableStrings import TranslatableStrings
+from TaskletDialog import TaskletDialog
+
 
 gLastSelected = None
 
-class Config(eg.PersistentData):
+
+class Config(PersistentData):
     position = None
     size = (550, 400)
     splitPosition = 210
 
 
-class Text(eg.TranslatableStrings):
+class Text(TranslatableStrings):
     title = "Add Event..."
     descriptionLabel = "Description"
     noDescription = "<i>No description available</i>"
@@ -38,7 +43,7 @@ class Text(eg.TranslatableStrings):
                 " it can be manually entered here."
 
 
-class AddEventDialog(eg.TaskletDialog):
+class AddEventDialog(TaskletDialog):
     @eg.LogItWithReturn
     def Configure(self, parent):
         global gLastSelected

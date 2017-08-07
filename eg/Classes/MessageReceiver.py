@@ -18,13 +18,14 @@
 
 # Local imports
 import eg
+from ThreadWorker import ThreadWorker
 from eg.WinApi.Dynamic import (
     byref, cast, CreateWindowEx, CW_USEDEFAULT, DefWindowProc, DestroyWindow,
     GetModuleHandle, LPCTSTR, RegisterClass, UnregisterClass, WinError,
     WM_SIZE, WM_USER, WNDCLASS, WNDPROC, WS_OVERLAPPEDWINDOW,
 )
 
-class MessageReceiver(eg.ThreadWorker):
+class MessageReceiver(ThreadWorker):
     """
     An eg.ThreadWorker with a invisible window to receive win32 messages for
     different purposes.
@@ -34,7 +35,7 @@ class MessageReceiver(eg.ThreadWorker):
         self.messageProcs = {
             WM_SIZE: [self.WmSizeHandler],
         }
-        eg.ThreadWorker.__init__(self)
+        ThreadWorker.__init__(self)
         wndclass = WNDCLASS(
             lpfnWndProc = WNDPROC(self.WindowProc),
             hInstance = GetModuleHandle(None),

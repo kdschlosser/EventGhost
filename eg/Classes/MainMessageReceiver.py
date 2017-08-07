@@ -20,15 +20,17 @@ import wx
 
 # Local imports
 import eg
+from MessageReceiver import MessageReceiver
 from eg.WinApi.Dynamic import (
     ChangeClipboardChain, SendMessage, SetClipboardViewer, WM_CHANGECBCHAIN,
     WM_DRAWCLIPBOARD,
 )
 
-class MainMessageReceiver(eg.MessageReceiver):
+
+class MainMessageReceiver(MessageReceiver):
     def __init__(self):
         self.hwndNextViewer = None
-        eg.MessageReceiver.__init__(self, "EventGhost Message Receiver")
+        MessageReceiver.__init__(self, "EventGhost Message Receiver")
 
     @eg.LogIt
     def OnChangeClipboardChain(self, dummyHwnd, mesg, wParam, lParam):

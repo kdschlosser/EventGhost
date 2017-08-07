@@ -19,8 +19,10 @@
 # Local imports
 import eg
 from TreeItem import HINT_MOVE_AFTER, HINT_MOVE_BEFORE_OR_AFTER, TreeItem
+from TranslatableStrings import TranslatableStrings
 
-class Text(eg.TranslatableStrings):
+
+class Text(TranslatableStrings):
     eventItem = "Event Item"
     eventName = "Event Name:"
     notice = (

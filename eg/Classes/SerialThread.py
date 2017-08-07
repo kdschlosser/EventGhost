@@ -117,6 +117,7 @@ STOPBITS_S2V_DICT = {'1': ONESTOPBIT, '1.5': ONE5STOPBITS, '2': TWOSTOPBITS}
 # stop bits dcb value to string dict
 STOPBITS_V2S_DICT = {ONESTOPBIT: '1', ONE5STOPBITS: '1.5', TWOSTOPBITS: '2'}
 
+
 class SerialError(eg.Exception):
     """
     Base class for SerialThread related exceptions.

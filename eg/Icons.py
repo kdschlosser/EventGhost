@@ -31,13 +31,71 @@ from PIL import Image
 # Local imports
 import eg
 
-IMAGES_PATH = eg.imagesDir
+IMAGES_PATH = None
 
-gImageList = wx.ImageList(16, 16)
-DISABLED_PIL = Image.open(join(IMAGES_PATH, "disabled.png"))
-FOLDER_PIL = Image.open(join(IMAGES_PATH, "folder.png")).convert("RGBA")
-PLUGIN_PIL = Image.open(join(IMAGES_PATH, "plugin.png"))
-ACTION_PIL = Image.open(join(IMAGES_PATH, "action.png")).convert("RGBA")
+gImageList = None
+DISABLED_PIL = None
+FOLDER_PIL = None
+PLUGIN_PIL = None
+ACTION_PIL = None
+
+
+INFO_ICON = None
+ERROR_ICON = None
+NOTICE_ICON = None
+FOLDER_ICON = None
+DISABLED_ICON = None
+PLUGIN_ICON = None
+EVENT_ICON = None
+ACTION_ICON = None
+MACRO_ICON = None
+ADD_ICON = None
+ROOT_ICON = None
+AUTOSTART_ICON = None
+
+
+def start():
+    global IMAGES_PATH
+    global gImageList
+    global DISABLED_PIL
+    global FOLDER_PIL
+    global PLUGIN_PIL
+    global ACTION_PIL
+
+    global INFO_ICON
+    global ERROR_ICON
+    global NOTICE_ICON
+    global FOLDER_ICON
+    global DISABLED_ICON
+    global PLUGIN_ICON
+    global EVENT_ICON
+    global ACTION_ICON
+    global MACRO_ICON
+    global ADD_ICON
+    global ROOT_ICON
+    global AUTOSTART_ICON
+
+    IMAGES_PATH = eg.imagesDir
+
+    gImageList = wx.ImageList(16, 16)
+    DISABLED_PIL = Image.open(join(IMAGES_PATH, "disabled.png"))
+    FOLDER_PIL = Image.open(join(IMAGES_PATH, "folder.png")).convert("RGBA")
+    PLUGIN_PIL = Image.open(join(IMAGES_PATH, "plugin.png"))
+    ACTION_PIL = Image.open(join(IMAGES_PATH, "action.png")).convert("RGBA")
+
+    INFO_ICON = PathIcon(join(IMAGES_PATH, "info.png"))
+    ERROR_ICON = PathIcon(join(IMAGES_PATH, "error.png"))
+    NOTICE_ICON = PathIcon(join(IMAGES_PATH, "notice.png"))
+    FOLDER_ICON = PathIcon(join(IMAGES_PATH, "folder.png"))
+    DISABLED_ICON = PathIcon(join(IMAGES_PATH, "disabled.png"))
+    PLUGIN_ICON = PathIcon(join(IMAGES_PATH, "plugin.png"))
+    EVENT_ICON = PathIcon(join(IMAGES_PATH, "event.png"))
+    ACTION_ICON = PathIcon(join(IMAGES_PATH, "action.png"))
+    MACRO_ICON = PathIcon(join(IMAGES_PATH, "macro.png"))
+    ADD_ICON = PathIcon(join(IMAGES_PATH, 'add.png'))
+    ROOT_ICON = PathIcon(join(IMAGES_PATH, 'root.png'))
+    AUTOSTART_ICON = PathIcon(join(IMAGES_PATH, 'Execute.png'))
+
 
 class IconBase(object):
     """
@@ -232,17 +290,3 @@ def PilToBitmap(pil):
     Convert a PIL image to a wx.Bitmap (with alpha channel support).
     """
     return wx.BitmapFromBufferRGBA(pil.size[0], pil.size[1], str(pil.tobytes()))
-
-# setup some commonly used icons
-INFO_ICON = PathIcon(join(IMAGES_PATH, "info.png"))
-ERROR_ICON = PathIcon(join(IMAGES_PATH, "error.png"))
-NOTICE_ICON = PathIcon(join(IMAGES_PATH, "notice.png"))
-FOLDER_ICON = PathIcon(join(IMAGES_PATH, "folder.png"))
-DISABLED_ICON = PathIcon(join(IMAGES_PATH, "disabled.png"))
-PLUGIN_ICON = PathIcon(join(IMAGES_PATH, "plugin.png"))
-EVENT_ICON = PathIcon(join(IMAGES_PATH, "event.png"))
-ACTION_ICON = PathIcon(join(IMAGES_PATH, "action.png"))
-MACRO_ICON = PathIcon(join(IMAGES_PATH, "macro.png"))
-ADD_ICON = PathIcon(join(IMAGES_PATH, 'add.png'))
-ROOT_ICON = PathIcon(join(IMAGES_PATH, 'root.png'))
-AUTOSTART_ICON = PathIcon(join(IMAGES_PATH, 'Execute.png'))

@@ -18,10 +18,10 @@
 
 import math
 
-import eg
+from SpinNumCtrl import SpinNumCtrl
 
 
-class SpinIntCtrl(eg.SpinNumCtrl):
+class SpinIntCtrl(SpinNumCtrl):
     """
     A wx.Control that shows a integer value and spin buttons to let the user
     easily input an integer value.
@@ -43,7 +43,7 @@ class SpinIntCtrl(eg.SpinNumCtrl):
         else:
             integerWidth = int(math.ceil(math.log10(max + 1)))
 
-        eg.SpinNumCtrl.__init__(
+        SpinNumCtrl.__init__(
             self,
             parent,
             id,

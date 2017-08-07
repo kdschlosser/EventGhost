@@ -16,10 +16,16 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-class Version:
-    try:
-        import VersionInfo
-        locals().update(VersionInfo.__dict__)
-    except ImportError:
-        base = string = "WIP"
-        major = minor = patch = alpha = beta = rc = buildTime = 0
+try:
+    import VersionInfo
+    locals().update(VersionInfo.__dict__)
+except ImportError:
+    base = "WIP"
+    string = "WIP"
+    major = 0
+    minor = 0
+    patch = 0
+    alpha = 0
+    beta = 0
+    rc = 0
+    buildTime = 0

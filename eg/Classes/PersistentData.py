@@ -19,6 +19,7 @@
 # Local imports
 import eg
 
+
 class PersistentDataMeta(type):
     def __new__(mcs, name, bases, dct):
         cls = type.__new__(mcs, name, bases, dct)

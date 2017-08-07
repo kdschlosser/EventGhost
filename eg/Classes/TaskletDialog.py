@@ -21,8 +21,10 @@ import wx
 
 # Local imports
 import eg
+from ControlProviderMixin import ControlProviderMixin
 
-class TaskletDialog(wx.Dialog, eg.ControlProviderMixin):
+
+class TaskletDialog(wx.Dialog, ControlProviderMixin):
     __tasklet = None
     __isModal = False
     __processingChannel = None

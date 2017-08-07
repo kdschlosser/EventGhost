@@ -19,11 +19,12 @@
 from threading import Timer
 
 # Local imports
-import eg
+from PluginBase import PluginBase
 
-class RawReceiverPlugin(eg.PluginBase):
+
+class RawReceiverPlugin(PluginBase):
     def __init__(self):
-        eg.PluginBase.__init__(self)
+        PluginBase.__init__(self)
         self.mapTable = {}
         self.timer = Timer(0, self.OnTimeOut)
         self.lastEventString = ""
