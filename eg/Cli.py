@@ -95,6 +95,10 @@ def send_message(msg, *msg_args):
         '%s, %s' % (msg, str(msg_args))
     )
 
+
+runcommand = []
+
+
 if args.isMain:
     for arg in argvIter:
         arg = arg.lower()
@@ -142,6 +146,25 @@ if args.isMain:
             elif ext in (".egtree", ".xml"):
                 args.startupFile = path
 
+    if args.pluginFile:
+        runcommand += [
+            'eg.PluginInstall.Import({0})'.format(args.pluginFile)
+        ]
+    if args.startupFile:
+        runcommand += [
+            'eg.document.Open({0})'.format(args.startupFile)
+        ]
+    if args.startupEvent:
+        runcommand += [
+            'eg.TriggerEvent(suffix={0}, payload={1})'.format(
+                *args.startupEvent
+            )
+        ]
+    if args.hideOnStartup:
+        runcommand += [
+            'eg.document.HideFrame()'
+        ]
+
     if (
         not args.allowMultiLoad and
         not args.translate and
@@ -153,17 +176,13 @@ if args.isMain:
                 if args.restart:
                     restart()
                 else:
-                    if args.startupFile is not None:
-                        send_message('eg.document.Open', args.startupFile)
-                    if args.startupEvent is not None:
-                        send_message('eg.TriggerEvent', *args.startupEvent)
-                    if args.pluginFile:
-                        send_message(
-                            'eg.PluginInstall.Import',
-                            args.pluginFile
-                        )
-                    if args.hideOnStartup:
-                        send_message('eg.document.HideFrame')
+                    for command in runcommand:
+                        command = command.split('(', 1)
+                        command[1] = command[1][:-1]
+                        if not command[1]:
+                            NamedPipe.send_message(command[0])
+                        else:
+                            NamedPipe.send_message(', '.join(command))
                     sys.exit(0)
             else:
                 sys.exit(1)

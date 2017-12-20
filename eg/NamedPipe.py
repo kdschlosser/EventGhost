@@ -23,6 +23,62 @@ import threading
 import wx
 
 
+def parse_parameters(data):
+    kwargs = dict()
+    args = []
+
+    quote_open = ''
+    last_char = ''
+    quotes = ('"', "'")
+    keyword = ''
+    line = ''
+    iterable = 0
+
+    def evaluate_data(data_str):
+        try:
+            return eval(data_str)
+        except:
+            return data_str
+
+    for char in data:
+        if char in quotes and not iterable:
+            if last_char != '\\':
+                if quote_open == char:
+                    quote_open = ''
+                elif not quote_open:
+                    quote_open = char
+            else:
+                line += char
+
+        elif char in ('(', '['):
+            iterable += 1
+            line += char
+        elif char in (')', ']'):
+            iterable -= 1
+            line += char
+        elif char == '=' and not quote_open:
+            keyword = line.strip()
+            line = ''
+        elif char == ',' and not quote_open and not iterable:
+            if keyword:
+                kwargs[keyword.strip()] = evaluate_data(line.strip())
+                keyword = ''
+                line = ''
+            else:
+                args += [evaluate_data(line.strip())]
+                line = ''
+        else:
+            line += char
+        last_char = char
+
+    if line:
+        if keyword:
+            kwargs[keyword] = evaluate_data(line.strip())
+        else:
+            args += [evaluate_data(line.strip())]
+    return kwargs, args
+
+
 def process_data(in_data):
     out_data = ''
     for char in in_data:
@@ -35,48 +91,48 @@ class Server:
     """
     Receiving thread class for the eventghost named pipe.
 
-    When EventGhost gets run a named pipe gets created by the name of 
-    "\\.\pipe\eventghost". The pipe is created so that everyone has full 
-    control. This allows for an instance of EventGhost to be running as 
+    When EventGhost gets run a named pipe gets created by the name of
+    "\\.\pipe\eventghost". The pipe is created so that everyone has full
+    control. This allows for an instance of EventGhost to be running as
     Administrator and be able to send commands into EventGhost as a user.
 
-    EventGhost command line arguments have been changed to use 
-    this pipe and has opened up the ability to be able to do things like hide 
-    the current running instance from the command line. It has also 
+    EventGhost command line arguments have been changed to use
+    this pipe and has opened up the ability to be able to do things like hide
+    the current running instance from the command line. It has also
     significantly increased the speed in which the operations are carried out.
 
-    This has been added in a way that will allow for another application that 
-    is running on the same computer as EventGhost to be able to make 
+    This has been added in a way that will allow for another application that
+    is running on the same computer as EventGhost to be able to make
     EventGhost perform various tasks. The API is as follows.
 
-    all data written to the pipe has be done as a string. this is a message 
+    all data written to the pipe has be done as a string. this is a message
     only pipe and you are not able to send any byte data through it. It is also
-    one way communications. the running instance of EventGhost will never 
+    one way communications. the running instance of EventGhost will never
     write anything to the pipe. the structure of the message is
 
     function/class/method name, *args or **kwargs
 
-    you are only able to make a call to an existing function/class/method you 
-    are not able to set a attributes value directly. you will have to create a 
-    function and then you can have data passed to that function via the named 
+    you are only able to make a call to an existing function/class/method you
+    are not able to set a attributes value directly. you will have to create a
+    function and then you can have data passed to that function via the named
     pipe and have the function then set the attributes value.
 
-    the args either have to be a list or a tuple empty if there are no 
+    the args either have to be a list or a tuple empty if there are no
     parameters to be sent.
 
-    kwargs can either be formatted as 
+    kwargs can either be formatted as
     dict(keyword1=None, keyword2=None)
     or
     {'keyword1': None, 'keyword2': None}
 
     any public class/method/function can be accessed by use of this pipe.
 
-    when a command is received it passes the command to the main thread to be 
-    evaluated for correctness and to be run. The reason this is done is 2 fold 
-    It is so that the named pipe can be created once again as fast as possible 
-    without having to wait for the command to finish executing. But also if a 
-    command is used that deals with the GUI aspects of EG a lot of the wx 
-    components need to be ran from the main thread. 
+    when a command is received it passes the command to the main thread to be
+    evaluated for correctness and to be run. The reason this is done is 2 fold
+    It is so that the named pipe can be created once again as fast as possible
+    without having to wait for the command to finish executing. But also if a
+    command is used that deals with the GUI aspects of EG a lot of the wx
+    components need to be ran from the main thread.
 
     """
 
@@ -140,86 +196,73 @@ class Server:
                 event = threading.Event()
                 res = ['']
 
-                def run_command(d):
+                data = data[1]
 
-                    command = process_data(d)
-                    try:
-                        command, d = command.split(',', 1)
-                    except ValueError:
-                        d = '()'
+                command = process_data(data)
+                try:
+                    command, data = command.split(',', 1)
+                except ValueError:
+                    data = ''
 
-                    eg.PrintDebugNotice(
-                        'Named Pipe: Command: %s, Parameters: %s' %
-                        (command, d)
-                    )
+                eg.PrintDebugNotice(
+                    'Named Pipe: Command: %s, Parameters: %s' %
+                    (command, data)
+                )
 
-                    command = command.strip()
-                    d = d.strip()
-
+                command = command.strip()
+                data = data.strip()
+                try:
                     if '=' in command:
-                        eg.PrintError(
-                            'Named Pipe Error: '
-                            'Command not allowed: ' + command
+                        raise NamedPipeCommandError(
+                            'Pipe {0}: Command not allowed: {1}'.format(
+                                pipe_id,
+                                command
+                            )
                         )
-                        command = None
 
-                    if not d.startswith('dict') and '=' in d:
-                        eg.PrintError(
-                            'Named Pipe Error: '
-                            'Data not allowed: ' + d
+                    if len(command.split('(')) > 1:
+                        raise NamedPipeCommandError(
+                            'Pipe {0}: IllegalCommand: {1}'.format(
+                                pipe_id,
+                                command
+                            )
                         )
-                        command = None
-
-                    if (
-                                d[0] not in ('(', '[', '{') and
-                            not d.startswith('dict')
-                    ):
-                        eg.PrintError(
-                            'Named Pipe Error: '
-                            'Data not allowed: ' + d
-                        )
-                        command = None
-
                     try:
-                        command = eval(command.split('(', 1)[0])
-                    except SyntaxError:
-                        eg.PrintTraceback(
-                            'Named Pipe Error: '
-                            'Command malformed: ' + command
-                        )
-                        command = None
-                    else:
+                        command = eval(command)
                         if isinstance(command, (str, unicode)):
-                            eg.PrintError(
-                                'Named Pipe Error: '
-                                'Command does not exist: ' + command
+                            raise NamedPipeCommandError(
+                                'Pipe {0}: Command does not exist: {1}'.format(
+                                    pipe_id,
+                                    command
+                                )
                             )
-                            command = None
-                    try:
-                        d = eval(d.strip())
-                    except SyntaxError:
-                        eg.PrintError(
-                            'Named Pipe Error: '
-                            'Data malformed: ' + d
+                    except NameError:
+                        raise NamedPipeCommandError(
+                            'Pipe {0}: Command does not exist: {1}'.format(
+                                pipe_id,
+                                command
+                            )
                         )
-                        command = None
 
-                    if command is not None:
-                        if isinstance(d, dict):
-                            res[0] = command(**d)
-                        elif isinstance(d, (tuple, list)):
-                            res[0] = command(*d)
-                        else:
-                            eg.PrintError(
-                                'Named Pipe Error: '
-                                'Data malformed: ' + str(d)
-                            )
+                    kwargs, args = parse_parameters(data)
+
+                except NamedPipeException:
+                    traceback.print_exc()
                     event.set()
+                else:
+                    def run():
+                        res[0] = command(*args, **kwargs)
+                        eg.PrintDebugNotice(
+                            'Pipe {0}: Return data: {1}'.format(
+                                pipe_id,
+                                str(res[0])
+                            )
+                        )
+                        event.set()
 
-                wx.CallAfter(run_command, data[1])
+                    wx.CallAfter(run)
 
-                while not event.isSet():
-                    pass
+                    event.wait()
 
                 eg.PrintDebugNotice(
                     'Named Pipe: return data: ' + str(res[0])
@@ -287,5 +330,5 @@ class NamedPipeConnectionError(NamedPipeException):
     def __getitem__(self, item):
         if item in self.__dict__:
             return self.__dict__[item]
-        
+
         return self.msg[item]
