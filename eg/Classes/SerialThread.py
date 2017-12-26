@@ -233,7 +233,7 @@ class SerialThread(Thread):
         for i in range(winreg.QueryInfoKey(key)[1]):
             serialPortList.append(winreg.EnumValue(key, i)[1])
 
-        return serialPortList
+        return sorted(serialPortList)
 
     def GetBaudrate(self):
         """
