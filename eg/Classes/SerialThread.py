@@ -18,6 +18,7 @@
 
 from threading import Condition, currentThread, Lock, Thread
 from time import clock, sleep
+import _winreg as winreg
 
 # Local imports
 import eg
@@ -224,21 +225,14 @@ class SerialThread(Thread):
         """
         Returns a list with all available serial ports.
         """
-        serialPortList = cls._serialPortList
-        if serialPortList is not None:
-            return serialPortList
         serialPortList = []
-        commconfig = COMMCONFIG()
-        commconfig.dwSize = sizeof(COMMCONFIG)
-        lpCC = pointer(commconfig)
-        dwSize = DWORD(0)
-        lpdwSize = byref(dwSize)
-        for i in range(0, 255):
-            name = 'COM%d' % (i + 1)
-            res = GetDefaultCommConfig(name, lpCC, lpdwSize)
-            if res == 1 or (res == 0 and GetLastError() == 122):
-                serialPortList.append(i)
-        cls._serialPortList = serialPortList
+
+        path = 'HARDWARE\\DEVICEMAP\\SERIALCOMM'
+        key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
+
+        for i in range(winreg.QueryInfoKey(key)[1]):
+            serialPortList.append(winreg.EnumValue(key, i)[1])
+
         return serialPortList
 
     def GetBaudrate(self):
@@ -269,7 +263,7 @@ class SerialThread(Thread):
         self.readCondition.notifyAll()
         self.readCondition.release()
 
-    def Open(self, port=0, baudrate=9600, mode="8N1"):
+    def Open(self, port='', baudrate=9600, mode="8N1"):
         """
         Opens the serial port. After the port is opened, you have to call
         :meth:`Start` to start the actual event processing of this class.
@@ -301,10 +295,8 @@ class SerialThread(Thread):
         #the "//./COMx" format is required for devices >= 9
         #not all versions of windows seem to support this properly
         #so that the first few ports are used with the DOS device name
-        if port < 9:
-            deviceStr = 'COM%d' % (port + 1)
-        else:
-            deviceStr = '\\\\.\\COM%d' % (port + 1)
+
+        deviceStr = '\\\\.\\' + port
         try:
             self.hFile = self._CreateFile(
                 deviceStr,
@@ -367,8 +359,8 @@ class SerialThread(Thread):
     def ReceiveThreadProc(self):
         hFile = self.hFile
         osReader = self.osReader
+        dwRead = self.dwRead
         lpBuf = create_string_buffer(1)
-        dwRead = DWORD()
         pHandles = (HANDLE * 2)(osReader.hEvent, self.stopEvent)
 
         waitingOnRead = False
@@ -546,8 +538,6 @@ class SerialThread(Thread):
                     # event handle.
                     CloseHandle(osStatus.hEvent)
                     raise SerialError("error in the WaitForSingleObject")
-
-        CloseHandle(osStatus.hEvent)
 
     def Stop(self):
         """

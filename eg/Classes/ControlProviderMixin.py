@@ -102,7 +102,7 @@ class ControlProviderMixin:
         ctrl.SetValue(value)
         return ctrl
 
-    def SerialPortChoice(self, value=0, *args, **kwargs):
+    def SerialPortChoice(self, value='', *args, **kwargs):
         kwargs['value'] = value
         return eg.SerialPortChoice(self, *args, **kwargs)
 

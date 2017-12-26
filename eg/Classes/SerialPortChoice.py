@@ -34,7 +34,7 @@ class SerialPortChoice(wx.Choice):
         style=0,
         validator=wx.DefaultValidator,
         name=wx.ChoiceNameStr,
-        value=None
+        value=''
     ):
         """
         :Parameters:
@@ -43,17 +43,11 @@ class SerialPortChoice(wx.Choice):
                 port will be selected if the given port does not exist or
                 no value is given.
         """
-        ports = eg.SerialThread.GetAllPorts()
-        self.ports = ports
-        choices = [("COM%d" % (portnum + 1)) for portnum in ports]
         wx.Choice.__init__(
-            self, parent, id, pos, size, choices, style, validator, name
+            self, parent, id, pos, size, eg.SerialThread.GetAllPorts(), style, validator, name
         )
-        try:
-            portPos = ports.index(value)
-        except ValueError:
-            portPos = 0
-        self.SetSelection(portPos)
+
+        self.SetStringSelection(value)
 
     def GetValue(self):
         """
@@ -62,8 +56,4 @@ class SerialPortChoice(wx.Choice):
         :rtype: int
         :returns: The serial port as an integer (0 = COM1:)
         """
-        try:
-            port = self.ports[self.GetSelection()]
-        except:
-            port = 0
-        return port
+        return self.GetStringSelection()
