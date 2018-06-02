@@ -27,6 +27,7 @@ from eg.WinApi import (
     GetTopLevelWindowList, GetWindowChildsList, GetWindowText, GetClassName
 )
 
+
 class WindowMatcher:
     """
     Returns a list of window handles matching a number of criteria.

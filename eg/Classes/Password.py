@@ -21,33 +21,34 @@ import hashlib
 import pickle
 import struct
 import weakref
-import wx
 from comtypes import GUID
-from Crypto.Cipher import AES
+# from Crypto.Cipher import AES
 
 # Local imports
 import eg
 from eg.WinApi.Dynamic import GetVolumeInformation, DWORD, byref
 
-class MasterPasswordDialog(wx.Dialog):
-    def __init__(self):
-        self.result = None
-        wx.Dialog.__init__(self, eg.document.frame)
-        staticText = wx.StaticText(
-            self, -1, "Please enter your master password:"
-        )
-        self.passwordCtrl = wx.TextCtrl(self, -1, "", style=wx.TE_PASSWORD)
-        self.buttonRow = eg.ButtonRow(self, (wx.ID_OK, wx.ID_CANCEL))
-        sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(staticText, 0, wx.EXPAND | wx.ALL, 5)
-        sizer.Add(self.passwordCtrl, 0, wx.EXPAND | wx.ALL, 5)
-        sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
-        sizer.Add(self.buttonRow.sizer, 0, wx.ALIGN_CENTER)
-        self.SetSizerAndFit(sizer)
-
-    def OnOK(self, event):
-        self.result = self.passwordCtrl.GetValue()
-        event.Skip()
+# TODO: Setup Data Stream
+# 
+# class MasterPasswordDialog(wx.Dialog):
+#     def __init__(self):
+#         self.result = None
+#         wx.Dialog.__init__(self, eg.document.frame)
+#         staticText = wx.StaticText(
+#             self, -1, "Please enter your master password:"
+#         )
+#         self.passwordCtrl = wx.TextCtrl(self, -1, "", style=wx.TE_PASSWORD)
+#         self.buttonRow = eg.ButtonRow(self, (wx.ID_OK, wx.ID_CANCEL))
+#         sizer = wx.BoxSizer(wx.VERTICAL)
+#         sizer.Add(staticText, 0, wx.EXPAND | wx.ALL, 5)
+#         sizer.Add(self.passwordCtrl, 0, wx.EXPAND | wx.ALL, 5)
+#         sizer.Add(wx.StaticLine(self), 0, wx.EXPAND | wx.TOP | wx.BOTTOM, 5)
+#         sizer.Add(self.buttonRow.sizer, 0, wx.ALIGN_CENTER)
+#         self.SetSizerAndFit(sizer)
+# 
+#     def OnOK(self, event):
+#         self.result = self.passwordCtrl.GetValue()
+#         event.Skip()
 
 
 class Password(object):

@@ -20,7 +20,6 @@ from time import sleep
 import ctypes
 
 # Local imports
-import eg
 from Dynamic import (
     c_char_p,
     c_wchar_p,
@@ -55,6 +54,8 @@ def GetClipboardText():
         else:
             hClipMem = GetClipboardData(CF_TEXT)
             if hClipMem:
+                import eg
+
                 text = cast(GlobalLock(hClipMem), c_char_p).value
                 GlobalUnlock(hClipMem)
                 text = text.decode(eg.systemEncoding)

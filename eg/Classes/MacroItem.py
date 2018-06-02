@@ -16,12 +16,11 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
 from ContainerItem import ContainerItem
 from TreeItem import HINT_MOVE_INSIDE, HINT_MOVE_BEFORE_OR_AFTER
+
 
 class MacroItem(ContainerItem):
     xmlTag = "Macro"
@@ -41,7 +40,7 @@ class MacroItem(ContainerItem):
             if eg.config.logMacros:
                 self.Print(self.name)
             if self.shouldSelectOnExecute:
-                wx.CallAfter(self.Select)
+                eg.mainThread.Call(self.Select)
 
             if self.childs:
                 eg.indent += 1

@@ -45,6 +45,7 @@ class Time(object):
     def __repr__(self):
         return self.__str__()
 
+
 class AutostartItem(MacroItem):
     xmlTag = "Autostart"
     icon = eg.Icons.AUTOSTART_ICON

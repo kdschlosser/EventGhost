@@ -22,7 +22,6 @@
 :undocumented: gIconCache, DISABLED_PIL, FOLDER_PIL, PLUGIN_PIL, ACTION_PIL
 """
 
-import wx
 from base64 import b64decode
 from cStringIO import StringIO
 from os.path import abspath, join
@@ -33,11 +32,11 @@ import eg
 
 IMAGES_PATH = eg.imagesDir
 
-gImageList = wx.ImageList(16, 16)
 DISABLED_PIL = Image.open(join(IMAGES_PATH, "disabled.png"))
 FOLDER_PIL = Image.open(join(IMAGES_PATH, "folder.png")).convert("RGBA")
 PLUGIN_PIL = Image.open(join(IMAGES_PATH, "plugin.png"))
 ACTION_PIL = Image.open(join(IMAGES_PATH, "action.png")).convert("RGBA")
+
 
 class IconBase(object):
     """
@@ -87,26 +86,24 @@ class IconBase(object):
         """
         Return a wx.Bitmap of the icon.
         """
-        return PilToBitmap(self.pil)
+        return self.pil
 
     def GetWxIcon(self):
         """
         Return a wx.Icon of the icon.
         """
-        icon = wx.EmptyIcon()
-        icon.CopyFromBitmap(PilToBitmap(self.pil))
-        return icon
+        return self.pil
 
-    def _GetDisabledIndex(self):
+    def _GetDisabledPil(self):
         """
         Creates a version of the icon with a "disabled" mark overlayed and
         returns its index inside the global wx.ImageList.
         """
         image = self.pil.copy()
         image.paste(DISABLED_PIL, None, DISABLED_PIL)
-        return gImageList.Add(PilToBitmap(image))
+        return image
 
-    def _GetFolderIndex(self):
+    def _GetFolderPil(self):
         """
         Creates a folder icon with a small version of the icon overlayed and
         returns its index inside the global wx.ImageList.
@@ -114,13 +111,7 @@ class IconBase(object):
         small = self.pil.resize((12, 12), Image.BICUBIC)
         image = FOLDER_PIL.copy()
         image.paste(small, (4, 4), small)
-        return gImageList.Add(PilToBitmap(image))
-
-    def _GetIndex(self):
-        """
-        Return the index of this icon inside the global wx.ImageList.
-        """
-        return gImageList.Add(PilToBitmap(self.pil))
+        return image
 
     def _GetPil(self):
         """
@@ -196,42 +187,18 @@ def ClearImageList():
     """
     Clear the global wxImageList.
     """
-    gImageList.RemoveAll()
     # clear out all instance variables for all icons, except the key variable
     for clsType in (IconBase, ActionSubIcon, PluginSubIcon):
         for icon in clsType.cache.itervalues():
             icon.__dict__ = {"key": icon.key}
 
+
 def CreateBitmapOnTopOfIcon(foregroundIcon, backgroundIcon, size=(12, 12)):
     small = foregroundIcon.pil.resize(size, Image.BICUBIC)
     pil = backgroundIcon.pil.copy()
     pil.paste(small, (16 - size[0], 16 - size[1]), small)
-    return wx.BitmapFromBufferRGBA(pil.size[0], pil.size[1], str(pil.tobytes()))
+    return pil
 
-def GetBitmap(filePath):
-    """
-    Returns a wx.Bitmap loaded from 'filePath'.
-
-    Uses PIL functions, because this way we have better alpha channel
-    handling.
-    """
-    return PilToBitmap(Image.open(filePath).convert("RGBA"))
-
-def GetInternalBitmap(name):
-    """
-    Same as GetBitmap() but looks for the file in the programs images
-    folder. Also appends the .png extension to the name.
-    """
-    return GetBitmap(join(IMAGES_PATH, name + ".png"))
-
-def GetInternalImage(name):
-    return wx.Image(join(eg.imagesDir, name + ".png"), wx.BITMAP_TYPE_PNG)
-
-def PilToBitmap(pil):
-    """
-    Convert a PIL image to a wx.Bitmap (with alpha channel support).
-    """
-    return wx.BitmapFromBufferRGBA(pil.size[0], pil.size[1], str(pil.tobytes()))
 
 # setup some commonly used icons
 INFO_ICON = PathIcon(join(IMAGES_PATH, "info.png"))

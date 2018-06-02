@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-from .. import Cli
+import sys
+from eg import Cli
 
 import platform
 from collections import OrderedDict

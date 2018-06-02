@@ -20,6 +20,7 @@ import os
 import winreg
 from collections import OrderedDict
 
+
 class Environment:
     IGNORE_LIST = (
         "PROCESSOR_ARCHITECTURE",

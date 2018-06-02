@@ -24,7 +24,7 @@
 import sys
 
 # Local imports
-from eg.WinApi.Dynamic import *
+from __init__ import *
 
 _psapi = WinDLL("Psapi")
 if __name__ == "__main__":

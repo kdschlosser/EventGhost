@@ -22,7 +22,6 @@ import sys
 import threading
 import time
 import warnings
-import wx
 import traceback
 from CommonMark import commonmark
 from ctypes import c_ulonglong, windll
@@ -47,8 +46,53 @@ __all__ = [
     "Bunch", "NotificationHandler", "LogIt", "LogItWithReturn", "TimeIt",
     "AssertInMainThread", "AssertInActionThread", "ParseString", "SetDefault",
     "EnsureVisible", "VBoxSizer", "HBoxSizer", "EqualizeWidths", "AsTasklet",
-    "ExecFile", "GetTopLevelWindow",
+    "ExecFile", "GetTopLevelWindow", "GetClosestLanguage", "LogService"
 ]
+
+
+def GetFuncArgString(func, args, kwargs):
+    classname = ""
+    argnames = inspect.getargspec(func)[0]
+    start = 0
+    if argnames:
+        if argnames[0] == "self":
+            classname = args[0].__class__.__name__ + "."
+            start = 1
+    res = []
+    append = res.append
+    for key, value in zip(argnames, args)[start:]:
+        append(str(key) + GetMyRepresentation(value))
+    for key, value in kwargs.items():
+        append(str(key) + GetMyRepresentation(value))
+    fname = classname + func.__name__
+    return fname, "(" + ", ".join(res) + ")"
+
+
+def GetMyRepresentation(value):
+    """
+    Give a shorter representation of some wx-objects. Returns normal repr()
+    for everything else. Also adds a "=" sign at the beginning to make it
+    useful as a "formatvalue" function for inspect.formatargvalues().
+    """
+    typeString = repr(type(value))
+    if typeString.startswith("<class 'wx._core."):
+        return "=<wx.%s>" % typeString[len("<class 'wx._core."): -2]
+    if typeString.startswith("<class 'wx._controls."):
+        return "=<wx.%s>" % typeString[len("<class 'wx._controls."): -2]
+    return "=" + repr(value)
+
+
+def LogService(func):
+    if func.func_code.co_flags & 0x20:
+        raise TypeError("Can't wrap generator function")
+
+    def LogItWrapper(*args, **kwargs):
+        funcName, argString = GetFuncArgString(func, args, kwargs)
+        eg.log.PrintServiceNotice(funcName + argString)
+        return func(*args, **kwargs)
+
+    return update_wrapper(LogItWrapper, func)
+
 
 USER_CLASSES = (type, ClassType)
 
@@ -78,11 +122,11 @@ class Bunch(object):
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
-
-class HBoxSizer(wx.BoxSizer):  #IGNORE:R0904
-    def __init__(self, *items):
-        wx.BoxSizer.__init__(self, wx.HORIZONTAL)
-        self.AddMany(items)
+#
+# class HBoxSizer(wx.BoxSizer):  #IGNORE:R0904
+#     def __init__(self, *items):
+#         wx.BoxSizer.__init__(self, wx.HORIZONTAL)
+#         self.AddMany(items)
 
 
 class MyHtmlDocWriter(Writer):
@@ -107,12 +151,12 @@ class NotificationHandler(object):
     def __init__(self):
         self.listeners = []
 
-
-class VBoxSizer(wx.BoxSizer):  #IGNORE:R0904
-    def __init__(self, *items):
-        wx.BoxSizer.__init__(self, wx.VERTICAL)
-        self.AddMany(items)
-
+#
+# class VBoxSizer(wx.BoxSizer):  #IGNORE:R0904
+#     def __init__(self, *items):
+#         wx.BoxSizer.__init__(self, wx.VERTICAL)
+#         self.AddMany(items)
+#
 
 def AppUrl(description, url):
     if url:
@@ -299,16 +343,16 @@ def GetClosestLanguage():
     """
     Returns the language file closest to system locale.
     """
-    langDir = join(dirname(abspath(sys.executable)), "languages")
-    if exists(langDir):
-        locale = wx.Locale()
-        name = locale.GetLanguageCanonicalName(locale.GetSystemLanguage())
-        if exists(join(langDir, name + ".py")):
-            return name
-        else:
-            for f in [f for f in os.listdir(langDir) if f.endswith(".py")]:
-                if f.startswith(name[0:3]):
-                    return f[0:5]
+    # langDir = join(dirname(abspath(sys.executable)), "languages")
+    # if exists(langDir):
+    #     locale = wx.Locale()
+    #     name = locale.GetLanguageCanonicalName(locale.GetSystemLanguage())
+    #     if exists(join(langDir, name + ".py")):
+    #         return name
+    #     else:
+    #         for f in [f for f in os.listdir(langDir) if f.endswith(".py")]:
+    #             if f.startswith(name[0:3]):
+    #                 return f[0:5]
     return "en_EN"
 
 def GetFirstParagraph(text):
@@ -339,35 +383,6 @@ def GetFirstParagraph(text):
             result += " " + line
         return ' '.join(result.split())
 
-def GetFuncArgString(func, args, kwargs):
-    classname = ""
-    argnames = inspect.getargspec(func)[0]
-    start = 0
-    if argnames:
-        if argnames[0] == "self":
-            classname = args[0].__class__.__name__ + "."
-            start = 1
-    res = []
-    append = res.append
-    for key, value in zip(argnames, args)[start:]:
-        append(str(key) + GetMyRepresentation(value))
-    for key, value in kwargs.items():
-        append(str(key) + GetMyRepresentation(value))
-    fname = classname + func.__name__
-    return fname, "(" + ", ".join(res) + ")"
-
-def GetMyRepresentation(value):
-    """
-    Give a shorter representation of some wx-objects. Returns normal repr()
-    for everything else. Also adds a "=" sign at the beginning to make it
-    useful as a "formatvalue" function for inspect.formatargvalues().
-    """
-    typeString = repr(type(value))
-    if typeString.startswith("<class 'wx._core."):
-        return "=<wx.%s>" % typeString[len("<class 'wx._core."): -2]
-    if typeString.startswith("<class 'wx._controls."):
-        return "=<wx.%s>" % typeString[len("<class 'wx._controls."): -2]
-    return "=" + repr(value)
 
 def GetTopLevelWindow(window):
     """

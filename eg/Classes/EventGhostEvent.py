@@ -32,6 +32,7 @@ GetItemPath = eg.EventItem.GetPath
 config = eg.config
 #pylint: enable-msg=C0103
 
+
 class EventGhostEvent(object):
     """
     .. attribute:: string

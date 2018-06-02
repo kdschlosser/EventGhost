@@ -22,7 +22,7 @@ import os
 import Queue
 import string
 import threading
-import wx
+
 from ctypes import (
     addressof,
     byref,
@@ -190,6 +190,7 @@ DISK_NAME="My Install Disk"
 DisplayName="$DISPLAY_NAME"
 """
 
+
 class Text(eg.TranslatableStrings):
     dialogCaption = "EventGhost Plugin: %s"
     downloadMsg = (
@@ -239,8 +240,8 @@ class WinUsb(object):
         if not eg.CallWait(self.ShowDownloadMessage):
             return False
         stopEvent = threading.Event()
-        wx.CallAfter(eg.TransferDialog, None, neededFiles, stopEvent)
-        stopEvent.wait()
+        # wx.CallAfter(eg.TransferDialog, None, neededFiles, stopEvent)
+        # stopEvent.wait()
         neededFiles = self.GetNeededFiles()
         if neededFiles:
             eg.CallWait(

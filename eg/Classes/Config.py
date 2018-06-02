@@ -26,6 +26,7 @@ from types import ClassType, InstanceType
 import eg
 from eg.Utils import GetClosestLanguage
 
+
 class Section:
     def __init__(self, defaults=None):
         if defaults:
@@ -95,8 +96,6 @@ class Config(Section):
             except:
                 if eg.debugLevel:
                     raise
-        else:
-            eg.PrintDebugNotice('File "%s" does not exist.' % configFilePath)
 
     def Save(self):
         self.version = eg.Version.string
@@ -110,6 +109,7 @@ def MakeSectionMetaClass(dummyName, dummyBases, dct):
     section = Section()
     section.__dict__ = dct
     return section
+
 
 def RecursivePySave(obj, fileWriter, indent=""):
     objDict = obj.__dict__

@@ -16,14 +16,13 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
 from eg.WinApi.Dynamic import (
     ChangeClipboardChain, SendMessage, SetClipboardViewer, WM_CHANGECBCHAIN,
     WM_DRAWCLIPBOARD,
 )
+
 
 class MainMessageReceiver(eg.MessageReceiver):
     def __init__(self):
@@ -42,7 +41,7 @@ class MainMessageReceiver(eg.MessageReceiver):
         return 0
 
     def OnDrawClipboard(self, dummyHwnd, mesg, wParam, lParam):
-        wx.CallAfter(eg.Notify, "ClipboardChange")
+        eg.Notify("ClipboardChange")
         # pass the message to the next window in the clipboard viewer chain
         if self.hwndNextViewer:
             SendMessage(self.hwndNextViewer, mesg, wParam, lParam)

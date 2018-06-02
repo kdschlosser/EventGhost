@@ -32,6 +32,12 @@ while not folder_name:
     install_directory, folder_name = os.path.split(install_directory)
 
 mainDir = os.path.abspath(install_directory)
+
+python_directory = os.path.join(
+    mainDir,
+    "lib%d%d" % version,
+)
+
 sitePackagesDir = os.path.join(
     mainDir,
     "lib%d%d" % version,

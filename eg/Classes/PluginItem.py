@@ -18,12 +18,12 @@
 
 import base64
 import pickle
-import wx
 
 # Local imports
 import eg
 from ActionItem import ActionItem
 from TreeItem import TreeItem
+
 
 class PluginItem(ActionItem):
     xmlTag = "Plugin"
@@ -68,13 +68,14 @@ class PluginItem(ActionItem):
                 if obj.executable and obj.executable.plugin == self.executable:
                     return True
             return None
-
+        
+        # TODO: Setup Data Stream
         if self.root.Traverse(SearchFunc) is not None:
-            eg.MessageBox(
-                eg.text.General.deletePlugin,
-                eg.APP_NAME,
-                wx.NO_DEFAULT | wx.OK | wx.ICON_EXCLAMATION
-            )
+            # eg.MessageBox(
+            #     eg.text.General.deletePlugin,
+            #     eg.APP_NAME,
+            #     wx.NO_DEFAULT | wx.OK | wx.ICON_EXCLAMATION
+            # )
             return False
         if not TreeItem.AskDelete(self):
             return False
@@ -193,9 +194,11 @@ class PluginItem(ActionItem):
             eg.actionThread.Call(self.info.Stop)
             eg.actionThread.Call(self.info.Start)
 
+    # TODO: Setup Data Stream
     def SetAttributes(self, tree, itemId):
         if self.info.lastException or self.info.initFailed:
-            tree.SetItemTextColour(itemId, eg.colour.pluginError)
+            pass
+            # tree.SetItemTextColour(itemId, eg.colour.pluginError)
 
     @eg.AssertInActionThread
     def SetEnable(self, flag=True):

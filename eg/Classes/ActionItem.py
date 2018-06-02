@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
 from TreeItem import (
@@ -30,7 +28,6 @@ PATCHES = {
     "Registry.RegistryQuery": "System.RegistryQuery",
 }
 
-RENAMED_COLOUR = eg.colour.GetRenamedColor()
 
 class ActionItem(TreeItem):
     xmlTag = "Action"
@@ -222,7 +219,10 @@ class ActionItem(TreeItem):
             args = ()
         self.SetArguments(args)
 
+    # TODO: Setup Data Stream
     def SetAttributes(self, tree, treeId):
+        RENAMED_COLOUR = eg.colour.GetRenamedColor()
+
         if self.name:
             tree.SetItemTextColour(treeId, RENAMED_COLOUR)
             tree.SetItemFont(treeId, tree.italicfont)
@@ -230,6 +230,8 @@ class ActionItem(TreeItem):
             tree.SetItemTextColour(treeId, None)
             tree.SetItemFont(treeId, tree.normalfont)
 
+
+    # TODO: Setup Data Stream
     @eg.LogIt
     def ShowHelp(self, parent=None):
         if self.helpDialog:

@@ -16,9 +16,8 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
+
 import eg
 
 class ActionBase(object):
@@ -116,28 +115,9 @@ class ActionBase(object):
             return self(*args)
         return CallWrapper
 
+    # TODO: Setup data stream
     def Configure(self, *args):
-        """
-        This should be overridden in a subclass, if the plugin wants to have
-        a configuration dialog.
-
-        When the plugin is freshly added by the user to the configuration tree
-        there are no *\*args* and you must therefore supply sufficient
-        default arguments.
-        If the plugin is reconfigured by the user, this method will be called
-        with the same arguments as the :meth:`!__start__` method would receive.
-        """
-        panel = eg.ConfigPanel()
-        panel.dialog.buttonRow.applyButton.Enable(False)
-        label = panel.StaticText(
-            eg.text.General.noOptionsAction,
-            style=wx.ALIGN_CENTRE | wx.ST_NO_AUTORESIZE
-        )
-        panel.sizer.Add((0, 0), 1, wx.EXPAND)
-        panel.sizer.Add(label, 0, wx.ALIGN_CENTRE)
-        panel.sizer.Add((0, 0), 1, wx.EXPAND)
-        while panel.Affirmed():
-            panel.SetResult()
+        pass
 
     def GetLabel(self, *args):
         """

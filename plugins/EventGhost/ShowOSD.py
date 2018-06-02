@@ -44,12 +44,12 @@ SKIN_DIR = join(
 SKINS = [name[:-3] for name in listdir(SKIN_DIR) if name.endswith(".py")]
 SKINS.sort()
 
-DEFAULT_FONT_INFO = wx.Font(
-    18,
-    wx.SWISS,
-    wx.NORMAL,
-    wx.BOLD
-).GetNativeFontInfoDesc()
+# DEFAULT_FONT_INFO = wx.Font(
+#     18,
+#     wx.SWISS,
+#     wx.NORMAL,
+#     wx.BOLD
+# ).GetNativeFontInfoDesc()
 
 
 class ShowOSD(eg.ActionBase):
@@ -240,7 +240,7 @@ class ShowOSD(eg.ActionBase):
 
             eg.app.onExitFuncs.append(CloseOSD)
 
-        wx.CallAfter(MakeOSD)
+        # wx.CallAfter(MakeOSD)
 
     @eg.LogIt
     def OnClose(self):

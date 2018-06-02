@@ -29,15 +29,11 @@ from eg.WinApi.Dynamic import (
     SetProcessWorkingSetSize,
 )
 
-# some shortcuts
-EventGhostEvent = eg.EventGhostEvent
-actionThread = eg.actionThread
-ActionThreadCall = actionThread.Call
 
 class EventThread(ThreadWorker):
     def __init__(self):
         ThreadWorker.__init__(self)
-        eg.event = EventGhostEvent("")
+        eg.event = eg.EventGhostEvent("")
         self.startupEvent = None
         self.hHandle = OpenProcess(PROCESS_SET_QUOTA, 0, eg.processId)
         self.filters = {}
@@ -72,7 +68,7 @@ class EventThread(ThreadWorker):
 
     @eg.LogIt
     def StartSession(self, filename):
-        actionThread.Func(actionThread.StartSession, 120)(filename)
+        eg.actionThread.Func(eg.actionThread.StartSession, 120)(filename)
         self.TriggerEvent("OnInit")
         if self.startupEvent is not None:
             self.TriggerEvent(self.startupEvent[0], self.startupEvent[1])
@@ -80,7 +76,7 @@ class EventThread(ThreadWorker):
 
     @eg.LogIt
     def StopSession(self):
-        actionThread.Func(actionThread.StopSession, 120)()
+        eg.actionThread.Func(eg.actionThread.StopSession, 120)()
         eg.PrintDebugNotice("StopSession done")
 
     def TriggerEnduringEvent(
@@ -90,30 +86,31 @@ class EventThread(ThreadWorker):
         prefix="Main",
         source=eg
     ):
-        event = EventGhostEvent(suffix, payload, prefix, source)
+        event = eg.EventGhostEvent(suffix, payload, prefix, source)
         if event.source in self.filters:
             for filterFunc in self.filters[event.source]:
                 if filterFunc(event) is True:
                     return event
 
         def Transfer():
-            ActionThreadCall(event.Execute)
+            eg.actionThread.Call(event.Execute)
         self.AppendAction(Transfer)
 
         return event
 
+    @eg.LogItWithReturn
     def TriggerEvent(self, suffix, payload=None, prefix="Main", source=eg):
         """
         Trigger an event
         """
-        event = EventGhostEvent(suffix, payload, prefix, source)
+        event = eg.EventGhostEvent(suffix, payload, prefix, source)
         if event.source in self.filters:
             for filterFunc in self.filters[event.source]:
                 if filterFunc(event) is True:
                     return event
 
         def Transfer():
-            ActionThreadCall(event.Execute)
+            eg.actionThread.Call(event.Execute)
             event.SetShouldEnd()
         self.AppendAction(Transfer)
 
@@ -126,7 +123,7 @@ class EventThread(ThreadWorker):
         prefix="Main",
         source=eg
     ):
-        event = EventGhostEvent(suffix, payload, prefix, source)
+        event = eg.EventGhostEvent(suffix, payload, prefix, source)
         if event.source in self.filters:
             for filterFunc in self.filters[event.source]:
                 if filterFunc(event) is True:
@@ -140,7 +137,7 @@ class EventThread(ThreadWorker):
                 executed.set()
 
         def Transfer():
-            ActionThreadCall(Execute)
+            eg.actionThread.Call(Execute)
             event.SetShouldEnd()
 
         self.AppendAction(Transfer)

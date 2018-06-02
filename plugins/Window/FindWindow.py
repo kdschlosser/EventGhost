@@ -495,30 +495,30 @@ class FindWindow(eg.ActionBase):
                 count = 0
         SetOption(count > 0, options[5], count or 1)
 
-
-class TestDialog(eg.Dialog):
-    def __init__(self, parent, hwnds):
-        eg.Dialog.__init__(
-            self,
-            parent,
-            title="Found Windows",
-            size=(500, 350),
-            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
-        )
-        windowList = eg.WindowList(self, hwnds)
-        okButton = wx.Button(self, wx.ID_OK)
-        btnSizer = eg.HBoxSizer(
-            ((0, 0), 1, wx.EXPAND),
-            (okButton, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5),
-            ((0, 0), 1, wx.EXPAND),
-            (eg.SizeGrip(self), 0, wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT),
-        )
-        mainSizer = eg.VBoxSizer(
-            (windowList, 1, wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, 5),
-            (btnSizer, 0, wx.EXPAND),
-        )
-        self.SetSizer(mainSizer)
-
+#
+# class TestDialog(eg.Dialog):
+#     def __init__(self, parent, hwnds):
+#         eg.Dialog.__init__(
+#             self,
+#             parent,
+#             title="Found Windows",
+#             size=(500, 350),
+#             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
+#         )
+#         windowList = eg.WindowList(self, hwnds)
+#         okButton = wx.Button(self, wx.ID_OK)
+#         btnSizer = eg.HBoxSizer(
+#             ((0, 0), 1, wx.EXPAND),
+#             (okButton, 0, wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL, 5),
+#             ((0, 0), 1, wx.EXPAND),
+#             (eg.SizeGrip(self), 0, wx.ALIGN_BOTTOM | wx.ALIGN_RIGHT),
+#         )
+#         mainSizer = eg.VBoxSizer(
+#             (windowList, 1, wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT, 5),
+#             (btnSizer, 0, wx.EXPAND),
+#         )
+#         self.SetSizer(mainSizer)
+#
 
 def UseForegroundWindowOnly():
     """ Instruct EventGhost to use the active desktop window only, by

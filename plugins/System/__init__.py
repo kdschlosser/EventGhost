@@ -34,7 +34,7 @@ from threading import Timer, Thread
 
 # Local imports
 import eg
-import eg.WinApi.SoundMixer as SoundMixer
+from eg.WinApi import SoundMixer
 from eg.cFunctions import (
     ResetIdleTimer as HookResetIdleTimer,
     SetIdleTime as HookSetIdleTime,
@@ -2146,7 +2146,7 @@ class ToggleMute(eg.ActionBase):
 
 def _CreateShowPictureFrame():
     ShowPicture.pictureFrame = ShowPictureFrame()
-wx.CallAfter(_CreateShowPictureFrame)
+# wx.CallAfter(_CreateShowPictureFrame)
 
 def AdjustPrivileges():
     """

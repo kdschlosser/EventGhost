@@ -25,7 +25,6 @@ import win32security
 import win32pipe
 import win32file
 import threading
-import wx
 import traceback
 import random
 

@@ -33,6 +33,7 @@ def ShowError(msg):
         0 | 40000
     )
 
+
 def NetworkSend(host, port, password, eventString, payload=None):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -102,6 +103,7 @@ def NetworkSend(host, port, password, eventString, payload=None):
 
     return True
 
+
 def Main(argv):
     try:
         host, port = argv[0].split(":")
@@ -124,6 +126,7 @@ def Main(argv):
         exit(1)
     else:
         NetworkSend(host, int(port), password, eventstring, payloads)
+
 
 if __name__ == '__main__':
     import sys

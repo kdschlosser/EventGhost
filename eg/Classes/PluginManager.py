@@ -22,6 +22,7 @@ from os.path import exists, isdir, join
 # Local imports
 import eg
 
+
 class PluginManager:
     def __init__(self):
         self.database = {}

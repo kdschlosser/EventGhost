@@ -42,6 +42,7 @@
 # 0.0.1 - initial
 #
 
+import eg
 
 eg.RegisterPlugin(
     name = "Yamaha RX-V1000 Serial",

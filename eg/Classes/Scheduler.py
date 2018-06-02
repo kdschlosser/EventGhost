@@ -23,6 +23,7 @@ from time import time
 # Local imports
 import eg
 
+
 class Scheduler(threading.Thread):
     """
     Sometimes you want to execute some code at a specified time or after a
@@ -76,18 +77,28 @@ class Scheduler(threading.Thread):
           An object to identify the task.
 
         """
-        return self.AddShortTaskAbsolute(time() + waitTime, func, *args, **kwargs)
+        return self.AddShortTaskAbsolute(
+            time() + waitTime, 
+            func,
+            *args,
+            **kwargs
+        )
 
     def AddShortTaskAbsolute(self, startTime, func, *args, **kwargs):
         """
-        This does the same as :meth:`AddShortTask`, but the `startTime` parameter
-        specifies an absolute time expressed in floating point seconds since
-        the epoch. Take a look at the documentation of `Python's time module`_,
+        This does the same as :meth:`AddShortTask`, but the `startTime` 
+        parameter specifies an absolute time expressed in floating point 
+        seconds since the epoch. Take a look at the documentation of `Python's 
+        time module`_,
         for more information about this time format. Again a little example::
 
             import time
             startTime = time.mktime((2007, 8, 15, 16, 53, 0, 0, 0, -1))
-            eg.scheduler.AddShortTaskAbsolute(startTime, eg.TriggerEvent, "MyEvent")
+            eg.scheduler.AddShortTaskAbsolute(
+                startTime,
+                eg.TriggerEvent, 
+                "MyEvent"
+            )
 
         This will trigger the event "Main.MyEvent" at 16:53:00 on 15 August
         2007. If you run this code after this point of time, the
@@ -112,7 +123,12 @@ class Scheduler(threading.Thread):
     def AddTaskAbsolute(self, startTime, func, *args, **kwargs):
         args = list(args)
         args.append(func)
-        return self.AddShortTaskAbsolute(startTime, self.LongTask, *args, **kwargs)
+        return self.AddShortTaskAbsolute(
+            startTime,
+            self.LongTask,
+            *args, 
+            **kwargs
+        )
 
     def CancelTask(self, task):
         """

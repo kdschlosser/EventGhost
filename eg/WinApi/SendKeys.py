@@ -16,10 +16,11 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
+
+import ctypes
+from ctypes.wintypes import BOOL, HWND
 from eg.WinApi.Dynamic import (
     AttachThreadInput, byref, c_ubyte, CloseHandle, DWORD, GetCurrentThreadId,
     GetFocus, GetForegroundWindow, GetGUIThreadInfo, GetKeyboardState,
@@ -28,8 +29,9 @@ from eg.WinApi.Dynamic import (
     PROCESS_QUERY_INFORMATION, SendInput, SetKeyboardState, SetTimer, sizeof,
     VK_CONTROL, VK_LCONTROL, VK_LSHIFT, VK_MENU, VK_SHIFT, VkKeyScanW,
     WaitForInputIdle, WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, WM_SYSKEYUP,
-    WM_TIMER,
+    WM_TIMER, CW_USEDEFAULT, WS_OVERLAPPEDWINDOW, cast, LPCTSTR, UnregisterClass
 )
+
 
 VK_CODES = (
     ('AltGr', 10),
@@ -321,11 +323,33 @@ VK_KEYS = {
 for keyword, code in VK_CODES:
     VK_KEYS[keyword.upper()] = code
 
+user32 = ctypes.windll.user32
+
+CreateWindow = user32.CreateWindowExW
+CreateWindow.restype = HWND
+
+DestroyWindow = user32.DestroyWindow
+DestroyWindow.restype = BOOL
+
+
 class SendKeysParser:
     @eg.LogIt
     def __init__(self):
-        self.dummyWindow = wx.Frame(None, -1, "Dummy Window")
-        self.dummyHwnd = self.dummyWindow.GetHandle()
+        self.dummyHwnd = CreateWindow(
+            0,
+            None,
+            ctypes.create_unicode_buffer('EventGhost Dummy Window'),
+            WS_OVERLAPPEDWINDOW,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            CW_USEDEFAULT,
+            None,
+            None,
+            None,
+            None
+        )
+
         self.msg = MSG()
         self.isSysKey = False
         self.sendInputStruct = INPUT()
@@ -334,6 +358,9 @@ class SendKeysParser:
         self.procHandle = None
         self.guiTreadInfo = GUITHREADINFO()
         self.guiTreadInfo.cbSize = sizeof(GUITHREADINFO)
+
+    def Close(self):
+        DestroyWindow(self.dummyHwnd)
 
     def __call__(self, hwnd, keystrokeString, useAlternateMethod=False, mode=2):
         keyData = ParseText(keystrokeString)

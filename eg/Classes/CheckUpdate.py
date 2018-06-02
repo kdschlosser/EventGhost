@@ -18,7 +18,6 @@
 
 import threading
 import webbrowser
-import wx
 from agithub.GitHub import GitHub
 from pkg_resources import parse_version
 
@@ -51,79 +50,80 @@ class CheckUpdate:
         _checkUpdate(manually=True)
 
 
-class MessageDialog(eg.Dialog):
-    def __init__(self, version, url):
-        self.url = url
-        eg.Dialog.__init__(self, None, -1, eg.APP_NAME)
-        bmp = wx.ArtProvider.GetBitmap(
-            wx.ART_INFORMATION,
-            wx.ART_MESSAGE_BOX,
-            (32, 32)
-        )
-        staticBitmap = wx.StaticBitmap(self, -1, bmp)
-        staticText = self.StaticText(
-            Text.newVersionMesg % (eg.Version.string, version)
-        )
-        downloadButton = wx.Button(self, -1, eg.text.General.ok)
-        downloadButton.Bind(wx.EVT_BUTTON, self.OnOk)
-        cancelButton = wx.Button(self, -1, eg.text.General.cancel)
-        cancelButton.Bind(wx.EVT_BUTTON, self.OnCancel)
+# TODO: Setup Data Stream
+# class MessageDialog(eg.Dialog):
+#     def __init__(self, version, url):
+#         self.url = url
+#         eg.Dialog.__init__(self, None, -1, eg.APP_NAME)
+#         bmp = wx.ArtProvider.GetBitmap(
+#             wx.ART_INFORMATION,
+#             wx.ART_MESSAGE_BOX,
+#             (32, 32)
+#         )
+#         staticBitmap = wx.StaticBitmap(self, -1, bmp)
+#         staticText = self.StaticText(
+#             Text.newVersionMesg % (eg.Version.string, version)
+#         )
+#         downloadButton = wx.Button(self, -1, eg.text.General.ok)
+#         downloadButton.Bind(wx.EVT_BUTTON, self.OnOk)
+#         cancelButton = wx.Button(self, -1, eg.text.General.cancel)
+#         cancelButton.Bind(wx.EVT_BUTTON, self.OnCancel)
+#
+#         sizer2 = eg.HBoxSizer(
+#             (staticBitmap, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 10),
+#             ((5, 5), 0),
+#             (
+#                 staticText,
+#                 0,
+#                 wx.TOP | wx.RIGHT | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL,
+#                 10
+#             ),
+#         )
+#         self.SetSizerAndFit(
+#             eg.VBoxSizer(
+#                 (sizer2),
+#                 ((5, 5), 1),
+#                 (
+#                     eg.HBoxSizer(
+#                         (downloadButton),
+#                         ((5, 5), 0),
+#                         (cancelButton),
+#                     ), 0, wx.ALIGN_CENTER_HORIZONTAL
+#                 ),
+#                 ((2, 10), 0),
+#             )
+#         )
+#         self.ShowModal()
+#
+#     def OnCancel(self, event):
+#         self.Close()
+#
+#     def OnOk(self, event):
+#         webbrowser.open(self.url, True, True)
+#         self.Close()
 
-        sizer2 = eg.HBoxSizer(
-            (staticBitmap, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 10),
-            ((5, 5), 0),
-            (
-                staticText,
-                0,
-                wx.TOP | wx.RIGHT | wx.BOTTOM | wx.ALIGN_CENTER_VERTICAL,
-                10
-            ),
-        )
-        self.SetSizerAndFit(
-            eg.VBoxSizer(
-                (sizer2),
-                ((5, 5), 1),
-                (
-                    eg.HBoxSizer(
-                        (downloadButton),
-                        ((5, 5), 0),
-                        (cancelButton),
-                    ), 0, wx.ALIGN_CENTER_HORIZONTAL
-                ),
-                ((2, 10), 0),
-            )
-        )
-        self.ShowModal()
+#
+# def CenterOnParent(self):
+#     parent = eg.document.frame
+#     if parent is None:
+#         return
+#     x, y = parent.GetPosition()
+#     parentWidth, parentHeight = parent.GetSize()
+#     width, height = self.GetSize()
+#     self.SetPosition(
+#         ((parentWidth - width) / 2 + x, (parentHeight - height) / 2 + y)
+#     )
 
-    def OnCancel(self, event):
-        self.Close()
-
-    def OnOk(self, event):
-        webbrowser.open(self.url, True, True)
-        self.Close()
-
-
-def CenterOnParent(self):
-    parent = eg.document.frame
-    if parent is None:
-        return
-    x, y = parent.GetPosition()
-    parentWidth, parentHeight = parent.GetSize()
-    width, height = self.GetSize()
-    self.SetPosition(
-        ((parentWidth - width) / 2 + x, (parentHeight - height) / 2 + y)
-    )
-
-def ShowWaitDialog():
-    dialog = wx.Dialog(None, style=wx.THICK_FRAME | wx.DIALOG_NO_PARENT)
-    staticText = wx.StaticText(dialog, -1, Text.waitMesg)
-    sizer = wx.BoxSizer(wx.HORIZONTAL)
-    sizer.Add(staticText, 1, wx.ALL, 20)
-    dialog.SetSizerAndFit(sizer)
-    CenterOnParent(dialog)
-    dialog.Show()
-    wx.GetApp().Yield()
-    return dialog
+# def ShowWaitDialog():
+#     dialog = wx.Dialog(None, style=wx.THICK_FRAME | wx.DIALOG_NO_PARENT)
+#     staticText = wx.StaticText(dialog, -1, Text.waitMesg)
+#     sizer = wx.BoxSizer(wx.HORIZONTAL)
+#     sizer.Add(staticText, 1, wx.ALL, 20)
+#     dialog.SetSizerAndFit(sizer)
+#     CenterOnParent(dialog)
+#     dialog.Show()
+#     wx.GetApp().Yield()
+#     return dialog
 
 def _checkUpdate(manually=False):
     if eg.Version.string == "WIP":

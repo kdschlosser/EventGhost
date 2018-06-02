@@ -25,6 +25,7 @@ import eg
 from eg.Utils import SetDefault
 from PluginModuleInfo import PluginModuleInfo
 
+
 class PluginInstanceInfo(PluginModuleInfo):
     pluginCls = None
     module = None

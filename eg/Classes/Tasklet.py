@@ -16,30 +16,33 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-"""
-    eg.Tasklet
-    ~~~~~~~~~~
 
-    A wrapper around stackless.tasklet
+import threading
 
-    :copyright: 2009 by EventGhost team, see AUTHORS.txt for more details.
-    :license: GNU GPL v2, see LICENSE.txt for more details.
-"""
 
-import stackless
-
-class Tasklet(stackless.tasklet):
+class Tasklet(threading.Thread):
     countTasklets = 0
 
     def __init__(self, func):
-        stackless.tasklet.__init__(self)
-        self.bind(func)
+        self.__func = func
+        self.__args = ()
+        self.__kwargs = {}
+        threading.Thread.__init__(self, target=self.__run)
+        self.daemon = True
+
         Tasklet.countTasklets += 1
         self.taskId = Tasklet.countTasklets
 
+    def __call__(self, *args, **kwargs):
+        self.__args = args
+        self.__kwargs = kwargs
+
+    def run(self):
+        self.start()
+
+    def __run(self):
+        self.__func(*self.__args, **self.__kwargs)
+
     @classmethod
     def GetCurrentId(cls):
-        try:
-            return stackless.getcurrent().taskId
-        except AttributeError:
-            return 0
+        return 0

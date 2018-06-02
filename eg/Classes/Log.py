@@ -18,7 +18,6 @@
 
 import codecs
 import sys
-import wx
 from collections import deque
 from threading import currentThread
 from time import strftime, time
@@ -35,12 +34,6 @@ _oldStdErr = sys.stderr
 oldStdOut = codecs.lookup("ascii").streamwriter(_oldStdOut, 'backslashreplace')
 oldStdErr = codecs.lookup("ascii").streamwriter(_oldStdErr, 'backslashreplace')
 
-INFO_ICON = eg.Icons.INFO_ICON
-ERROR_ICON = eg.Icons.ERROR_ICON
-NOTICE_ICON = eg.Icons.NOTICE_ICON
-DEBUG_ICON = eg.Icons.DEBUG_ICON
-WARNING_ICON = eg.Icons.WARNING_ICON
-
 
 def _build_notice(icon, args):
     strs = [
@@ -50,27 +43,27 @@ def _build_notice(icon, args):
 
     for arg in args:
         arg = str(arg).strip()
-        if icon == WARNING_ICON:
+        if icon == eg.Icons.WARNING_ICON:
             arg = arg.replace('Traceback', 'Warning')
         strs += [arg]
 
     msg = ' '.join(strs)
-    if icon == DEBUG_ICON:
+    if icon == eg.Icons.DEBUG_ICON:
         msg = 'DEBUG: ' + msg.replace('\n', '\nDEBUG: ')
 
-    elif icon == WARNING_ICON:
+    elif icon == eg.Icons.WARNING_ICON:
         msg = 'WARNING: ' + msg.replace('\n', '\nWARNING: ')
 
-    std_msg = (
-        strftime("%H:%M:%S: ") +
-        msg.replace('\n', '\n' + strftime("%H:%M:%S: "))
-    ) + '\n'
-    msg += "\n"
+    # std_msg = (
+    #     strftime("%H:%M:%S: ") +
+    #     msg.replace('\n', '\n' + strftime("%H:%M:%S: "))
+    # ) + '\n'
+    # msg += "\n"
 
-    try:
-        oldStdErr.write(std_msg)
-    except:
-        oldStdErr.write(std_msg.decode("mbcs"))
+    # try:
+    #     oldStdErr.write(std_msg)
+    # except:
+    #     oldStdErr.write(std_msg.decode("mbcs"))
 
     return msg
 
@@ -94,28 +87,29 @@ class Log(object):
 
         class StdOut:
             def write(self, data):
-                log.Write(data, INFO_ICON)
-                if eg.debugLevel:
-                    try:
-                        oldStdOut.write(data)
-                    except:
-                        oldStdOut.write(data.decode("mbcs"))
+                log.Write(data, eg.Icons.INFO_ICON)
+                # if eg.debugLevel:
+                #     try:
+                #         oldStdOut.write(data)
+                #     except:
+                #         oldStdOut.write(data.decode("mbcs"))
 
         class StdErr:
             def write(self, data):
-                log.Write(data, ERROR_ICON)
-                if eg.debugLevel:
-                    try:
-                        oldStdErr.write(data)
-                    except:
-                        oldStdErr.write(data.decode("mbcs"))
+                log.Write(data, eg.Icons.ERROR_ICON)
+                # if eg.debugLevel:
+                #     try:
+                #         oldStdErr.write(data)
+                #     except:
+                #         oldStdErr.write(data.decode("mbcs"))
 
         if eg.startupArguments.isMain:
             sys.stdout = StdOut()
             sys.stderr = StdErr()
-        if eg.debugLevel == 2:
-            if hasattr(_oldStdErr, "_displayMessage"):
-                _oldStdErr._displayMessage = False
+
+        # if eg.debugLevel == 2:
+        #     if hasattr(_oldStdErr, "_displayMessage"):
+        #         _oldStdErr._displayMessage = False
         if eg.debugLevel:
             import platform
             import warnings
@@ -136,14 +130,6 @@ class Log(object):
                 "[{0}]".format(platform.python_compiler())
             )
             self.PrintDebugNotice("----------------------------------------")
-
-        # redirect all wxPython error messages to our log
-        class MyLog(wx.PyLog):
-            def DoLog(self, level, msg, dummyTimestamp):
-                if (level >= 6):
-                    return
-                sys.stderr.write("wxError%d: %s\n" % (level, msg))
-        wx.Log.SetActiveTarget(MyLog())
 
     def AddEventListener(self, listener):
         if listener not in self.eventListeners:
@@ -184,23 +170,30 @@ class Log(object):
     def Print(self, *args, **kwargs):
         self._Print(args, **kwargs)
 
+    def PrintServiceNotice(self, *args):
+        """
+        Logs a message if eg.debugLevel is set.
+        """
+        msg = _build_notice(eg.Icons.DEBUG_ICON, args)
+        self.Write(msg, eg.Icons.DEBUG_ICON)
+
     def PrintDebugNotice(self, *args):
         """
         Logs a message if eg.debugLevel is set.
         """
         if eg.debugLevel:
-            msg = _build_notice(DEBUG_ICON, args)
-            self.Write(msg, DEBUG_ICON)
+            msg = _build_notice(eg.Icons.DEBUG_ICON, args)
+            self.Write(msg, eg.Icons.DEBUG_ICON)
 
     def PrintWarningNotice(self, *args):
         """
         Logs a message if eg.debugLevel is set.
         """
         if eg.debugLevel:
-            msg = _build_notice(WARNING_ICON, args)
+            msg = _build_notice(eg.Icons.WARNING_ICON, args)
             indent = eg.indent
             eg.indent = 0
-            self.Write(msg, WARNING_ICON)
+            self.Write(msg, eg.Icons.WARNING_ICON)
             eg.indent = indent
 
     def PrintError(self, *args, **kwargs):
@@ -209,11 +202,11 @@ class Log(object):
         icon and a red colour, so the user can easily identify it as an error
         message.
         """
-        kwargs.setdefault("icon", ERROR_ICON)
+        kwargs.setdefault("icon", eg.Icons.ERROR_ICON)
         self._Print(args, **kwargs)
 
     def PrintNotice(self, *args, **kwargs):
-        kwargs.setdefault("icon", NOTICE_ICON)
+        kwargs.setdefault("icon", eg.Icons.NOTICE_ICON)
         self._Print(args, **kwargs)
 
     def PrintStack(self, skip=0):
@@ -222,9 +215,9 @@ class Log(object):
         ]
         strs += format_stack(sys._getframe().f_back)[skip:]
         error = "".join(strs)
-        self.Write(error.rstrip() + "\n", ERROR_ICON)
-        if eg.debugLevel:
-            sys.stderr.write(error)
+        self.Write(error.rstrip() + "\n", eg.Icons.ERROR_ICON)
+        # if eg.debugLevel:
+        #     sys.stderr.write(error)
 
     def PrintTraceback(self, msg=None, skip=0, source=None, excInfo=None):
         if msg:
@@ -250,9 +243,9 @@ class Log(object):
         error = "".join(slist)
         if source is not None:
             source = ref(source)
-        self.Write(error.rstrip() + "\n", ERROR_ICON, source)
-        if eg.debugLevel:
-            oldStdErr.write(error)
+        self.Write(error.rstrip() + "\n", eg.Icons.ERROR_ICON, source)
+        # if eg.debugLevel:
+        #     oldStdErr.write(error)
 
     def RemoveEventListener(self, listener):
         if listener in self.eventListeners:
@@ -278,11 +271,11 @@ class Log(object):
         when = time()
         for line in lines[:-1]:
             data.append((line, icon, wRef, when, eg.indent))
-            wx.CallAfter(self._WriteLine, line, icon, wRef, when, eg.indent)
+            eg.mainThread.Call(self._WriteLine, line, icon, wRef, when, eg.indent)
             if len(data) >= self.maxlength:
                 data.popleft()
 
-    def _Print(self, args, sep=" ", end="\n", icon=INFO_ICON, source=None):
+    def _Print(self, args, sep=" ", end="\n", icon=eg.Icons.INFO_ICON, source=None):
         if source is not None:
             source = ref(source)
         #strs = [unicode(arg) for arg in args]
@@ -291,5 +284,6 @@ class Log(object):
     def _WriteLine(self, line, icon, wRef, when, indent):
         if self.NativeLog:
             self.ctrl.WriteLine(line, icon, wRef, when, indent)
+        # print line, icon, wRef, when, indent
         for listener in self.logListeners:
             listener.WriteLine(line, icon, wRef, when, indent)

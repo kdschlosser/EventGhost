@@ -19,6 +19,7 @@
 # Local imports
 import eg
 
+
 class ExceptionsProvider(object):
     def __init__(self, source):
         self.source = source

@@ -23,6 +23,7 @@ from types import ClassType
 import eg
 from eg.Utils import SetDefault
 
+
 class ActionGroup(object):
     __slots__ = [
         "plugin", "name", "description", "icon", "items", "expanded",

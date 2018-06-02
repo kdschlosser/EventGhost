@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
 import xml.etree.cElementTree as ElementTree
 from cStringIO import StringIO
 from xml.sax.saxutils import escape, quoteattr
@@ -32,6 +31,7 @@ HINT_MOVE_BEFORE = 2           # item would move before
 HINT_MOVE_AFTER = 4            # item would move after
 HINT_MOVE_BEFORE_OR_AFTER = 6  # item can be inserted before or after
 HINT_MOVE_EVERYWHERE = 7       # item can be inserted before or after or dropped inside
+
 
 class TreeItem(object):
     # name
@@ -83,21 +83,24 @@ class TreeItem(object):
                 mesg = eg.text.General.deleteManyQuestion % str(count)
             else:
                 mesg = eg.text.General.deleteQuestion
-            answer = eg.MessageBox(
-                mesg,
-                eg.APP_NAME,
-                wx.NO_DEFAULT | wx.YES_NO | wx.ICON_EXCLAMATION
-            )
-            if answer == wx.ID_NO:
-                return False
+                # TODO: Setup Data Stream
+            # answer = eg.MessageBox(
+            #     mesg,
+            #     eg.APP_NAME,
+            #     wx.NO_DEFAULT | wx.YES_NO | wx.ICON_EXCLAMATION
+            # )
+            # if answer == wx.ID_NO:
+            #     return False
         dependants = self.GetDependantsOutside(allItems)
         if len(dependants) > 0:
-            answer = eg.MessageBox(
-                eg.text.General.deleteLinkedItems,
-                eg.APP_NAME,
-                wx.NO_DEFAULT | wx.YES_NO | wx.ICON_EXCLAMATION
-            )
-            return answer == wx.ID_YES
+            # TODO: Setup Data Stream
+            # answer = eg.MessageBox(
+            #     eg.text.General.deleteLinkedItems,
+            #     eg.APP_NAME,
+            #      wx.NO_DEFAULT | wx.YES_NO | wx.ICON_EXCLAMATION
+            #  )
+            #  return answer == wx.ID_YES
+            return True
         return True
 
     def CanCopy(self):
@@ -109,39 +112,40 @@ class TreeItem(object):
     def CanDelete(self):
         return True
 
+    # TODO: Setup Data Stream
     def CanPaste(self):
-        if not wx.TheClipboard.Open():
-            return False
-        try:
-            dataObj = wx.CustomDataObject("DragEventItem")
-            if wx.TheClipboard.GetData(dataObj):
-                if self.DropTest(eg.EventItem):
-                    return True
-
-            dataObj = wx.TextDataObject()
-            if not wx.TheClipboard.GetData(dataObj):
-                return False
-            try:
-                data = dataObj.GetText().encode("utf-8")
-                tagToCls = self.document.XMLTag2ClassDict
-                try:
-                    rootXmlNode = ElementTree.fromstring(data)
-                except SyntaxError:
-                    return False
-                for childXmlNode in rootXmlNode:
-                    childCls = tagToCls[childXmlNode.tag.lower()]
-                    if self.DropTest(childCls) & HINT_MOVE_INSIDE:
-                        continue
-                    if self.parent is None:
-                        return False
-                    elif not self.parent.DropTest(childCls) & HINT_MOVE_INSIDE:
-                        return False
-            except:
-                if eg.debugLevel:
-                    raise
-                return False
-        finally:
-            wx.TheClipboard.Close()
+        # if not wx.TheClipboard.Open():
+        #     return False
+        # try:
+        #     dataObj = wx.CustomDataObject("DragEventItem")
+        #     if wx.TheClipboard.GetData(dataObj):
+        #         if self.DropTest(eg.EventItem):
+        #             return True
+        # 
+        #     dataObj = wx.TextDataObject()
+        #     if not wx.TheClipboard.GetData(dataObj):
+        #         return False
+        #     try:
+        #         data = dataObj.GetText().encode("utf-8")
+        #         tagToCls = self.document.XMLTag2ClassDict
+        #         try:
+        #             rootXmlNode = ElementTree.fromstring(data)
+        #         except SyntaxError:
+        #             return False
+        #         for childXmlNode in rootXmlNode:
+        #             childCls = tagToCls[childXmlNode.tag.lower()]
+        #             if self.DropTest(childCls) & HINT_MOVE_INSIDE:
+        #                 continue
+        #             if self.parent is None:
+        #                 return False
+        #             elif not self.parent.DropTest(childCls) & HINT_MOVE_INSIDE:
+        #                 return False
+        #     except:
+        #         if eg.debugLevel:
+        #             raise
+        #         return False
+        # finally:
+        #     wx.TheClipboard.Close()
         return True
 
     def CanPython(self):
@@ -181,7 +185,7 @@ class TreeItem(object):
         def Do():
             self.document.expandedNodes.add(self)
             eg.Notify("NodeChanged", self)
-        wx.CallAfter(Do)
+        eg.mainThread.Call(Do)
 
     def GetAllItems(self):
         """
@@ -322,13 +326,15 @@ class TreeItem(object):
         stream.close()
         return xmlString
 
+    # TODO: Setup Data Stream
     @property
     def imageIndex(self):
-        return self.icon.index if self.isEnabled else self.icon.disabledIndex
+        return None
+        # return self.icon.index if self.isEnabled else self.icon.disabledIndex
 
     @eg.AssertInActionThread
     def MoveItemTo(self, newParentItem, pos):
-        wx.CallAfter(eg.Notify, "NodeMoveBegin")
+        eg.Notify("NodeMoveBegin")
         oldPos = self.parent.RemoveChild(self)
         newPos = pos
         if newParentItem == self.parent:
@@ -336,31 +342,36 @@ class TreeItem(object):
                 newPos -= 1
         self.parent = newParentItem
         newParentItem.AddChild(self, newPos)
-        wx.CallAfter(eg.Notify, "NodeMoveEnd")
+        eg.Notify("NodeMoveEnd")
 
+    # TODO: Setup Data Stream
     def OnCmdCopy(self):
-        data = self.GetXmlString()
-        if data and wx.TheClipboard.Open():
-            wx.TheClipboard.SetData(wx.TextDataObject(data.decode("utf-8")))
-            wx.TheClipboard.Close()
+        # data = self.GetXmlString()
+        # if data and wx.TheClipboard.Open():
+        #     wx.TheClipboard.SetData(wx.TextDataObject(data.decode("utf-8")))
+        #     wx.TheClipboard.Close()
+        pass
 
+    # TODO: Setup Data Stream
     def OnCmdPython(self):
-        data = self.GetXmlString()
-        if data and wx.TheClipboard.Open():
-            ix1 = data.find("<Action")
-            ix1 = 3 + data.find(">\r\n        ", ix1)
-            ix2 = data.find("\r\n    </Action>")
-            data = data[ix1:ix2].strip()
-            if data[:24] == "EventGhost.PythonScript(":
-                #data = data[24:-1]
-                data = data[26:-2].replace('\\n', '\n').rstrip() + '\n'
-            elif data[:25] == "EventGhost.PythonCommand(":
-                #data = data[25:-1]
-                data = data[27:-2].replace('\\n', '\n').strip()
-            else:
-                data = "eg.plugins." + data
-            wx.TheClipboard.SetData(wx.TextDataObject(data))
-            wx.TheClipboard.Close()
+        
+        # data = self.GetXmlString()
+        # if data and wx.TheClipboard.Open():
+        #     ix1 = data.find("<Action")
+        #     ix1 = 3 + data.find(">\r\n        ", ix1)
+        #     ix2 = data.find("\r\n    </Action>")
+        #     data = data[ix1:ix2].strip()
+        #     if data[:24] == "EventGhost.PythonScript(":
+        #         #data = data[24:-1]
+        #         data = data[26:-2].replace('\\n', '\n').rstrip() + '\n'
+        #     elif data[:25] == "EventGhost.PythonCommand(":
+        #         #data = data[25:-1]
+        #         data = data[27:-2].replace('\\n', '\n').strip()
+        #     else:
+        #         data = "eg.plugins." + data
+        #     wx.TheClipboard.SetData(wx.TextDataObject(data))
+        #     wx.TheClipboard.Close()
+        pass
 
     def Print(self, *args, **kwargs):
         kwargs.setdefault("source", self)
@@ -372,21 +383,21 @@ class TreeItem(object):
         eg.PrintError(*args, **kwargs)
 
     def Refresh(self):
-        wx.CallAfter(eg.Notify, "NodeChanged", self)
+        eg.Notify("NodeChanged", self)
 
     @eg.AssertInActionThread
     def RenameTo(self, newName):
         self.name = newName
         if self.dependants:
             for link in self.dependants:
-                wx.CallAfter(eg.Notify, "NodeChanged", link.owner)
-        wx.CallAfter(eg.Notify, "NodeChanged", self)
+                eg.Notify("NodeChanged", link.owner)
+        eg.Notify("NodeChanged", self)
 
     def RestoreState(self):
         pass
 
     def Select(self):
-        wx.CallAfter(eg.Notify, "NodeSelected", self)
+        eg.Notify("NodeSelected", self)
 
     def SetAttributes(self, tree, treeId):
         pass

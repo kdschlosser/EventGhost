@@ -19,6 +19,7 @@
 # Local imports
 import eg
 
+
 class Text(eg.TranslatableStrings):
     DriverNotFound = "Driver not found!"
     DriverNotOpen = "Could not open driver!"

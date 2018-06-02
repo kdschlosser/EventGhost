@@ -22,7 +22,8 @@ from time import clock
 import eg
 from eg.WinApi import User
 
-EVENT_ICON_INDEX = eg.EventItem.icon.index
+
+
 
 class ActionThread(eg.ThreadWorker):
     corePluginInfos = None
@@ -111,12 +112,15 @@ class ActionThread(eg.ThreadWorker):
         if payload['IsDomainLogin']:
             payload['IsDomainAdmin'] = User.IsDomainAdmin()
 
+        print 'Action Thread Triggering Events'
         event = eg.EventGhostEvent(
             prefix='Windows',
             suffix='User.' + User.Name(),
             payload=payload
         )
         event.Execute()
+
+        print 'Action Thread Running Autostart'
         eg.programCounter = (eg.document.autostartMacro, None)
         eg.RunProgram()
 

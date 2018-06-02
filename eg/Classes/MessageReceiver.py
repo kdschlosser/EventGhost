@@ -24,6 +24,7 @@ from eg.WinApi.Dynamic import (
     WM_SIZE, WM_USER, WNDCLASS, WNDPROC, WS_OVERLAPPEDWINDOW,
 )
 
+
 class MessageReceiver(eg.ThreadWorker):
     """
     An eg.ThreadWorker with a invisible window to receive win32 messages for
@@ -43,7 +44,12 @@ class MessageReceiver(eg.ThreadWorker):
         )
         self.classAtom = RegisterClass(byref(wndclass))
         if not self.classAtom:
-            raise WinError()
+            try:
+                raise WinError()
+            except WindowsError:
+                import traceback
+                traceback.print_exc()
+
         self.wndclass = wndclass
         self.hwnd = None
         self.nextWmUserMsg = WM_USER + 1000
@@ -130,5 +136,5 @@ class MessageReceiver(eg.ThreadWorker):
         return 1
 
     def WmSizeHandler(self, hwnd, mesg, wParam, lParam):
-        #print "MessageReceiver sized"
+        # print "MessageReceiver sized"
         return 0

@@ -21,6 +21,7 @@ import eg
 from ContainerItem import ContainerItem
 from TreeItem import HINT_MOVE_EVERYWHERE
 
+
 class FolderItem(ContainerItem):
     xmlTag = "Folder"
     icon = eg.Icons.FOLDER_ICON

@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-from os.path import join, split
+from os.path import join
 from ctypes import c_int, create_unicode_buffer, HRESULT, windll
 from ctypes.wintypes import DWORD, HANDLE, HWND, LPWSTR
 
@@ -85,15 +85,15 @@ BUFFER = create_unicode_buffer(MAX_PATH)
 GetTempPathW(MAX_PATH, BUFFER)
 temporaryFiles = BUFFER.value[:-1]
 
+
 class FolderPath(object):
     __ALL__ = CSIDL.keys() + ["TemporaryFiles"]
     TemporaryFiles = temporaryFiles
     __repr__ = object.__repr__
 
-
     @property
     def mainDir(self):
-        return eg.Cli.PythonPaths.mainDir
+        return eg.PythonPaths.mainDir
 
     @property
     def configDir(self):
@@ -101,10 +101,6 @@ class FolderPath(object):
             self.RoamingAppData,
             eg.APP_NAME
         )
-
-        if eg.Cli.args.configDir and config_dir != eg.Cli.args.configDir:
-            config_dir = eg.Cli.args.configDir
-
         return config_dir
 
     @property
@@ -116,16 +112,11 @@ class FolderPath(object):
 
     @property
     def localPluginDir(self):
-        if self.configDir == eg.Cli.args.configDir:
-            return self.corePluginDir
-
-        else:
-
-            return join(
-                self.ProgramData,
-                eg.APP_NAME,
-                'plugins'
-            )
+        return join(
+            self.ProgramData,
+            eg.APP_NAME,
+            'plugins'
+        )
 
     @property
     def imagesDir(self):
@@ -143,7 +134,7 @@ class FolderPath(object):
 
     @property
     def sitePackagesDir(self):
-        return eg.Cli.PythonPaths.sitePackagesDir
+        return eg.PythonPaths.sitePackagesDir
 
     def __getattr__(self, name):
         csidl = CSIDL[name]

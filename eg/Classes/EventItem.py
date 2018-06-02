@@ -20,6 +20,7 @@
 import eg
 from TreeItem import HINT_MOVE_AFTER, HINT_MOVE_BEFORE_OR_AFTER, TreeItem
 
+
 class Text(eg.TranslatableStrings):
     eventItem = "Event Item"
     eventName = "Event Name:"
@@ -44,17 +45,19 @@ class EventItem(TreeItem):
         TreeItem.__init__(self, parent, node)
         self.RegisterEvent(self.name)
 
+    # TODO: Setup Data Stream
     def Configure(self, name):
-        panel = eg.ConfigPanel()
-        staticText = panel.StaticText(Text.eventName)
-        textCtrl = panel.TextCtrl(name, size=(250, -1))
-        staticText2 = panel.StaticText(Text.notice)
-        panel.sizer.Add(staticText)
-        panel.sizer.Add(textCtrl)
-        panel.sizer.Add((5, 5))
-        panel.sizer.Add(staticText2)
-        while panel.Affirmed():
-            panel.SetResult(textCtrl.GetValue())
+        # panel = eg.ConfigPanel()
+        # staticText = panel.StaticText(Text.eventName)
+        # textCtrl = panel.TextCtrl(name, size=(250, -1))
+        # staticText2 = panel.StaticText(Text.notice)
+        # panel.sizer.Add(staticText)
+        # panel.sizer.Add(textCtrl)
+        # panel.sizer.Add((5, 5))
+        # panel.sizer.Add(staticText2)
+        # while panel.Affirmed():
+        #     panel.SetResult(textCtrl.GetValue())
+        pass
 
     def Delete(self):
         self.UnRegisterEvent(self.name)

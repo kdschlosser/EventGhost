@@ -17,7 +17,6 @@
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import wx
 from tempfile import mkstemp
 from threading import Lock
 from types import ClassType
@@ -26,11 +25,15 @@ from xml.etree import cElementTree as ElementTree
 # Local imports
 import eg
 
+
 class Document(object):
+
     def __init__(self):
         class ItemMixin:
             document = self
             root = None
+
+
         self.ItemMixin = ItemMixin
         itemNamespace = {}
         self.XMLTag2ClassDict = {}
@@ -42,8 +45,8 @@ class Document(object):
             return cls
 
         self.TreeLink = eg.TreeLink
-#        self.TreeItem = MakeCls("TreeItem")
-#        self.ContainerItem = MakeCls("ContainerItem")
+        #        self.TreeItem = MakeCls("TreeItem")
+        #        self.ContainerItem = MakeCls("ContainerItem")
         self.EventItem = MakeCls("EventItem")
         self.ActionItem = MakeCls("ActionItem")
         self.PluginItem = MakeCls("PluginItem")
@@ -66,6 +69,7 @@ class Document(object):
         self.reentrantLock = Lock()
         self.expandedNodes = set()
         self.visibleLogItem = 0
+
 
     def AfterLoad(self):
         if (
@@ -92,6 +96,7 @@ class Document(object):
         self.SetIsDirty()
         self.SetUndoState((True, False, ": " + handler.name, ""))
 
+    # TODO: Setup Data Stream
     def AskFile(self, style):
         fileDialog = wx.FileDialog(
             self.frame,
@@ -106,6 +111,7 @@ class Document(object):
         finally:
             fileDialog.Destroy()
 
+    # TODO: Setup Data Stream
     @eg.LogItWithReturn
     def CheckFileNeedsSave(self):
         """
@@ -137,10 +143,6 @@ class Document(object):
         try:
             eg.config.hideOnStartup = self.frame is None
             eg.config.autoloadFilePath = self.filePath
-            if self.frame is not None:
-                frame = self.frame
-                self.frame = None
-                frame.Destroy()
             TreeStateData.guid = self.root.guid
             TreeStateData.time = self.root.time
             TreeStateData.expanded = self.GetExpandState()
@@ -149,6 +151,7 @@ class Document(object):
         except:
             eg.PrintTraceback()
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdAddAction(self, selection=None, action=None):
         if selection is None:
@@ -165,6 +168,7 @@ class Document(object):
             action = result[0]
         return eg.UndoHandler.NewAction(self).Do(selection, action)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdAddEvent(self):
         if not self.selection.DropTest(eg.EventItem):
@@ -178,23 +182,27 @@ class Document(object):
             label=result[0]
         )
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdAddFolder(self):
         folderNode = eg.UndoHandler.NewFolder(self).Do(self.selection)
-        wx.CallAfter(self.frame.treeCtrl.EditNodeLabel, folderNode)
+        # wx.CallAfter(self.frame.treeCtrl.EditNodeLabel, folderNode)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdAddMacro(self):
         return eg.UndoHandler.NewMacro(self).Do(self.selection)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdAddPlugin(self):
-        result = eg.AddPluginDialog.GetModalResult(self.frame)
-        if result:
-            try:
-                eg.UndoHandler.NewPlugin(self).Do(result[0])
-            except eg.Exceptions.PluginLoadError:
-                pass
+        # result = eg.AddPluginDialog.GetModalResult(self.frame)
+        # if result:
+        #     try:
+        #         eg.UndoHandler.NewPlugin(self).Do(result[0])
+        #     except eg.Exceptions.PluginLoadError:
+        #         pass
+        pass
 
     @eg.AssertInMainThread
     def CmdConfigure(self, item=None, isFirstConfigure=False):
@@ -205,18 +213,22 @@ class Document(object):
         else:
             return eg.UndoHandler.Configure(self).Do(item, isFirstConfigure)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdCopy(self):
         self.selection.OnCmdCopy()
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdCut(self):
         eg.UndoHandler.Cut(self).Do(self.selection)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdDelete(self):
         eg.UndoHandler.Clear(self).Do(self.selection)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdExecute(self):
         if not self.selection.isExecutable:
@@ -224,6 +236,7 @@ class Document(object):
         else:
             self.ExecuteNode(self.selection).SetShouldEnd()
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def CmdPaste(self):
         eg.UndoHandler.Paste(self).Do(self.selection)
@@ -293,6 +306,7 @@ class Document(object):
             filename = os.path.splitext(os.path.basename(self.filePath))[0]
         return "EventGhost %s - %s" % (eg.Version.string, filename)
 
+    # TODO: Setup Data Stream
     @eg.LogItWithReturn
     def HideFrame(self):
         # NOTICE:
@@ -343,7 +357,7 @@ class Document(object):
         eg.TreeLink.StopLoad()
         self.SetIsDirty(False)
         self.AfterLoad()
-        wx.CallAfter(eg.Notify, "DocumentNewRoot", root)
+        eg.Notify("DocumentNewRoot", root)
         return root
 
     @eg.LogIt
@@ -363,7 +377,7 @@ class Document(object):
         root.childs.append(self.autostartMacro)
         eg.TreeLink.StopLoad()
         self.SetIsDirty(False)
-        wx.CallAfter(eg.Notify, "DocumentNewRoot", root)
+        eg.Notify("DocumentNewRoot", root)
         return root
 
     def New(self):
@@ -374,6 +388,7 @@ class Document(object):
     def OnCmdConfigure(self, node):
         eg.AsTasklet(eg.UndoHandler.Configure(self).Do)(node)
 
+    # TODO: Setup Data Stream
     def Open(self, filePath=None):
         self.ShowFrame()
         if filePath is not None:
@@ -430,6 +445,7 @@ class Document(object):
         item.RestoreState()
         return item
 
+    # TODO: Setup Data Stream
     @eg.LogItWithReturn
     def Save(self):
         if not self.filePath:
@@ -437,6 +453,7 @@ class Document(object):
         self.WriteFile(self.filePath)
         return wx.ID_YES
 
+    # TODO: Setup Data Stream
     def SaveAs(self):
         filePath = self.AskFile(style=wx.SAVE | wx.OVERWRITE_PROMPT)
         if filePath is None:
@@ -470,24 +487,16 @@ class Document(object):
         self.isDirty = flag
         eg.Notify("DocumentChange", flag)
 
+    # TODO: Setup Data Stream
     def SetUndoState(self, undoState):
         self.undoState = undoState
         eg.Notify("UndoChange", undoState)
-
-    @eg.LogItWithReturn
-    def ShowFrame(self):
-        if self.reentrantLock.acquire(False):
-            if self.frame is None:
-                self.frame = eg.mainFrame = eg.MainFrame(self)
-                self.frame.Show()
-            else:
-                self.frame.Iconize(False)
-            self.reentrantLock.release()
 
     def StartSession(self, filePath):
         eg.eventThread.Func(eg.eventThread.StopSession)()
         eg.eventThread.Call(eg.eventThread.StartSession, filePath)
 
+    # TODO: Setup Data Stream
     @eg.AssertInMainThread
     def Undo(self):
         if len(self.stockUndo) == 0:
@@ -526,53 +535,55 @@ class Document(object):
             eg.PrintTraceback("Error while saving file")
         return success
 
-
-class SaveChangesDialog(wx.Dialog):
-    def __init__(self, parent=None):
-        text = eg.text.MainFrame.SaveChanges
-        wx.Dialog.__init__(self, parent, title=eg.APP_NAME)
-        bmp = wx.ArtProvider.GetBitmap(
-            wx.ART_WARNING, wx.ART_CMN_DIALOG, (32, 32)
-        )
-        staticBitmap = wx.StaticBitmap(self, -1, bmp)
-
-        messageCtrl = wx.StaticText(
-            self, -1, eg.text.MainFrame.SaveChanges.mesg
-        )
-        messageCtrl.Wrap(400)
-        saveButton = wx.Button(self, wx.ID_YES, text.saveButton)
-        saveButton.Bind(wx.EVT_BUTTON, self.OnButton)
-        saveButton.SetDefault()
-        saveButton.SetFocus()
-        dontSaveButton = wx.Button(self, wx.ID_NO, text.dontSaveButton)
-        dontSaveButton.Bind(wx.EVT_BUTTON, self.OnButton)
-        cancelButton = wx.Button(self, wx.ID_CANCEL, eg.text.General.cancel)
-        cancelButton.Bind(wx.EVT_BUTTON, self.OnButton)
-        self.SetDefaultItem(saveButton)
-
-        sizer = wx.BoxSizer(wx.HORIZONTAL)
-        sizer.Add(staticBitmap, 0, wx.ALL, 12)
-        sizer.Add(messageCtrl, 0, wx.ALIGN_CENTER | wx.LEFT | wx.TOP | wx.RIGHT, 6)
-        buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        buttonSizer.Add(saveButton, 0, wx.LEFT | wx.RIGHT, 3)
-        buttonSizer.Add(dontSaveButton, 0, wx.LEFT | wx.RIGHT, 3)
-        buttonSizer.Add(cancelButton, 0, wx.LEFT | wx.RIGHT, 3)
-        mainSizer = wx.BoxSizer(wx.VERTICAL)
-        mainSizer.Add(sizer)
-        mainSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
-        self.SetSizerAndFit(mainSizer)
-        if parent:
-            self.CenterOnParent()
-        else:
-            self.Center()
-
-    def OnButton(self, event):
-        buttonId = event.GetId()
-        self.EndModal(buttonId)
-        event.Skip()
+# TODO: Setup Data Stream
+# class SaveChangesDialog(wx.Dialog):
+#     def __init__(self, parent=None):
+#         text = eg.text.MainFrame.SaveChanges
+#         wx.Dialog.__init__(self, parent, title=eg.APP_NAME)
+#         bmp = wx.ArtProvider.GetBitmap(
+#             wx.ART_WARNING, wx.ART_CMN_DIALOG, (32, 32)
+#         )
+#         staticBitmap = wx.StaticBitmap(self, -1, bmp)
+#
+#         messageCtrl = wx.StaticText(
+#             self, -1, eg.text.MainFrame.SaveChanges.mesg
+#         )
+#         messageCtrl.Wrap(400)
+#         saveButton = wx.Button(self, wx.ID_YES, text.saveButton)
+#         saveButton.Bind(wx.EVT_BUTTON, self.OnButton)
+#         saveButton.SetDefault()
+#         saveButton.SetFocus()
+#         dontSaveButton = wx.Button(self, wx.ID_NO, text.dontSaveButton)
+#         dontSaveButton.Bind(wx.EVT_BUTTON, self.OnButton)
+#         cancelButton = wx.Button(self, wx.ID_CANCEL, eg.text.General.cancel)
+#         cancelButton.Bind(wx.EVT_BUTTON, self.OnButton)
+#         self.SetDefaultItem(saveButton)
+#
+#         sizer = wx.BoxSizer(wx.HORIZONTAL)
+#         sizer.Add(staticBitmap, 0, wx.ALL, 12)
+#         sizer.Add(messageCtrl, 0, wx.ALIGN_CENTER | wx.LEFT | wx.TOP | wx.RIGHT, 6)
+#         buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+#         buttonSizer.Add(saveButton, 0, wx.LEFT | wx.RIGHT, 3)
+#         buttonSizer.Add(dontSaveButton, 0, wx.LEFT | wx.RIGHT, 3)
+#         buttonSizer.Add(cancelButton, 0, wx.LEFT | wx.RIGHT, 3)
+#         mainSizer = wx.BoxSizer(wx.VERTICAL)
+#         mainSizer.Add(sizer)
+#         mainSizer.Add(buttonSizer, 0, wx.ALIGN_RIGHT | wx.ALL, 12)
+#         self.SetSizerAndFit(mainSizer)
+#         if parent:
+#             self.CenterOnParent()
+#         else:
+#             self.Center()
+#
+#     def OnButton(self, event):
+#         buttonId = event.GetId()
+#         self.EndModal(buttonId)
+#         event.Skip()
 
 
 class TreeStateData(eg.PersistentData):
     guid = None
     time = None
     expanded = None
+    firstVisibleItem = None
+    selection = None

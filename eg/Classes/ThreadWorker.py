@@ -42,6 +42,8 @@ class ThreadWorker(object):
     )
 
     def __init__(self, *args, **kwargs):
+        self._pause_event = Event()
+        self._pause_event.set()
         self.__alive = True
         self.__queue = deque()
         self.__setupFunc = partial(self.Setup, *args, **kwargs)
@@ -53,6 +55,12 @@ class ThreadWorker(object):
             target=self.__MainLoop,
             name=self.__class__.__name__,
         )
+
+    def Pause(self):
+        self._pause_event.clear()
+
+    def Continue(self):
+        self._pause_event.set()
 
     def AppendAction(self, action):
         self.__queue.append(action)
@@ -181,6 +189,8 @@ class ThreadWorker(object):
         """
         Call this if the thread should stop.
         """
+        self._pause_event.clear()
+
         def StopCall():
             self.__alive = False
 
@@ -236,6 +246,7 @@ class ThreadWorker(object):
 
     def __DoOneEvent(self):
         try:
+            self._pause_event.wait()
             resultCode = MsgWaitForMultipleObjects(
                 1,
                 self.__events,
@@ -266,7 +277,8 @@ class ThreadWorker(object):
                 raise RuntimeError("unexpected win32wait return value")
         except:
             eg.PrintDebugNotice("Exception in __DoOneEvent")
-            eg.PrintTraceback()
+            import traceback
+            traceback.print_exc()
 
     @eg.LogItWithReturn
     def __MainLoop(self):

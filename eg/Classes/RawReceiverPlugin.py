@@ -21,6 +21,7 @@ from threading import Timer
 # Local imports
 import eg
 
+
 class RawReceiverPlugin(eg.PluginBase):
     def __init__(self):
         eg.PluginBase.__init__(self)

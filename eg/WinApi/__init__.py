@@ -18,13 +18,14 @@
 
 # Local imports
 import Clipboard  # NOQA
-from cFunctions import (  # NOQA
-    GetClassName,
-    GetProcessName,
-    GetTopLevelWindowList as _GetTopLevelWindowList,
-    GetWindowChildsList,
-    GetWindowText,
-)
+
+cFunctions = __import__('cFunctions')
+GetClassName = cFunctions.GetClassName
+GetProcessName = cFunctions.GetProcessName
+_GetTopLevelWindowList = cFunctions.GetTopLevelWindowList
+GetWindowChildsList = cFunctions.GetWindowChildsList
+GetWindowText = cFunctions.GetWindowText
+
 from Dynamic import (  # NOQA
     WM_COMMAND,
     WM_USER,

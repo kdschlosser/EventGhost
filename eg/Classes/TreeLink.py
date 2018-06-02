@@ -16,8 +16,6 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
 
@@ -86,7 +84,7 @@ class TreeLink(object):
         for link in target.dependants:
             link.target = None
             if link.owner:
-                wx.CallAfter(eg.Notify, "NodeChanged", link.owner)
+                eg.Notify("NodeChanged", link.owner)
         cls.unresolvedIds[target.xmlId] = target.dependants
         target.dependants = None
 
@@ -135,7 +133,7 @@ class TreeLink(object):
                     target.dependants = [link]
                 else:
                     target.dependants.append(link)
-                wx.CallAfter(eg.Notify, "NodeChanged", link.owner)
+                eg.Notify("NodeChanged", link.owner)
         del cls.linkList[:]
 
     @classmethod
@@ -156,5 +154,5 @@ class TreeLink(object):
                 else:
                     target.dependants.append(link)
                 #eg.Notify("NodeChanged", link.owner) # August 2012
-                wx.CallAfter(eg.Notify, "NodeChanged", link.owner)
+                eg.Notify("NodeChanged", link.owner)
         cls.linkList = notFoundLinks

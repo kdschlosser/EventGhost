@@ -16,11 +16,10 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-import wx
-
 # Local imports
 import eg
 from TreeItem import TreeItem
+
 
 class ContainerItem(TreeItem):
     xmlTag = "Container"
@@ -45,7 +44,7 @@ class ContainerItem(TreeItem):
             pos = -1
         else:
             childs.insert(pos, child)
-        wx.CallAfter(eg.Notify, "NodeAdded", (child, pos))
+        eg.Notify("NodeAdded", (child, pos))
 
     @eg.AssertInActionThread
     def Delete(self):
@@ -63,5 +62,5 @@ class ContainerItem(TreeItem):
     def RemoveChild(self, child):
         pos = self.childs.index(child)
         del self.childs[pos]
-        wx.CallAfter(eg.Notify, "NodeDeleted", (child, self))
+        eg.Notify("NodeDeleted", (child, self))
         return pos

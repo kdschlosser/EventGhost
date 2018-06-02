@@ -18,13 +18,11 @@
 
 import ctypes
 import sys
-import wx
 from ctypes.wintypes import LPWSTR, GetLastError
 from win32api import OpenProcess, TerminateProcess
 from win32com.client import GetObject
 
 # Local imports
-import eg
 import Dynamic
 from cFunctions import GetProcessName, GetWindowChildsList
 from Dynamic import (
@@ -160,6 +158,8 @@ def GetAlwaysOnTop(hwnd = None):
     return isAlwaysOnTop
 
 def GetBestHwnd(hwnd = None):
+    import eg
+
     if isinstance(hwnd, int):
         return hwnd
     elif len(eg.lastFoundWindows):
@@ -425,15 +425,21 @@ def KillProcess(pid = None, processName = None, hwnd = None, signal = 0, restart
         proc = OpenProcess(1, 0, pid)
         TerminateProcess(proc, signal)
         if restart:
+            import eg
+
             eg.plugins.System.Execute(fullPath)
         return True
     except:
         return False
 
 def PluginIsEnabled(plugin):
+    import eg
+
     return PluginIsLoaded(plugin) and eg.plugins.__dict__[plugin].plugin.info.isStarted
 
 def PluginIsLoaded(plugin):
+    import eg
+
     return hasattr(eg.plugins, plugin)
 
 def ProcessExists(pid):

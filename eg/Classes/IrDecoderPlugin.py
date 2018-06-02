@@ -19,6 +19,7 @@
 # Local imports
 import eg
 
+
 class IrDecoderPlugin(eg.PluginBase):
     def __init__(self, sampleTime):
         eg.PluginBase.__init__(self)
