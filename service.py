@@ -27,17 +27,20 @@ for p in pip.get_installed_distributions():
         site_packages = p.location
         sys32_path = os.path.join(site_packages, 'pywin32_system32')
         win32_path = os.path.join(site_packages, 'win32')
-
-        command = 'setx /M PATH "%PATH%'
+        command = ''
         if base_path not in os.environ['PATH']:
             command += ';' + base_path
         if sys32_path not in os.environ['PATH']:
             command += ';' + sys32_path
         if win32_path not in os.environ['PATH']:
             command += ';' + win32_path
-
-        proc = subprocess.Popen(command)
-        proc.communicate()
+        if command:
+            proc = subprocess.Popen(
+                'setx /M PATH "%PATH%' + command,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            proc.communicate()
         break
 
 import win32serviceutil # NOQA
@@ -171,15 +174,28 @@ class EventGhostSvc(win32serviceutil.ServiceFramework):
             (self._svc_name_, '')
         )
 
-        servicemanager.LogMsg(
-            servicemanager.EVENTLOG_INFORMATION_TYPE,
-            servicemanager.PYS_SERVICE_STARTED,
-            (self._svc_name_, '')
-        )
-        import eg as _eg
+        try:
+            import eg as _eg
 
-        global eg
-        eg = _eg
+            global eg
+            eg = _eg
+
+            servicemanager.LogMsg(
+                servicemanager.EVENTLOG_INFORMATION_TYPE,
+                servicemanager.PYS_SERVICE_STARTED,
+                (self._svc_name_, '')
+            )
+
+        except (WindowsError, IOError):
+            import traceback
+            msg = traceback.format_exc()
+            servicemanager.LogErrorMsg(
+                servicemanager.EVENTLOG_ERROR_TYPE,
+                0xF000,
+                (msg, '')
+            )
+            self.ReportServiceStatus(win32service.SERVICE_ERROR_CRITICAL)
+            self.ReportServiceStatus(win32service.SERVICE_STOPPED)
 
         eg.scheduler.start()
         eg.messageReceiver.Start()
@@ -215,26 +231,80 @@ class EventGhostSvc(win32serviceutil.ServiceFramework):
 if __name__ == '__main__':
     # service = EventGhostSvc()
     # service.SvcDoRun()
-
     import pywintypes
-    hSCManager = win32service.OpenSCManager(
-        None,
-        None,
-        win32service.SC_MANAGER_CONNECT
-    )
-    try:
-        status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
 
-    except pywintypes.error:
-        print 'Cannot locate Service'
-        args = sys.argv + ['--startup', 'auto', 'install']
-        win32serviceutil.HandleCommandLine(EventGhostSvc, argv=args)
-        status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+    argv = list(item.lower() for item in sys.argv[:])
 
-    if status == win32service.SERVICE_STOPPED:
-        win32serviceutil.StartService('EventGhost')
-        win32serviceutil.WaitForServiceStatus(
-            'EventGhost',
-            win32service.SERVICE_RUNNING,
-            10
-        )
+    if len(argv) == 1:
+        try:
+            status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+        except pywintypes.error:
+            argv += ['--interactive', '--startup', 'auto', 'install']
+            win32serviceutil.HandleCommandLine(EventGhostSvc, argv=argv)
+            status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+            servicemanager.SetEventSourceName('EventGhost', True)
+
+        if status == win32service.SERVICE_STOPPED:
+            win32serviceutil.StartService('EventGhost')
+            win32serviceutil.WaitForServiceStatus(
+                'EventGhost',
+                win32service.SERVICE_RUNNING,
+                10
+            )
+    elif 'remove' in argv:
+        if argv.index('remove') != len(argv) - 1:
+            argv.remove('remove')
+            argv += ['remove']
+        try:
+            status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+            if status != win32service.SERVICE_STOPPED:
+                win32serviceutil.StopService('EventGhost')
+                win32serviceutil.WaitForServiceStatus(
+                    'EventGhost',
+                    win32service.SERVICE_STOPPED,
+                    10
+                )
+
+            win32serviceutil.HandleCommandLine(EventGhostSvc, argv=argv)
+        except pywintypes.error:
+            pass
+    else:
+        argv = sys.argv[:]
+        try:
+            status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+            if 'update' in argv:
+                if argv.index('update') != len(argv) - 1:
+                    argv.remove('update')
+                    argv += ['update']
+                else:
+                    argv += ['update']
+        except pywintypes.error:
+            if 'update' in argv:
+                argv.remove('update')
+
+            if 'install' in argv:
+                if argv.index('install') != len(argv) - 1:
+                    argv.remove('install')
+                    argv += ['install']
+            else:
+                argv += ['install']
+
+            if '--interactive' not in argv:
+                argv.insert(1, '--interactive')
+            if '--startup' not in argv:
+                argv.insert(1, 'auto')
+                argv.insert(1, '--startup')
+
+            win32serviceutil.HandleCommandLine(EventGhostSvc, argv=argv)
+            status = win32serviceutil.QueryServiceStatus('EventGhost')[1]
+            servicemanager.SetEventSourceName('EventGhost', True)
+
+        if status == win32service.SERVICE_STOPPED:
+            win32serviceutil.StartService('EventGhost')
+            win32serviceutil.WaitForServiceStatus(
+                'EventGhost',
+                win32service.SERVICE_RUNNING,
+                10
+            )
+
+        win32serviceutil.HandleCommandLine(EventGhostSvc, argv=sys.argv)

@@ -27,6 +27,8 @@ import __builtin__
 
 _excepthook = sys.excepthook
 _import = __builtin__.__import__
+_stderr = sys.stderr
+_stdout = sys.stdout
 
 import pywintypes # NOQA
 import pythoncom # NOQA
@@ -40,25 +42,60 @@ import threading # NOQA
 import json # NOQA
 from types import ModuleType # NOQA
 
+
+class StdErrReplacement(object):
+    softspace = 0
+    _file = None
+    _error = None
+    _logFilePath = None
+    _displayMessage = True
+    encoding = "mbcs"
+
+    def __init__(self):
+        prgName = 'EventGhost'  # NOQA
+        prgAppDataPath = os.path.join(os.environ["APPDATA"], prgName)
+        self._logFilePath = os.path.join(prgAppDataPath, "EGService.txt")
+        if not os.path.exists(prgAppDataPath):
+            os.mkdir(prgAppDataPath)
+
+        self._file = open(self._logFilePath, 'a')
+
+    def write(self, text):
+        if self._file is not None:
+            self._file.write(text)
+            self._file.flush()
+
+    def flush(self):
+        if self._file is not None:
+            self._file.flush()
+
+    def close(self):
+        if self._file is not None:
+            self._file.close()
+
+
+# Replace stderr.
+sys.stderr = StdErrReplacement()
+
 APP_NAME = "EventGhost"
-
-
-# noinspection PyShadowingBuiltins,PyShadowingNames
-def import_wrapper(name, globals={}, locals={}, fromlist=[], level=-1):
-    if name.startswith('eg'):
-        sys.modules['eg'] = sys.modules[__name__]
-        split_name = name.split('.', 1)
-        if len(split_name) == 2:
-            try:
-                mod = _import(split_name[1], globals, locals, fromlist, level)
-                return mod
-            except ImportError:
-                pass
-
-    return _import(name, globals, locals, fromlist, level)
-
-
-__builtin__.__import__ = import_wrapper
+#
+#
+# # noinspection PyShadowingBuiltins,PyShadowingNames
+# def import_wrapper(name, globals={}, locals={}, fromlist=[], level=-1):
+#     if name.startswith('eg'):
+#         sys.modules['eg'] = sys.modules[__name__]
+#         split_name = name.split('.', 1)
+#         if len(split_name) == 2:
+#             try:
+#                 mod = _import(split_name[1], globals, locals, fromlist, level)
+#                 return mod
+#             except ImportError:
+#                 pass
+#
+#     return _import(name, globals, locals, fromlist, level)
+#
+#
+# __builtin__.__import__ = import_wrapper
 __builtin__.eg = sys.modules[__name__]
 
 
