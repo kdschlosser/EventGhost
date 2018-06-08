@@ -69,7 +69,7 @@ install:
         }
 
 
-        Function InstallPython ()
+        Function InstallPython
         {
           " "
           "--- Stackless 2.7.12150 x86"
@@ -84,7 +84,8 @@ install:
 
         }
 
-        Function InstallWX () {
+        Function InstallWX
+        {
           Wait-Job -Name "InstallPython" -Timeout 300
           "--- wxPython 3.0.2.0"
           $WXInstaller = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
@@ -97,7 +98,8 @@ install:
         }
 
 
-        Function UpdateModuleInstallers () {
+        Function UpdateModuleInstallers
+        {
           " "
           "--- pip 9.0.1"
           "    Updating..."
@@ -110,7 +112,7 @@ install:
           "    Done."
         }
 
-        Funcion JinjaInstall ()
+        Funcion JinjaInstall
         {
           Wait-Job -Name "InstallPython" -Timeout 300
           Wait-Job -Name "UpdateModuleInstallers" -Timeout 300
