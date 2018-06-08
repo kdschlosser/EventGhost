@@ -111,7 +111,7 @@ install:
           "    Done."
         }
 
-        Funcion JinjaInstall
+        Function JinjaInstall
         {
           Wait-Job -Name "InstallPython" -Timeout 300
           Wait-Job -Name "UpdateModuleInstallers" -Timeout 300
