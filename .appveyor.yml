@@ -147,19 +147,25 @@ install:
 
         $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
-        ForEach($job in $jobs) {
-          if ($job.State -eq "Running") {
-              Wait-Job -id $job.Id
-          }
 
-          if ($job.HasMoreData) {
-            Receive-Job $job
+        $count = 0
+        While ($jobs.count -gt 0) {
+          For ($i = 0; $i -lt $jobs.count; $i++) {
+            $job = $jobs[$i]
+
+            if ($job.HasMoreData) {
+              Receive-Job $job
+            }
+
+            elseif ($job.Status -ne "Running") {
+              $jobs.RemoveAt($i)
+              $i--
+            }
           }
         }
 
         Get-Job
-        Wait-Job
-        Get-Job
+
       }
 
       " "
