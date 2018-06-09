@@ -127,21 +127,21 @@ install:
           Write-Host "    Done."
         }
 
-        $jobs = (
-          Start-Job -Name "InstallPython" -ScriptBlock $python_install -Arg "-python_dir $PythonFolder -installers_folder $InstallersFolder",
-          Start-Job -Name "InstallWX" -ScriptBlock $wx_install -Arg "-installers_folder $InstallersFolder",
-          Start-Job -Name "UpdateModuleInstallers" -ScriptBlock $mod_updates -Arg "-python_dir $PythonFolder",
-          Start-Job -Name "JinjaInstall" -ScriptBlock $jinja_install -Arg "-script_dir $PythonScripts",
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "wheel 0.29.0" -mod "heel==0.29.0" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "sphinx 1.5.6" -mod "sphinx==1.5.6" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "pillow 3.4.2" -mod "pillow==3.4.2" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "py2exe 0.6.9" -mod "py2exe_py2==0.6.9" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "pycrypto 2.6.1" -mod "pycrypto==2.6.1" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "comtypes 1.1.3" -mod "https://github.com/enthought/comtypes/archive/1.1.3.zip" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "ctypeslib 0.5.6" -mod "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "paramiko 2.2.1" -mod "paramiko==2.2.1" -script_dir $PythonScripts',
-          Start-Job -ScriptBlock $pip_install -Arg '-msg "pywin32 223" -mod "pywin32==223" -script_dir $PythonScripts'
-        )
+        $job1 = Start-Job -Name "InstallPython" -ScriptBlock $python_install -Arg "-python_dir $PythonFolder -installers_folder $InstallersFolder"
+        $job2 = Start-Job -Name "InstallWX" -ScriptBlock $wx_install -Arg "-installers_folder $InstallersFolder"
+        $job3 = Start-Job -Name "UpdateModuleInstallers" -ScriptBlock $mod_updates -Arg "-python_dir $PythonFolder"
+        $job4 = Start-Job -Name "JinjaInstall" -ScriptBlock $jinja_install -Arg "-script_dir $PythonScripts"
+        $job5 = Start-Job -ScriptBlock $pip_install -Arg '-msg "wheel 0.29.0" -mod "heel==0.29.0" -script_dir $PythonScripts'
+        $job6 = Start-Job -ScriptBlock $pip_install -Arg '-msg "sphinx 1.5.6" -mod "sphinx==1.5.6" -script_dir $PythonScripts'
+        $job7 = Start-Job -ScriptBlock $pip_install -Arg '-msg "pillow 3.4.2" -mod "pillow==3.4.2" -script_dir $PythonScripts'
+        $job8 = Start-Job -ScriptBlock $pip_install -Arg '-msg "py2exe 0.6.9" -mod "py2exe_py2==0.6.9" -script_dir $PythonScripts'
+        $job9 = Start-Job -ScriptBlock $pip_install -Arg '-msg "pycrypto 2.6.1" -mod "pycrypto==2.6.1" -script_dir $PythonScripts'
+        $job10 = Start-Job -ScriptBlock $pip_install -Arg '-msg "comtypes 1.1.3" -mod "https://github.com/enthought/comtypes/archive/1.1.3.zip" -script_dir $PythonScripts'
+        $job11 = Start-Job -ScriptBlock $pip_install -Arg '-msg "ctypeslib 0.5.6" -mod "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6" -script_dir $PythonScripts'
+        $job12 = Start-Job -ScriptBlock $pip_install -Arg '-msg "paramiko 2.2.1" -mod "paramiko==2.2.1" -script_dir $PythonScripts'
+        $job13 = Start-Job -ScriptBlock $pip_install -Arg '-msg "pywin32 223" -mod "pywin32==223" -script_dir $PythonScripts'
+
+        $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
         ForEach($job in $jobs) {
           while ($job.State -eq 'Running') {
