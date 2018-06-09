@@ -125,30 +125,34 @@ install:
           Write-Host " "
           Write-Host "--- jinja2 2.8.1"
           Write-Host "    Installing..."
-          Write-Host Start-Process -FilePath $script_dir + "\pip.exe" -Arg "install -q jinja2==2.8.1" -Wait -WindowStyle Hidden
+          Start-Process -FilePath $script_dir + "\pip.exe" -Arg "install -q jinja2==2.8.1" -Wait -WindowStyle Hidden
           Write-Host "    Done."
         }
 
         $job1 = Start-Job -Name "InstallPython" -ScriptBlock $python_install -ArgumentList @($PythonFolder, $InstallersFolder)
-        $job2 = Start-Job -Name "InstallWX" -ScriptBlock $wx_install -ArgumentList @($InstallersFolder)
-        $job3 = Start-Job -Name "UpdateModuleInstallers" -ScriptBlock $mod_updates -ArgumentList @($PythonFolder)
-        $job4 = Start-Job -Name "JinjaInstall" -ScriptBlock $jinja_install -ArgumentList @($PythonScripts)
-        $job5 = Start-Job -ScriptBlock $pip_install -ArgumentList @("wheel 0.29.0", "wheel==0.29.0", $PythonScripts)
-        $job6 = Start-Job -ScriptBlock $pip_install -ArgumentList @("sphinx 1.5.6", "sphinx==1.5.6", $PythonScripts)
-        $job7 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pillow 3.4.2", "pillow==3.4.2", $PythonScripts)
-        $job8 = Start-Job -ScriptBlock $pip_install -ArgumentList @("py2exe 0.6.9", "py2exe_py2==0.6.9", $PythonScripts)
-        $job9 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pycrypto 2.6.1", "pycrypto==2.6.1", $PythonScripts)
-        $job10 = Start-Job -ScriptBlock $pip_install -ArgumentList @("comtypes 1.1.3", "https://github.com/enthought/comtypes/archive/1.1.3.zip", $PythonScripts)
-        $job11 = Start-Job -ScriptBlock $pip_install -ArgumentList @("ctypeslib 0.5.6", "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6", $PythonScripts)
-        $job12 = Start-Job -ScriptBlock $pip_install -ArgumentList @("paramiko 2.2.1", "paramiko==2.2.1", $PythonScripts)
-        $job13 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pywin32 223", "pywin32==223", $PythonScripts)
+        $job2 = Start-Job -Name "InstallWX" -ScriptBlock $wx_install -ArgumentList @($InstallersFolder) | Receive-Job
+        $job3 = Start-Job -Name "UpdateModuleInstallers" -ScriptBlock $mod_updates -ArgumentList @($PythonFolder) | Receive-Job
+        $job4 = Start-Job -Name "JinjaInstall" -ScriptBlock $jinja_install -ArgumentList @($PythonScripts) | Receive-Job
+        $job5 = Start-Job -ScriptBlock $pip_install -ArgumentList @("wheel 0.29.0", "wheel==0.29.0", $PythonScripts) | Receive-Job
+        $job6 = Start-Job -ScriptBlock $pip_install -ArgumentList @("sphinx 1.5.6", "sphinx==1.5.6", $PythonScripts) | Receive-Job
+        $job7 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pillow 3.4.2", "pillow==3.4.2", $PythonScripts) | Receive-Job
+        $job8 = Start-Job -ScriptBlock $pip_install -ArgumentList @("py2exe 0.6.9", "py2exe_py2==0.6.9", $PythonScripts) | Receive-Job
+        $job9 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pycrypto 2.6.1", "pycrypto==2.6.1", $PythonScripts) | Receive-Job
+        $job10 = Start-Job -ScriptBlock $pip_install -ArgumentList @("comtypes 1.1.3", "https://github.com/enthought/comtypes/archive/1.1.3.zip", $PythonScripts) | Receive-Job
+        $job11 = Start-Job -ScriptBlock $pip_install -ArgumentList @("ctypeslib 0.5.6", "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6", $PythonScripts) | Receive-Job
+        $job12 = Start-Job -ScriptBlock $pip_install -ArgumentList @("paramiko 2.2.1", "paramiko==2.2.1", $PythonScripts) | Receive-Job
+        $job13 = Start-Job -ScriptBlock $pip_install -ArgumentList @("pywin32 223", "pywin32==223", $PythonScripts) | Receive-Job
+
+        Receive-Job $job1
 
         $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
         ForEach($job in $jobs) {
-          Receive-Job $job
-          Wait-Job $job
-          Receive-Job $job
+          while ($job.HasMoreData -or $job.State -eq "Running") {
+            if ($job.HasMoreData) {
+              Receive-Job $job
+            }
+          }
         }
         Get-Job
       }
