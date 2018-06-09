@@ -143,10 +143,10 @@ install:
           Start-Job -ScriptBlock $PipInstall -Arg "pywin32_223 pywin32==223 " + $PythonFolder
         )
         Get-Job
-        ForEach($job in $jobs)
-        {
+        ForEach($job in $jobs) {
           while ($job.State -eq 'Running') {
             Receive-Job $job
+          }
         }
         Wait-Job
       }
