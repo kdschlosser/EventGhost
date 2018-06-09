@@ -89,7 +89,7 @@ install:
 
         $wx_install = {
           Param ([string]$installers_folder)
-
+          Write-Host $installers_folder
           $WXInstaller = $installers_folder + "wxPython3.0-win32-3.0.2.0-py27.exe"
           $WXURL = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
           Write-Host "--- wxPython 3.0.2.0"
@@ -146,11 +146,11 @@ install:
         $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
         ForEach($job in $jobs) {
-          while ($job.HasMoreData) {
-            Receive-Job $job
-          }
-          Get-Job
+          Receive-Job $job
+          Wait-Job $job
+          Receive-Job $job
         }
+        Get-Job
       }
 
       " "
