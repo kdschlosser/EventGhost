@@ -145,10 +145,9 @@ install:
 
         Receive-Job $job1
 
-        $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
+        $jobs = [System.Collections.Generic.List[System.Object]]($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
 
-        $count = 0
         While ($jobs.count -gt 0) {
           For ($i = 0; $i -lt $jobs.count; $i++) {
             $job = $jobs[$i]
