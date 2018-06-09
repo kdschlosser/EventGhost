@@ -66,7 +66,7 @@ install:
           Write-Host "--- " + $msg
           Write-Host "    Installing..."
 
-          Write-Host Start-Process -FilePath $script_dir + "\pip.exe"  -Arg "install -q " + $mod -Wait -WindowStyle Hidden
+          Start-Process -FilePath $script_dir + "\pip.exe"  -Arg "install -q " + $mod -Wait -WindowStyle Hidden
           Write-Host "    Done."
         }
 
@@ -78,9 +78,9 @@ install:
           $StacklessInstaller = $installers_folder + "python-2.7.12150-stackless.msi"
           $StacklessInstallDir = "TARGETDIR=" + $python_dir
           $StacklessURL = "http://www.stackless.com/binaries/python-2.7.12150-stackless.msi"
-          Write-Host Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
+          Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
           Write-Host "    Installing..."
-          Write-Host Start-Process MsiExec.exe -Arg "/I $StacklessInstaller /quiet /passive /qn /norestart $StacklessInstallDir" -Wait
+          Start-Process MsiExec.exe -Arg "/I $StacklessInstaller /quiet /passive /qn /norestart $StacklessInstallDir" -Wait
           Write-Host "    Done."
           Write-Host " "
         }
@@ -88,14 +88,13 @@ install:
         $wx_install = {
           Param ([string]$installers_folder)
 
-          Wait-Job -Name "InstallPython" -Timeout 300
-          Write-Host "--- wxPython 3.0.2.0"
           $WXInstaller = $installers_folder + "wxPython3.0-win32-3.0.2.0-py27.exe"
           $WXURL = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
-          Write-Host Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller
+          Write-Host "--- wxPython 3.0.2.0"
+          Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller
           Wait-Job -Name "InstallPython" -Timeout 300
           Write-Host "    Installing..."
-          Write-Host Start-Process $WXInstaller -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
+          Start-Process $WXInstaller -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
           Write-Host "    Done."
         }
 
@@ -103,15 +102,16 @@ install:
         $mod_updates = {
           Param ([string]$python_dir)
 
+          Wait-Job -Name "InstallPython" -Timeout 300
           Write-Host " "
           Write-Host "--- pip 9.0.1"
           Write-Host "    Updating..."
-          Write-Host Start-Process -FilePath $python_dir + "\python.exe" -Arg "-m pip install -q -U pip==9.0.1" -Wait -WindowStyle Hidden
+          Start-Process -FilePath $python_dir + "\python.exe" -Arg "-m pip install -q -U pip==9.0.1" -Wait -WindowStyle Hidden
           Write-Host "    Done."
           Write-Host " "
           Write-Host "--- setuptools 34.3.0"
           Write-Host "    Updating..."
-          Write-Host Start-Process -FilePath $python_dir + "\Scripts\pip.exe" -Arg "install -q -U setuptools==34.3.0" -Wait -WindowStyle Hidden
+          Start-Process -FilePath $python_dir + "\Scripts\pip.exe" -Arg "install -q -U setuptools==34.3.0" -Wait -WindowStyle Hidden
           Write-Host "    Done."
         }
 
