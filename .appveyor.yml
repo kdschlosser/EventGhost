@@ -149,7 +149,7 @@ install:
         Get-Job
         ForEach($job in $jobs) {
           if ($job.State -eq "Running") {
-              Wait-Job $job
+              Wait-Job -id $job.Id
           }
 
           if ($job.HasMoreData) {
