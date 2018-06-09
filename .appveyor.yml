@@ -148,12 +148,17 @@ install:
         $jobs = ($job1, $job2, $job3, $job4, $job5, $job6, $job7, $job8, $job9, $job10, $job11, $job12, $job13)
         Get-Job
         ForEach($job in $jobs) {
-          while ($job.HasMoreData -or $job.State -eq "Running") {
-            if ($job.HasMoreData) {
-              Receive-Job $job
-            }
+          if ($job.State -eq "Running") {
+              Wait-Job $job
+          }
+
+          if ($job.HasMoreData) {
+            Receive-Job $job
           }
         }
+
+        Get-Job
+        Wait-Job
         Get-Job
       }
 
