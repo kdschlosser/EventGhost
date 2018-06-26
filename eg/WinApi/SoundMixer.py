@@ -165,7 +165,7 @@ class SoundMixerException(Exception):
 def ChangeMasterVolumeBy(value, deviceId=0):
 
     if eg.WindowsVersion >= 'Vista':
-        minimum = 0
+        minimum = 0.0
         maximum = 100.0
 
     else:
@@ -179,7 +179,7 @@ def ChangeMasterVolumeBy(value, deviceId=0):
         maximum = mixerControl.Bounds.lMaximum
 
     oldVolume = GetMasterVolume(deviceId)
-    newVolume = int(round((maximum - minimum) * value / 100.0)) + oldVolume
+    newVolume = ((maximum - minimum) * value / 100.0) + oldVolume
 
     if newVolume < minimum:
         newVolume = minimum

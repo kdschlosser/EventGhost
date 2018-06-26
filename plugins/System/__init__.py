@@ -1877,7 +1877,21 @@ class ChangeMasterVolumeBy(eg.ActionBase):
         #    deviceCtrl.SetValue(0)
         #    deviceCtrl.Enable(False)
 
-        valueCtrl = panel.SmartSpinNumCtrl(value, min=-100, max=100)
+        valueCtrl = eg.FloatSliderCtrl(
+            panel,
+            -1,
+            value,
+            style=(
+                wx.SL_HORIZONTAL |
+                wx.SL_BOTTOM |
+                wx.SL_LABELS |
+                wx.SL_AUTOTICKS |
+                wx.SL_SELRANGE
+            ),
+            minValue=-100.0,
+            maxValue=100.0,
+            increment=0.05
+        )
         sizer = eg.HBoxSizer(
             (panel.StaticText(self.text.text1), 0, wx.ALIGN_CENTER_VERTICAL),
             (valueCtrl, 0, wx.LEFT | wx.RIGHT, 5),
@@ -2076,26 +2090,46 @@ class SetMasterVolume(eg.ActionBase):
         """if eg.WindowsVersion >= 'Vista':
             deviceCtrl.SetValue(0)
             deviceCtrl.Enable(False)"""
-        valueCtrl = panel.SmartSpinNumCtrl(value, min=0, max=100)
+        valueCtrl = eg.FloatSliderCtrl(
+            panel,
+            -1,
+            value,
+            style=(
+                wx.SL_HORIZONTAL |
+                wx.SL_BOTTOM |
+                wx.SL_LABELS |
+                wx.SL_AUTOTICKS |
+                wx.SL_SELRANGE
+            ),
+            minValue=0.0,
+            maxValue=100.0,
+            increment=0.05
+        )
+
+        valueCtrl.AddSelection(0.0, 70.0, (18, 171, 43))
+        valueCtrl.AddSelection(70.0, 90.0, (240, 229, 69))
+        valueCtrl.AddSelection(90.0, 100.0, (255, 0, 0))
+        valueCtrl.SetTickFreq(int((100.0 / 0.05) / 100.0) * 2)
+
         label1 = panel.StaticText(self.text.text1)
         label3 = panel.StaticText(self.plugin.text.device)
-        eg.EqualizeWidths((label1, label3))
-        sizer1 = eg.HBoxSizer(
-            (label3, 0, wx.ALIGN_CENTER_VERTICAL),
-            (deviceCtrl, 1, wx.LEFT | wx.RIGHT, 5),
-        )
-        style1 = wx.LEFT | wx.RIGHT
-        style2 = wx.TOP
-        if isinstance(valueCtrl.ctrl, wx._controls.TextCtrl):
-            style1 |= wx.EXPAND
-            style2 |= wx.EXPAND
-        sizer2 = eg.HBoxSizer(
-            (label1, 0, wx.ALIGN_CENTER_VERTICAL),
-            (valueCtrl, 1, style1, 5),
-            (panel.StaticText(self.text.text2), 0, wx.ALIGN_CENTER_VERTICAL),
-        )
-        panel.sizer.Add(sizer1, 0, wx.TOP, 10)
-        panel.sizer.Add(sizer2, 0, style2, 10)
+        sizer1 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer1.Add(label3, 0, wx.ALIGN_CENTER_VERTICAL | wx.EXPAND | wx.ALL, 5)
+        sizer1.Add(deviceCtrl, 1, wx.EXPAND | wx.ALL, 5)
+        # style1 = wx.LEFT | wx.RIGHT
+        # style2 = wx.TOP
+        # if isinstance(valueCtrl.ctrl, wx._controls.TextCtrl):
+        #     style1 |= wx.EXPAND
+        #     style2 |= wx.EXPAND
+
+        sizer2 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer2.AddStretchSpacer(1)
+        sizer2.Add(label1)
+        sizer2.AddStretchSpacer(1)
+
+        panel.sizer.Add(sizer1, 0, wx.EXPAND | wx.TOP, 10)
+        panel.sizer.Add(sizer2, 0, wx.EXPAND)
+        panel.sizer.Add(valueCtrl, 1, wx.EXPAND | wx.ALL, 5)
         while panel.Affirmed():
             panel.SetResult(
                 valueCtrl.GetValue(),
