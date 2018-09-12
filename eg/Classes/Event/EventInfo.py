@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
+
 import wx
 import time
 import threading
@@ -139,7 +140,7 @@ class EventThread(object):
     @property
     def percent_macros(self):
         return self._percent_macros
-    
+
     @property
     def id(self):
         return self.thread.ident
