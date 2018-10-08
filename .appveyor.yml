@@ -93,6 +93,17 @@ install:
             Start-FileDownload $Py2ExeURLX86 -Timeout 60000 -FileName $Py2ExeInstallerX86
             Start-FileDownload $Py2ExeURLX64 -Timeout 60000 -FileName $Py2ExeInstallerX64
 
+            $VCInstaller = $InstallersFolder + "VCForPython27.msi"
+            $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+
+            Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
+
+            "Installing Visual C Compiler for Python 2.7"
+            Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
+            "Done."
+            " "
+
+
             $Env:PYTHON = $PythonX86
             $Env:PYTHONPATH = $PythonPathX86
             $Env:PATH = $PathX86
@@ -117,15 +128,14 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x86"
-            easy_install --always-unzip $Py2ExeInstallerX86
+            easy_install --always-unzip --quiet $Py2ExeInstallerX86
             "Done"
             " "
 
             "Installing pycrypto 2.6.1 x86"
-            easy_install --always-unzip pycrypto==2.6.1
+            easy_install --always-unzip --quiet pycrypto==2.6.1
             "Done"
             " "
-
 
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
@@ -166,12 +176,12 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x64"
-            easy_install --always-unzip $Py2ExeInstallerX64
+            easy_install --always-unzip --quiet $Py2ExeInstallerX64
             "Done"
             " "
 
             "Installing pycrypto 2.6.1 x64"
-            easy_install --always-unzip pycrypto==2.6.1
+            easy_install --always-unzip --quiet pycrypto==2.6.1
             "Done"
             " "
 
