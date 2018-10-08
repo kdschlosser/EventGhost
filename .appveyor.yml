@@ -36,19 +36,19 @@ install:
 
     #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     - ps: |
-        $Python_x86 = 'C:\Stackless27'
-        $PythonPath_x86 = 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
-        $PythonScripts_x86 = $Python_x86 + "\Scripts"
-        $SitePackages_x86 = $Python_x86 + "\lib\site-packages"
-        $PythonDLL_x86 = $Python_x86 + "\python27.dll"
-        $Path_x86 = $PythonPath_x86 + $Env:PATH
+        $PythonX86 = 'C:\Stackless27'
+        $PythonPathX86 = 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
+        $PythonScriptsX86 = $PythonX86 + "\Scripts"
+        $SitePackagesX86 = $PythonX86 + "\lib\site-packages"
+        $PythonDLLX86 = $PythonX86 + "\python27.dll"
+        $PathX86 = $PythonPathX86 + $Env:PATH
 
-        $Python_x64: 'C:\Stackless27x64'
-        $PythonPath_x64: 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
-        $PythonScripts_x64 = $Python_x64 + "\Scripts"
-        $SitePackages_x64 = $Python_x64 + "\lib\site-packages"
-        $PythonDLL_x64 = $Python_x64 + "\python27.dll"
-        $Path_x64 = $PythonPath_x64 + $Env:PATH
+        $PythonX64: 'C:\Stackless27x64'
+        $PythonPathX64: 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
+        $PythonScriptsX64 = $PythonX64 + "\Scripts"
+        $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
+        $PythonDLLX64 = $PythonX64 + "\python27.dll"
+        $PathX64 = $PythonPathX64 + $Env:PATH
 
         $SysWOW = $Env:SYSTEMROOT + "\SysWOW64"
         $PythonWindowsDLL = $SysWOW + "\python27.dll"
@@ -60,26 +60,26 @@ install:
             $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
             New-Item $InstallersFolder -type directory | Out-Null
 
-            $StacklessInstallerx86 = $InstallersFolder + "python-2.7.12150-stackless.msi"
-            $StacklessURLx86 = "http://www.stackless.com/binaries/python-2.7.12150-stackless.msi"
+            $StacklessInstallerX86 = $InstallersFolder + "python-2.7.12150-stackless.msi"
+            $StacklessURLX86 = "http://www.stackless.com/binaries/python-2.7.12150-stackless.msi"
 
-            $StacklessInstallerx64 = $InstallersFolder + "python-2.7.12150.amd64-stackless.msi"
-            $StacklessURLx64 = "http://www.stackless.com/binaries/python-2.7.12150.amd64-stackless.msi"
+            $StacklessInstallerX64 = $InstallersFolder + "python-2.7.12150.amd64-stackless.msi"
+            $StacklessURLX64 = "http://www.stackless.com/binaries/python-2.7.12150.amd64-stackless.msi"
 
             $WXInstaller = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
             $WXURL = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
 
-            Start-FileDownload $StacklessURLx86 -Timeout 60000 -FileName $StacklessInstallerx86
-            Start-FileDownload $StacklessURLx64 -Timeout 60000 -FileName $StacklessInstallerx64
+            Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
+            Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
             Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller
 
             "Installing Stackless 2.7.12150 x86"
-            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$Python_x86 /quiet /passive /qn /norestart $StacklessInstallerx86" -Wait
+            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$PythonX86 /quiet /passive /qn /norestart $StacklessInstallerX86" -Wait
             "Done."
             " "
 
             "Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$Python_x64 /quiet /passive /qn /norestart $StacklessInstallerx64" -Wait
+            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$PythonX64 /quiet /passive /qn /norestart $StacklessInstallerX64" -Wait
             "Done."
             " "
 
@@ -125,23 +125,23 @@ install:
                 PipInstall "pywin32 223" pywin32==223
             }
 
-            $Env:PYTHON = $Python_x86
-            $Env:PYTHONPATH = $PythonPath_x86
-            $Env:PATH = $Path_x86
+            $Env:PYTHON = $PythonX86
+            $Env:PYTHONPATH = $PythonPathX86
+            $Env:PATH = $PathX86
             RunInstallers
 
-            $Env:PYTHON = $Python_x64
-            $Env:PYTHONPATH = $PythonPath_x64
-            $Env:PATH = $Path_x64
+            $Env:PYTHON = $PythonX64
+            $Env:PYTHONPATH = $PythonPathX64
+            $Env:PATH = $PathX64
             RunInstallers
 
-            $Env:Python_x86 = $Python_x86
-            $Env:PythonPath_x86 = $PythonPath_x86
-            $Env:Path_x86 = $Path_x86
+            $Env:PythonX86 = $PythonX86
+            $Env:PythonPathX86 = $PythonPathX86
+            $Env:PathX86 = $PathX86
 
-            $Env:Python_x64 = $Python_x64
-            $Env:PythonPath_x64 = $PythonPath_x64
-            $Env:Path_x64 = $Path_x64
+            $Env:PythonX64 = $PythonX64
+            $Env:PythonPathX64 = $PythonPathX64
+            $Env:PathX64 = $PathX64
         }
 
 build_script:
@@ -161,23 +161,23 @@ build_script:
             $BuildArgs = "--build --package --release --version $release $url"
         }
 
-        $Env:PYTHON = $Env:Python_x86
-        $Env:PYTHONPATH = $Env:PythonPath_x86
-        $Env:PATH = $Env:Path_x86
+        $Env:PYTHON = $Env:PythonX86
+        $Env:PYTHONPATH = $Env:PythonPathX86
+        $Env:PATH = $Env:PathX86
         python "_build\Build.py" $BuildArgs
-        $Env:SetupExe_x86 = gci -recurse -filter "_build\output\*Setup.exe" -name
+        $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
 
-        $Env:PYTHON = $Env:Python_x64
-        $Env:PYTHONPATH = $Env:PythonPath_x64
-        $Env:PATH = $Env:Path_x64
+        $Env:PYTHON = $Env:PythonX64
+        $Env:PYTHONPATH = $Env:PythonPathX64
+        $Env:PATH = $Env:PathX64
         python "_build\Build.py" $BuildArgs
-        $Env:SetupExe_x64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
+        $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
 
         # update the appveyor build version to be the same as the EventGhost version
-        $start = $env:SetupExe_x86.IndexOf("_")
-        $length = $env:SetupExe_x86.LastIndexOf("_") - $start
-        $build_version = $env:SetupExe_x86.Substring($start + 1, $length - 1)
+        $start = $env:SetupExeX86.IndexOf("_")
+        $length = $env:SetupExeX86.LastIndexOf("_") - $start
+        $build_version = $env:SetupExeX86.Substring($start + 1, $length - 1)
         Update-AppveyorBuild -Version "$build_version"
 
         # Make sure the appveyor cache is only saved if our build was successfull
@@ -195,10 +195,10 @@ build_script:
 
 
 artifacts:
-    - path: _build\output\$(SetupExe_x86)
-      name: $(SetupExe_x86)
-    - path: _build\output\$(SetupExe_x64)
-      name: $(SetupExe_x64)
+    - path: _build\output\$(SetupExeX86)
+      name: $(SetupExeX86)
+    - path: _build\output\$(SetupExeX64)
+      name: $(SetupExeX64)
     - path: _build\output\Build_x86.log
       name: Build_x86.log
     - path: _build\output\Build_x64.log
