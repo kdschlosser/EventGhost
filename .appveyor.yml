@@ -159,6 +159,7 @@ build_script:
             $url = if($Env:SFTP_URL){' --docs --url "' + $env:SFTP_URL + '"'} else {''}
 
             $BuildArgs = "--build --package --release --version $release $url"
+        }
 
         $Env:PYTHON = $Env:Python_x86
         $Env:PYTHONPATH = $Env:PythonPath_x86
