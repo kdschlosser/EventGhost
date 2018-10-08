@@ -43,8 +43,8 @@ install:
         $PythonDLLX86 = $PythonX86 + "\python27.dll"
         $PathX86 = $PythonPathX86 + $Env:PATH
 
-        $PythonX64: 'C:\Stackless27x64'
-        $PythonPathX64: 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
+        $PythonX64 = 'C:\Stackless27x64'
+        $PythonPathX64 = 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
         $PythonScriptsX64 = $PythonX64 + "\Scripts"
         $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
         $PythonDLLX64 = $PythonX64 + "\python27.dll"
