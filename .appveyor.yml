@@ -99,7 +99,7 @@ install:
             Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
 
             "Installing Visual C Compiler for Python 2.7"
-            Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
+            Start-+          MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
             "Done."
             " "
 
@@ -212,7 +212,6 @@ build_script:
         "=============== start the EventGhost build ==============="
         " "
 
-        $BuildArgs = "--build --package"
         If ($Env:APPVEYOR_REPO_TAG.tolower() -eq "true" -and $Env:APPVEYOR_REPO_TAG_NAME.tolower().startswith("deploy")) {
             # to do a release, create a tag in the form "Deploy_VERSION"
             # VERSION must be a valid version string (without leading 'v')
@@ -221,22 +220,33 @@ build_script:
             $release = $Env:APPVEYOR_REPO_TAG_NAME.split("_", 2)[1]
             $url = if($Env:SFTP_URL){' --docs --url "' + $env:SFTP_URL + '"'} else {''}
 
-            $BuildArgs = "--build --package --release --version $release $url"
+            $Env:PYTHON = $Env:PythonX86
+            $Env:PYTHONPATH = $Env:PythonPathX86
+            $Env:PATH = $Env:PathX86
+            python "_build\Build.py" --build --package --release --version $release $url
+            $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
+
+
+            $Env:PYTHON = $Env:PythonX64
+            $Env:PYTHONPATH = $Env:PythonPathX64
+            $Env:PATH = $Env:PathX64
+            python "_build\Build.py" --build --package --release --version $release $url
+            $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
+        } else {
+            $Env:PYTHON = $Env:PythonX86
+            $Env:PYTHONPATH = $Env:PythonPathX86
+            $Env:PATH = $Env:PathX86
+            python "_build\Build.py" --build --package
+            $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
+
+
+            $Env:PYTHON = $Env:PythonX64
+            $Env:PYTHONPATH = $Env:PythonPathX64
+            $Env:PATH = $Env:PathX64
+            python "_build\Build.py" --build --package
+            $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
         }
-
-        $Env:PYTHON = $Env:PythonX86
-        $Env:PYTHONPATH = $Env:PythonPathX86
-        $Env:PATH = $Env:PathX86
-        python "_build\Build.py" $BuildArgs
-        $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
-
-
-        $Env:PYTHON = $Env:PythonX64
-        $Env:PYTHONPATH = $Env:PythonPathX64
-        $Env:PATH = $Env:PathX64
-        python "_build\Build.py" $BuildArgs
-        $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
-
+        
         # update the appveyor build version to be the same as the EventGhost version
         $start = $env:SetupExeX86.IndexOf("_")
         $length = $env:SetupExeX86.LastIndexOf("_") - $start
