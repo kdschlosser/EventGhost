@@ -79,11 +79,19 @@ install:
             $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win64-3.0.2.0-py27.exe"
 
 
+            $Py2ExeInstallerX86 = $InstallersFolder + "py2exe-0.6.9.win32-py2.7.exe"
+            $Py2ExeURLX86 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe"
+            $Py2ExeInstallerX64 = $InstallersFolder + "py2exe-0.6.9.win64-py2.7.amd64.exe"
+            $Py2ExeURLX64 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win64-py2.7.amd64.exe"
+
             Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
             Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
 
             Start-FileDownload $WXURLX86 -Timeout 60000 -FileName $WXInstallerX86
             Start-FileDownload $WXURLX64 -Timeout 60000 -FileName $WXInstallerX64
+
+            Start-FileDownload $Py2ExeURLX86 -Timeout 60000 -FileName $Py2ExeInstallerX86
+            Start-FileDownload $Py2ExeURLX64 -Timeout 60000 -FileName $Py2ExeInstallerX64
 
             $Env:PYTHON = $PythonX86
             $Env:PYTHONPATH = $PythonPathX86
@@ -97,14 +105,20 @@ install:
             Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
             "Done"
             " "
+
+            "Installing py2exe 0.6.9 x86"
+            Start-Process $Py2ExeInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
+            "Done"
+            " "
+
             "--- pip 9.0.1 x86"
             "    Updating..."
             python -m pip install --no-cache-dir -q -U "pip==9.0.1"
             "    Done."
             " "
-            "--- setuptools 40.4.3 x86"
+            "--- setuptools 40.0.0 x86"
             "    Updating..."
-            pip install --no-cache-dir -q -U "setuptools==40.4.3"
+            pip install --no-cache-dir -q -U "setuptools==40.2.0"
             "    Done."
 
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
@@ -135,15 +149,21 @@ install:
             Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
             "Done"
 
+            "Installing py2exe 0.6.9 x64"
+            Start-Process $Py2ExeInstallerX64 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
+            "Done"
+            " "
+
+
             " "
             "--- pip 9.0.1 x64"
             "    Updating..."
-            python -m pip install -q -U "pip==9.0.1"
+            python -m pip install --no-cache-dir -q -U "pip==9.0.1"
             "    Done."
             " "
-            "--- setuptools 40.4.3 x64"
+            "--- setuptools 40.2.0 x64"
             "    Updating..."
-            pip install -q -U "setuptools==40.4.3"
+            pip install -q --no-cache-dir -U "setuptools==40.2.0"
             "    Done."
 
             PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
