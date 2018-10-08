@@ -77,6 +77,10 @@ class BuildLibrary(builder.Task):
                 buildSetup.appVersion.split("-")[1].split(".")
             )
 
+        import eventghost_build_ext
+        import eventghost_build
+
+
         setup(
             script_args=["py2exe"],
             windows=[Target(buildSetup)],
@@ -86,7 +90,14 @@ class BuildLibrary(builder.Task):
                 build=dict(build_base=join(buildSetup.tmpDir, "build")),
                 py2exe=dict(
                     compressed=0,
-                    includes=["encodings", "encodings.*", "Imports"],
+                    includes=[
+                        "encodings",
+                        "encodings.*",
+                        "Imports",
+                        'cFunctions',
+                        '_dxJoystick',
+                        'VistaVolEvents'
+                    ],
                     excludes=buildSetup.excludeModules,
                     dll_excludes = DLL_EXCLUDES,
                     dist_dir = EncodePath(buildSetup.sourceDir),
@@ -94,7 +105,21 @@ class BuildLibrary(builder.Task):
                         buildSetup.dataDir, "Py2ExeBootScript.py"
                     ),
                 )
-            )
+            ),
+            cmdclass=dict(
+                build_exe=eventghost_build.Build,
+                py2exe=eventghost_build.Build,
+                build_ext=eventghost_build_ext.BuildEXT,
+            ),
+            ext_modules=[
+                eventghost_build_ext.RawInputHook,
+                eventghost_build_ext.MceIr,
+                eventghost_build_ext.TaskHook,
+                eventghost_build_ext.cFunctions,
+                eventghost_build_ext.dxJoystick,
+                eventghost_build_ext.VistaVolEvents,
+                eventghost_build_ext.WinUsbWrapper
+            ]
         )
 
         if wip_version:

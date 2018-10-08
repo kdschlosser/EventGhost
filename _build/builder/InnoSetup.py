@@ -66,6 +66,14 @@ class InnoInstaller(object):
         ).read()
         innoScriptPath = join(self.buildSetup.tmpDir, "Setup.iss")
         issFile = open(innoScriptPath, "w")
+
+        if self.buildSetup.arch == 'x86':
+            arch = ''
+        else:
+            arch = 'x64'
+
+        issFile.write('# define ARCH {0}\n\n'.format(arch))
+        
         templateDict = {}
         for key, value in self.buildSetup.__dict__.iteritems():
             if isinstance(value, unicode):

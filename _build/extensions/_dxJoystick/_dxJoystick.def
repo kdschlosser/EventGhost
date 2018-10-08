@@ -1,2 +1,2 @@
 EXPORTS
-	init_dxJoystick
+	PyInit__dxJoystick

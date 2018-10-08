@@ -78,13 +78,11 @@ class Builder(object):
         self.pyVersionDir = join(self.dataDir, "Python%s" % self.pyVersionStr)
         self.outputDir = join(self.buildDir, "output")
         self.websiteDir = join(self.outputDir, "website")
+        self.arch = 'x86'
 
         if Is64bitInterpreter():
-            print(
-                "ERROR: Sorry, EventGhost can't be built with the 64-bit "
-                "version of Python!"
-            )
-            sys.exit(1)
+            self.arch = 'x64'
+
         elif not exists(self.pyVersionDir):
             print(
                 "ERROR: Sorry, EventGhost can't be built with Python %d.%d!"
@@ -113,7 +111,7 @@ class Builder(object):
         if not exists(self.outputDir):
             os.mkdir(self.outputDir)
 
-        LogToFile(join(self.outputDir, "Build.log"), self.args.verbose)
+        LogToFile(join(self.outputDir, "Build_{0}.log".format(self.arch)), self.args.verbose)
 
         from CheckDependencies import CheckDependencies
         if not CheckDependencies(self):
