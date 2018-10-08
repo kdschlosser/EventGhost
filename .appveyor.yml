@@ -90,7 +90,7 @@ install:
             $Env:PATH = $PathX86
 
             "Installing Stackless 2.7.12150 x86"
-            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$PythonX86 /quiet /passive /qn /norestart $StacklessInstallerX86" -Wait
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
             "Done."
             " "
             "Installing wxPython 3.0.2.0 x86"
@@ -128,7 +128,7 @@ install:
             $Env:PATH = $PathX64
 
             "Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I TARGETDIR=$PythonX64 /quiet /passive /qn /norestart $StacklessInstallerX64" -Wait
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
             "Done."
             " "
             "Installing wxPython 3.0.2.0 x64"
