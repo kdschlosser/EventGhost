@@ -61,7 +61,7 @@ install:
                 " "
                 "--- " + $msg
                 "    Installing..."
-                pip install -q $mod
+                pip install --no-cache-dir -q $mod
                 "    Done."
             }
             $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
@@ -99,12 +99,12 @@ install:
             " "
             "--- pip 9.0.1 x86"
             "    Updating..."
-            python -m pip install -q -U "pip==9.0.1"
+            python -m pip install --no-cache-dir -q -U "pip==9.0.1"
             "    Done."
             " "
             "--- setuptools 40.4.3 x86"
             "    Updating..."
-            pip install -q -U "setuptools==40.4.3"
+            pip install --no-cache-dir -q -U "setuptools==40.4.3"
             "    Done."
 
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
