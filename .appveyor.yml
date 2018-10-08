@@ -75,10 +75,9 @@ install:
 
             $WXInstallerX86 = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
             $WXURLX86 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
-            $WXInstallerX64 = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
-            $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
+            $WXInstallerX64 = $InstallersFolder + "wxPython3.0-win64-3.0.2.0-py27.exe"
+            $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win64-3.0.2.0-py27.exe"
 
-            wxPython3.0-win64-3.0.2.0-py27.exe
 
             Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
             Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
