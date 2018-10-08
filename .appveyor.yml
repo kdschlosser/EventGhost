@@ -161,26 +161,15 @@ install:
             PipInstall "ctypeslib 0.5.6 x64" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
             PipInstall "paramiko 2.2.1 x64" "paramiko==2.2.1"
             PipInstall "pywin32 223 x64" pywin32==223
-
-
-            $Env:PYTHON = $PythonX86
-            $Env:PYTHONPATH = $PythonPathX86
-            $Env:PATH = $PathX86
-            RunInstallers
-
-            $Env:PYTHON = $PythonX64
-            $Env:PYTHONPATH = $PythonPathX64
-            $Env:PATH = $PathX64
-            RunInstallers
-
-            $Env:PythonX86 = $PythonX86
-            $Env:PythonPathX86 = $PythonPathX86
-            $Env:PathX86 = $PathX86
-
-            $Env:PythonX64 = $PythonX64
-            $Env:PythonPathX64 = $PythonPathX64
-            $Env:PathX64 = $PathX64
         }
+
+        $Env:PythonX86 = $PythonX86
+        $Env:PythonPathX86 = $PythonPathX86
+        $Env:PathX86 = $PathX86
+
+        $Env:PythonX64 = $PythonX64
+        $Env:PythonPathX64 = $PythonPathX64
+        $Env:PathX64 = $PathX64
 
 build_script:
     ps: |
