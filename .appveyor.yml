@@ -56,7 +56,7 @@ install:
         Remove-Item $PythonWindowsDLL
         " "
         "=============== prepare EventGhost build environment ==============="
-        If (-not (Test-Path $PythonFolder)) {
+        If (-not (Test-Path $PythonX86)) {
             $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
             New-Item $InstallersFolder -type directory | Out-Null
 
