@@ -211,45 +211,46 @@ artifacts:
       name: CHANGELOG_THIS_RELEASE.bb
 
 
+
 notifications:
-    - provider: GitHubPullRequest
-      template: >-
-        [{{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}})
+- provider: GitHubPullRequest
+  template: >-
+    [{{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}})
 
-      Artifacts:
+    Artifacts:
 
-        {{#jobs}}
-        {{#artifacts}}
-        [{{name}}]({{permalink}})
+    {{#jobs}}
+    {{#artifacts}}
+    [{{name}}]({{permalink}})
 
-        {{/artifacts}}
-        {{/jobs}}
+    {{/artifacts}}
+    {{/jobs}}
 
-      on_build_success: true
-      on_build_failure: true
-      on_build_status_changed: false
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
 
-    - provider: Slack
-      incoming_webhook:
-      secure: DXo21MuJufndeGjaRDMxLgLo5yEaPf9uYg1YqrHPlfjsXUAzxRR2yGhCKcUwfLTT3gO192GKwkNAc52Y6TnxuKsNAgI+K5mBW40+6I9FOmU=
+- provider: Slack
+  incoming_webhook:
+    secure: DXo21MuJufndeGjaRDMxLgLo5yEaPf9uYg1YqrHPlfjsXUAzxRR2yGhCKcUwfLTT3gO192GKwkNAc52Y6TnxuKsNAgI+K5mBW40+6I9FOmU=
 
-      template: >-
-        <{{buildUrl}}|{{projectName}} {{buildVersion}} {{status}}>
+  template: >-
+    <{{buildUrl}}|{{projectName}} {{buildVersion}} {{status}}>
 
-      Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
+    Commit <{{commitUrl}}|{{commitId}}> by {{commitAuthor}} on {{commitDate}}:
 
-      Commit message: _{{commitMessage}}_
+    Commit message: _{{commitMessage}}_
 
 
-      Artifacts:
+    Artifacts:
 
-        {{#jobs}}{{#artifacts}}<{{permalink}}|{{name}}>
+    {{#jobs}}{{#artifacts}}<{{permalink}}|{{name}}>
 
-        {{/artifacts}}{{/jobs}}
+    {{/artifacts}}{{/jobs}}
 
-      on_build_success: true
-      on_build_failure: true
-      on_build_status_changed: true
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
 
 
 
