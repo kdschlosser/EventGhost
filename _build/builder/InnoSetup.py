@@ -73,7 +73,7 @@ class InnoInstaller(object):
             arch = 'x64'
 
         issFile.write('# define ARCH {0}\n\n'.format(arch))
-        
+
         templateDict = {}
         for key, value in self.buildSetup.__dict__.iteritems():
             if isinstance(value, unicode):
@@ -87,7 +87,9 @@ class InnoInstaller(object):
                 issFile.write("%s\n" % line)
         issFile.close()
 
-        if not (StartProcess(GetInnoCompilerPath(), innoScriptPath, "/Q") == 0):
+        command = GetInnoCompilerPath().replace('%1', innoScriptPath)
+
+        if not (StartProcess(command) == 0):
             raise InnoSetupError
 
 
@@ -96,15 +98,15 @@ def GetInnoCompilerPath():
         key = _winreg.OpenKey(
             _winreg.HKEY_LOCAL_MACHINE,
             (
-                "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\"
-                "Uninstall\\Inno Setup 5_is1"
+                "SOFTWARE\\\Classes\\\InnoSetupScriptFile\\"
+                "shell\\Compile\\command"
             )
         )
-        installPath = _winreg.QueryValueEx(key, "InstallLocation")[0]
+        installPath = _winreg.QueryValueEx(key, "")[0]
         _winreg.CloseKey(key)
     except WindowsError:
         return None
-    installPath = join(installPath, "ISCC.exe")
-    if not exists(installPath):
+
+    if not exists(installPath[1:].split('"')[0]):
         return None
     return installPath
