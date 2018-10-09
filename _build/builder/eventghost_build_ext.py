@@ -23,7 +23,6 @@ from subprocess import Popen, PIPE
 
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
-
 EXTENSIONS_PATH = os.path.join(BASE_PATH, '..', 'extensions')
 
 RAW_INPUT_HOOK_SRC = os.path.join(EXTENSIONS_PATH, 'RawInputHook.dll')
@@ -47,10 +46,6 @@ VISTA_VOL_EVENTS_DST = 'pyd_imports'
 WIN_USB_SRC = os.path.join(EXTENSIONS_PATH, 'WinUsbWrapper')
 WIN_USB_DST = 'build\lib27\site-packages'
 
-import msvc
-
-sys.path.append(PYD_IMPORTS_PATH)
-
 
 class Extension(object):
     def __init__(self, name, solution_path, destination_path):
@@ -68,8 +63,6 @@ class BuildEXT(Command):
         pass
 
     def run(self):
-        import msvc
-
         build_base = self.distribution.get_command_obj("build").build_base
         tmp_folder = os.path.split(build_base)[0]
 
@@ -78,8 +71,9 @@ class BuildEXT(Command):
         if not os.path.exists(extensions_build_path):
             os.mkdir(extensions_build_path)
 
-
         extensions = self.distribution.ext_modules
+
+        import msvc
         environment = msvc.Environment()
 
         print environment
@@ -136,7 +130,6 @@ class BuildEXT(Command):
                         print line.rstrip()
 
             self.copy_file(os.path.join(output_path, name), destination_path)
-
 
 
 RawInputHook = eventghost_build_ext.Extension(

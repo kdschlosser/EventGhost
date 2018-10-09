@@ -36,6 +36,9 @@ install:
 
     #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
     - ps: |
+
+        "========== Prepare EventGhost build environment =========="
+
         $PythonX86 = 'C:\Stackless27'
         $PythonPathX86 = 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
         $PythonScriptsX86 = $PythonX86 + "\Scripts"
@@ -55,7 +58,7 @@ install:
 
         Remove-Item $PythonWindowsDLL
         " "
-        "=============== prepare EventGhost build environment ==============="
+
         If (-not (Test-Path $PythonX86)) {
             Function PipInstall ($msg, $mod) {
                 " "
@@ -216,7 +219,7 @@ install:
 
 build_script:
     ps: |
-        "=============== start the EventGhost build ==============="
+        "=============== Start the EventGhost build ==============="
         " "
 
         If ($Env:APPVEYOR_REPO_TAG.tolower() -eq "true" -and $Env:APPVEYOR_REPO_TAG_NAME.tolower().startswith("deploy")) {
@@ -227,19 +230,23 @@ build_script:
             $release = $Env:APPVEYOR_REPO_TAG_NAME.split("_", 2)[1]
             $url = if($Env:SFTP_URL){' --docs --url "' + $env:SFTP_URL + '"'} else {''}
 
+
+            "================== Building deploy x86 ==================="
             $Env:PYTHON = $Env:PythonX86
             $Env:PYTHONPATH = $Env:PythonPathX86
             $Env:PATH = $Env:PathX86
             python "_build\Build.py" --build --package --release --version $release $url
             $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
-
+            "================== Building deploy x64 ==================="
             $Env:PYTHON = $Env:PythonX64
             $Env:PYTHONPATH = $Env:PythonPathX64
             $Env:PATH = $Env:PathX64
             python "_build\Build.py" --build --package --release --version $release $url
             $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
         } else {
+
+            "=================== Building Test x86 ===================="
             $Env:PYTHON = $Env:PythonX86
             $Env:PYTHONPATH = $Env:PythonPathX86
             $Env:PATH = $Env:PathX86
@@ -247,6 +254,7 @@ build_script:
             $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
 
+            "=================== Building Test x64 ===================="
             $Env:PYTHON = $Env:PythonX64
             $Env:PYTHONPATH = $Env:PythonPathX64
             $Env:PATH = $Env:PathX64
@@ -264,8 +272,8 @@ build_script:
         If (-Not (Test-Path(".\EventGhost.exe"))) {$env:APPVEYOR_CACHE_SKIP_SAVE = "true"}
 
         " "
+        "=============== EventGhost build finished ================"
 
-        "=============== EventGhost build finished ==============="
         " "
         " "
 
