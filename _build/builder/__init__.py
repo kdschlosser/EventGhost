@@ -23,6 +23,7 @@ import sys
 import tempfile
 import threading
 from os.path import abspath, dirname, exists, join
+import msvc
 
 # Local imports
 import builder
