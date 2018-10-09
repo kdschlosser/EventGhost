@@ -207,7 +207,7 @@ class StacklessDependency(DependencyBase):
 class wxPythonDependency(DependencyBase):
     name = "wxPython"
     version = "3.0.2.0"
-    module=wx
+    module = 'wx'
 
     def Check(self):
         try:
