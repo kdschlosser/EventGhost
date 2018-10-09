@@ -98,11 +98,6 @@ install:
 
             Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
 
-            "Installing Visual C Compiler for Python 2.7"
-            Start-+          MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
-            "Done."
-            " "
-
 
             $Env:PYTHON = $PythonX86
             $Env:PYTHONPATH = $PythonPathX86
@@ -112,6 +107,17 @@ install:
             Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
             "Done."
             " "
+
+            "Installing Stackless 2.7.12150 x64"
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
+            "Done."
+            " "
+
+            "Installing Visual C Compiler for Python 2.7"
+            Start-+          MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
+            "Done."
+            " "
+
             "Installing wxPython 3.0.2.0 x86"
             Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
             "Done"
@@ -132,11 +138,7 @@ install:
             "Done"
             " "
 
-            "Installing pycrypto 2.6.1 x86"
-            easy_install --always-unzip --quiet pycrypto==2.6.1
-            "Done"
-            " "
-
+            PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
@@ -155,14 +157,10 @@ install:
             $Env:PYTHONPATH = $PythonPathX64
             $Env:PATH = $PathX64
 
-            "Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
-            "Done."
-            " "
+
             "Installing wxPython 3.0.2.0 x64"
             Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
             "Done"
-
 
             " "
             "--- pip 9.0.1 x64"
@@ -180,11 +178,7 @@ install:
             "Done"
             " "
 
-            "Installing pycrypto 2.6.1 x64"
-            easy_install --always-unzip --quiet pycrypto==2.6.1
-            "Done"
-            " "
-
+            PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
             PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
@@ -246,7 +240,7 @@ build_script:
             python "_build\Build.py" --build --package
             $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
         }
-        
+
         # update the appveyor build version to be the same as the EventGhost version
         $start = $env:SetupExeX86.IndexOf("_")
         $length = $env:SetupExeX86.LastIndexOf("_") - $start
