@@ -98,11 +98,6 @@ install:
 
             Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
 
-
-            $Env:PYTHON = $PythonX86
-            $Env:PYTHONPATH = $PythonPathX86
-            $Env:PATH = $PathX86
-
             "Installing Stackless 2.7.12150 x86"
             Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
             "Done."
@@ -114,9 +109,13 @@ install:
             " "
 
             "Installing Visual C Compiler for Python 2.7"
-            Start-+          MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
+            Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
             "Done."
             " "
+
+            $Env:PYTHON = $PythonX86
+            $Env:PYTHONPATH = $PythonPathX86
+            $Env:PATH = $PathX86
 
             "Installing wxPython 3.0.2.0 x86"
             Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
