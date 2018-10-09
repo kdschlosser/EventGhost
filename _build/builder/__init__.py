@@ -61,6 +61,24 @@ class Task(object):
 
 class Builder(object):
     def __init__(self):
+        class PseudocFunctions(object):
+
+            def __init__(self):
+
+                self.__name__ = 'cFunctions'
+                self.__module__ = 'cFunctions'
+                self.__file__ = None
+                self.__package__ = ''
+
+            def __getattr__(self, item):
+                def dummy_func(*args, **kwargs):
+                    pass
+
+                return dummy_func
+
+
+        sys.modules['cFunctions'] = PseudocFunctions()
+
         if not VirtualEnv.Running() and VirtualEnv.Exists():
             VirtualEnv.Activate()
 

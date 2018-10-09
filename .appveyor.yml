@@ -138,7 +138,7 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x86"
-            easy_install --always-unzip --verbose $Py2ExeInstallerX86
+            easy_install --always-unzip --quiet $Py2ExeInstallerX86
             "Done"
             " "
 
@@ -182,7 +182,7 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x64"
-            easy_install --always-unzip --verbose $Py2ExeInstallerX64
+            easy_install --always-unzip --quiet $Py2ExeInstallerX64
             "Done"
             " "
 
