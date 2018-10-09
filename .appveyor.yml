@@ -133,11 +133,16 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x86"
-            easy_install --always-unzip --quiet $Py2ExeInstallerX86
+            easy_install --always-unzip --verbose $Py2ExeInstallerX86
             "Done"
             " "
 
-            PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
+            # removed pycrypto as this library is no longer being mainted.
+            # the lobrary pycryptodome can be used as an alternative and has
+            # st of the same API
+            # PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
+            PipInstall "pycryptodome x86" "pycryptodome"
+
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
@@ -173,11 +178,15 @@ install:
             "    Done."
 
             "Installing py2exe 0.6.9 x64"
-            easy_install --always-unzip --quiet $Py2ExeInstallerX64
+            easy_install --always-unzip --verbose $Py2ExeInstallerX64
             "Done"
             " "
 
-            PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
+            # removed pycrypto as this library is no longer being mainted.
+            # the lobrary pycryptodome can be used as an alternative and has
+            # st of the same API
+            # PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
+            PipInstall "pycryptodome x64" "pycryptodome"
             PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
