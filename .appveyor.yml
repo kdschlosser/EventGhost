@@ -74,10 +74,12 @@ install:
             $StacklessURLX64 = "http://www.stackless.com/binaries/python-2.7.12150.amd64-stackless.msi"
 
             $WXInstallerX86 = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
+            $WXInstallLocationX86 = $PythonX86 + "\wxPython3.0.2_x86"
             $WXURLX86 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
-            $WXInstallerX64 = $InstallersFolder + "wxPython3.0-win64-3.0.2.0-py27.exe"
-            $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win64-3.0.2.0-py27.exe"
 
+            $WXInstallerX64 = $InstallersFolder + "wxPython3.0-win64-3.0.2.0-py27.exe"
+            $WXInstallLocationX64 = $PythonX64 + "\wxPython3.0.2_x64"
+            $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win64-3.0.2.0-py27.exe"
 
             $Py2ExeInstallerX86 = $InstallersFolder + "py2exe-0.6.9.win32-py2.7.exe"
             $Py2ExeURLX86 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe"
@@ -97,6 +99,9 @@ install:
             $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
 
             Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
+
+            " "
+            " "
 
             "Installing Stackless 2.7.12150 x86"
             Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
@@ -118,7 +123,7 @@ install:
             $Env:PATH = $PathX86
 
             "Installing wxPython 3.0.2.0 x86"
-            Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
+            Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes  /Silent /dir=$WXInstallLocationX86" -NoNewWindow -Wait
             "Done"
             " "
 
@@ -137,9 +142,9 @@ install:
             "Done"
             " "
 
-            # removed pycrypto as this library is no longer being mainted.
-            # the lobrary pycryptodome can be used as an alternative and has
-            # st of the same API
+            # removed pycrypto as this library is no longer being maintained.
+            # the library pycryptodome can be used as an alternative and has
+            # most of the same API
             # PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
             PipInstall "pycryptodome x86" "pycryptodome"
 
@@ -161,9 +166,8 @@ install:
             $Env:PYTHONPATH = $PythonPathX64
             $Env:PATH = $PathX64
 
-
             "Installing wxPython 3.0.2.0 x64"
-            Start-Process $WXInstallerX86 -Arg "/VERYSILENT /SUPPRESSMSGBOXES" -NoNewWindow -Wait
+            Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes  /Silent /dir=$WXInstallLocationX64" -NoNewWindow -Wait
             "Done"
 
             " "
@@ -182,11 +186,12 @@ install:
             "Done"
             " "
 
-            # removed pycrypto as this library is no longer being mainted.
-            # the lobrary pycryptodome can be used as an alternative and has
-            # st of the same API
+            # removed pycrypto as this library is no longer being maintained.
+            # the library pycryptodome can be used as an alternative and has
+            # most of the same API
             # PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
             PipInstall "pycryptodome x64" "pycryptodome"
+
             PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
