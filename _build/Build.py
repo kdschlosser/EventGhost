@@ -35,23 +35,21 @@ setup(
         'future==0.15.2',
         'comtypes==1.1.3',
         'CommonMark==0.7.3',
-        'wxPython==3.0.2.0',
         'pywin32==223',
         'paramiko==2.2.1'
     ]
 )
 
-
-
-from os.path import dirname, exists, join
+from os.path import dirname, exists, join # NOQA
 
 # Local imports
-import builder
-from builder.Utils import CaseInsensitiveList, ListDir
+import builder # NOQA
+from builder.Utils import CaseInsensitiveList, ListDir # NOQA
 
 SKIP_IF_UNCHANGED = CaseInsensitiveList(
     r"plugins\Task\TaskHook.dll",
 )
+
 
 class MyBuilder(builder.Builder):
     name = "EventGhost"
