@@ -175,7 +175,7 @@ class ModuleDependency(DependencyBase):
 
 class PyWin32Dependency(DependencyBase):
     name = "pywin32"
-    version = "220"
+    version = "223"
     url = "https://eventghost.github.io/dist/dependencies/pywin32-220-cp27-none-win32.whl"
 
     def Check(self):
@@ -204,6 +204,20 @@ class StacklessDependency(DependencyBase):
             raise WrongVersion
 
 
+class wxPythonDependency(DependencyBase):
+    name = "wxPython"
+    version = "3.0.2.0"
+    module=wx
+
+    def Check(self):
+        try:
+            import wxversion  # NOQA
+        except:
+            raise MissingDependency
+        if not wxversion.checkInstalled(self.version):
+            raise WrongVersion
+
+
 DEPENDENCIES = [
     ModuleDependency(
         name = "CommonMark",
@@ -215,12 +229,12 @@ DEPENDENCIES = [
         module = "comtypes",
         version = "1.1.2",
     ),
-    ModuleDependency(
-        name = "ctypeslib",
-        module = "ctypeslib",
-        version = "0.5.6",
-        url = "https://eventghost.github.io/dist/dependencies/ctypeslib-0.5.6-cp27-none-any.whl"
-    ),
+    # ModuleDependency(
+    #     name = "ctypeslib",
+    #     module = "ctypeslib",
+    #     version = "0.5.6",
+    #     url = "https://eventghost.github.io/dist/dependencies/ctypeslib-0.5.6-cp27-none-any.whl"
+    # ),
     ModuleDependency(
         name = "future",
         module = "future",
@@ -250,10 +264,10 @@ DEPENDENCIES = [
         version = "0.6.9",
     ),
     ModuleDependency(
-        name = "PyCrypto",
+        name = "pycryptodome",
         module = "Crypto",
-        version = "2.6.1",
-        url = "https://eventghost.github.io/dist/dependencies/pycrypto-2.6.1-cp27-none-win32.whl",
+        version = "3.6.6",
+        url = "",
     ),
     PyWin32Dependency(),
     ModuleDependency(
@@ -262,12 +276,7 @@ DEPENDENCIES = [
         version = "1.3.5",
     ),
     StacklessDependency(),
-    ModuleDependency(
-        name = "wxPython",
-        module = "wx",
-        version = "3.0.2.0",
-        url = "https://eventghost.github.io/dist/dependencies/wxPython-3.0.2.0-cp27-none-win32.whl",
-    ),
+    wxPythonDependency()
 ]
 
 def CheckDependencies(buildSetup):

@@ -20,6 +20,27 @@
 This script creates the EventGhost setup installer.
 """
 
+
+from setuptools import setup
+
+setup(
+    name='EventGhost',
+    setup_requires=[
+        'wheel==0.29.0'
+        'jinja2==2.8.1'
+        'Pillow==3.4.2',
+        'py2exe_py2==0.6.9',
+        'pycryptodome==3.6.6',
+        'Sphinx==1.5.6',
+        'future==0.15.2',
+        'comtypes==1.1.3',
+        'CommonMark==0.7.3',
+        'wxPython==3.0.2.0',
+        'pywin32==223'
+        'paramiko==2.2.1'
+    ]
+)
+
 from os.path import dirname, exists, join
 
 # Local imports
