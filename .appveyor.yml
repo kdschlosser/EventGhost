@@ -3,6 +3,105 @@
 # To draft a release on GitHub with AppVeyor, create a tag on master.
 
 
+# *****************************************************************************
+# *                                                                           *
+# *                              READ ME!!!                                   *
+# *                                                                           *
+# *****************************************************************************
+#
+#
+# =============================== PROBLEMS ====================================
+#
+# python <3 - C-Python or Stackless you can only have a single copy
+#             of that version of python installed on a machine. The issue with
+#             the installer is that it does not launch the uninstaller for the
+#             version that is already installed. It simply iterates the
+#             installation folder and deletes the files for the currently
+#             installed version. It does this without ever telling you that it
+#             is and it does not do a CRC check against the installed files
+#             before removing them. So if you have any modified core python
+#             files be warned.. It does not care. It will delete them without
+#             notice.
+#
+#             The big problem with this process is that it does not remove
+#             any entries in the registry for the old installation. and it
+#             adds entries for the new installation below them. This causes
+#             any installers that do a search for python installations to
+#             always select the wrong one. Now under normal situations an
+#             installer would iterate the list of possible installations and
+#             verify if it is there or not.. But because Python 2.7 is only
+#             supposed to have a single installed copy why would the author
+#             do this?? They wouldn't. they would rely on there being only a
+#             single installation listed in the registry.
+#
+# py2xe_py2 - does not have a pypi dist available for python 2.7 x64
+#             so for sake of keeping the code symmetrical both the x86 and x64
+#             use the executable that gets downloaded.
+#             the installer for py2exe_py2 does not detect installed python
+#             version properly because of the bug mentioned above.
+#
+#
+# x86 - x64 - The second portion of the multiple Python 2.7 installations
+#             dilemma. we need to install an x86 and an x64 variant at the
+#             same time. I know there is a way to have the appveyor build run
+#             2 times. I have not investigated this fully as of yet.
+#
+#
+# ========================== SOLUTIONS / HACKS ================================
+#
+# py2xe_py2 - this is a fix for the above issue.
+#             since the executable was created using distutils we can use
+#             easy_install to install the library. There is a single glitch
+#             with it There is some kind of a warning/error that gets printed
+#             out. Tho it does not affect the installation it does produce the
+#             undesirable red in the powershell log.
+#
+# x86 - x64 - How we get around this is we relocate the python installations
+#             after installing everything needed. we also move the python dll
+#             file from SysWOW or System to the installations folder.
+#             we do not want an entry in the registry pointing to a current
+#             python installation that we intend to use. When we install the
+#             second variant if the first is found it will be deleted. So we
+#             have to play a little bit of hide and seek with the python
+#             installations. That is why you will see all of the moving and
+#             copying of files.
+#
+#
+# =============================== CHANGES =====================================
+#
+# *REMOVED*
+# ctypeslib - This is a non functioning package due to
+#             components that are required by the library and are no longer
+#             available. The only thing this module was ever used for was the
+#             creation of eg.WinApi.Dynamic module.
+#             Microsoft has not changed any of the API for any of the
+#             constants/functions located in this file since their creation in
+#             Windows XP. I do not forsee them making any changes because of
+#             how long this API has been in place. So the need for ctypeslib
+#             (even if it did function) is no longer needed.
+# *REMOVED*
+# pycrypto  - this library is no longer being maintained. has been replaced
+#
+# *ADDED*
+# pycryptodome - pycrypto replacement. most of the same API. It is a maintained
+#                fork of pycrypto
+#
+# *MOVED*
+# build process - I moved the building of EG out of the install section of
+#                 appveyor. I did this because of the incorrect build
+#                 completion notifications. There is a build_script section
+#                 that can be used in replacement of build. this section
+#                 does not do a VS solution scan and it also properly reports
+#                 the status of the build. the install section is not monitored
+#                 for application status codes properly. and the use of
+#                 fast_finish i believe only works on the build/build_script
+#                 sections
+#
+#
+# *****************************************************************************
+# *****************************************************************************
+
+
 image: Visual Studio 2017
 version: '{build}-{branch}'
 
@@ -15,6 +114,12 @@ version: '{build}-{branch}'
 matrix:
   fast_finish: true
 
+environment:
+  PythonX86: 'C:\Stackless27'
+  PythonPathX86: 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
+
+  PythonX64: 'C:\Stackless27x64'
+  PythonPathX64: 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
 
 cache:
     # Invalidate cache if .appveyor.yml has changed
@@ -39,33 +144,45 @@ install:
 
         "========== Prepare EventGhost build environment =========="
 
-        $PythonX86 = 'C:\Stackless27'
-        $PythonPathX86 = 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
-        $PythonScriptsX86 = $PythonX86 + "\Scripts"
-        $SitePackagesX86 = $PythonX86 + "\lib\site-packages"
-        $PythonDLLX86 = $PythonX86 + "\python27.dll"
-        $PathX86 = $PythonPathX86 + $Env:PATH
+        $Env:PathX86 = $Env:PythonPathX86 + $Env:PATH
+        $Env:PathX64 = $Env:PythonPathX64 + $Env:PATH
+        $PythonSysWOWDLL = $Env:SYSTEMROOT + "\SysWOW64\python27.dll"
+        $PythonSystemDLL = $Env:SYSTEMROOT + "\System\python27.dll"
 
-        $PythonX64 = 'C:\Stackless27x64'
-        $PythonPathX64 = 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
-        $PythonScriptsX64 = $PythonX64 + "\Scripts"
-        $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
-        $PythonDLLX64 = $PythonX64 + "\python27.dll"
-        $PathX64 = $PythonPathX64 + $Env:PATH
+        # remove any python dll files for pre installed versions of python
+        # because we move out installations dll files into the installations
+        # folder out dll files get cached with the installation. The cache is
+        # copied to the appveyor VM so the VM image contains these files in
+        # their original location. we want to remove them to ensure a trouble
+        # free build.
 
-        $SysWOW = $Env:SYSTEMROOT + "\SysWOW64"
-        $PythonWindowsDLL = $SysWOW + "\python27.dll"
+        If (Test-Path $PythonSysWOWDLL) {
+            Remove-Item $PythonSysWOWDLL
+        }
 
-        Remove-Item $PythonWindowsDLL
+        If (Test-Path $PythonSystemDLL) {
+            Remove-Item $PythonSystemDLL
+        }
+
         " "
 
         If (-not (Test-Path $PythonX86)) {
+            $PythonX86 = 'C:\Stackless27_temp'
+            $PythonPathX86 = 'C:\Stackless27_temp;C:\Stackless27_temp\Scripts;C:\Stackless27_temp\DLLs;C:\Stackless27_temp\Lib;C:\Stackless27_temp\Lib\site-packages;'
+            $PythonScriptsX86 = $PythonX86 + "\Scripts"
+            $SitePackagesX86 = $PythonX86 + "\lib\site-packages"
+            $PathX86 = $PythonPathX86 + $Env:PATH
+
+            $PythonX64 = 'C:\Stackless27x64_temp'
+            $PythonPathX64 = 'C:\Stackless27x64_temp;C:\Stackless27x64_temp\Scripts;C:\Stackless27x64_temp\DLLs;C:\Stackless27x64_temp\Lib;C:\Stackless27x64_temp\Lib\site-packages;'
+            $PythonScriptsX64 = $PythonX64 + "\Scripts"
+            $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
+            $PathX64 = $PythonPathX64 + $Env:PATH
+
             Function PipInstall ($msg, $mod) {
-                " "
-                "--- " + $msg
-                "    Installing..."
+                "  ---- Installing " + $msg
                 pip install --no-cache-dir -q $mod
-                "    Done."
+                "       Done."
             }
             $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
             New-Item $InstallersFolder -type directory | Out-Null
@@ -89,139 +206,141 @@ install:
             $Py2ExeInstallerX64 = $InstallersFolder + "py2exe-0.6.9.win64-py2.7.amd64.exe"
             $Py2ExeURLX64 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win64-py2.7.amd64.exe"
 
-            Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
-            Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
-
-            Start-FileDownload $WXURLX86 -Timeout 60000 -FileName $WXInstallerX86
-            Start-FileDownload $WXURLX64 -Timeout 60000 -FileName $WXInstallerX64
-
-            Start-FileDownload $Py2ExeURLX86 -Timeout 60000 -FileName $Py2ExeInstallerX86
-            Start-FileDownload $Py2ExeURLX64 -Timeout 60000 -FileName $Py2ExeInstallerX64
-
+            # I am using the VS 2017 appveyor image and this is not installed
+            # with that image. It is needed to compile the crypto library
             $VCInstaller = $InstallersFolder + "VCForPython27.msi"
             $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
 
+            "==================== Downloading Files ==================="
+
+            Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
+            Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
+            Start-FileDownload $WXURLX86 -Timeout 60000 -FileName $WXInstallerX86
+            Start-FileDownload $WXURLX64 -Timeout 60000 -FileName $WXInstallerX64
+            Start-FileDownload $Py2ExeURLX86 -Timeout 60000 -FileName $Py2ExeInstallerX86
+            Start-FileDownload $Py2ExeURLX64 -Timeout 60000 -FileName $Py2ExeInstallerX64
             Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
 
             " "
-            " "
+            "================= Installing Requirements ================"
 
-            "Installing Stackless 2.7.12150 x86"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
-            "Done."
-            " "
-
-            "Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
-            "Done."
-            " "
-
-            "Installing Visual C Compiler for Python 2.7"
+            "  ---- Installing Visual C Compiler for Python 2.7"
             Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
-            "Done."
+            "       Done."
+
             " "
+            "=============== Installing x86 Requirements =============="
+
+            "  ---- Installing Stackless 2.7.12150 x86"
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
+            "       Done."
 
             $Env:PYTHON = $PythonX86
             $Env:PYTHONPATH = $PythonPathX86
             $Env:PATH = $PathX86
 
-            "Installing wxPython 3.0.2.0 x86"
+            "  ---- Installing wxPython 3.0.2.0 x86"
             Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackagesX86" -NoNewWindow -Wait
-            "Done"
-            " "
+            "       Done"
 
-            "--- pip 9.0.1 x86"
-            "    Updating..."
+            "  ---- Upgrading pip 9.0.1 x86"
             python -m pip install --no-cache-dir -q -U "pip==9.0.1"
-            "    Done."
-            " "
-            "--- setuptools 40.0.0 x86"
-            "    Updating..."
+            "       Done."
+            "  ---- Upgrading setuptools 40.0.0 x86"
             pip install --no-cache-dir -q -U "setuptools==40.2.0"
-            "    Done."
+            "     Done."
 
-            "Installing py2exe 0.6.9 x86"
+            "  ---- Installing py2exe 0.6.9 x86"
             easy_install --always-unzip --quiet $Py2ExeInstallerX86
-            "Done"
-            " "
+            "     Done."
 
-            # removed pycrypto as this library is no longer being maintained.
-            # the library pycryptodome can be used as an alternative and has
-            # most of the same API
-            # PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
+            # *See Changes* PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
             PipInstall "pycryptodome 3.6.6 x86" "pycryptodome==3.6.6"
 
             PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
+
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
             # problems with (build of eg will fail)
             PipInstall "jinja2 2.8.1 x86" "jinja2==2.8.1"
             PipInstall "sphinx 1.5.6 x86" "sphinx==1.5.6"
+
             PipInstall "commonmark 0.7.3 x86" "commonmark==0.7.3"
             PipInstall "pillow 3.4.2 x86" "pillow==3.4.2"
             PipInstall "comtypes 1.1.3 x86" "https://github.com/enthought/comtypes/archive/1.1.3.zip"
-            # PipInstall "ctypeslib 0.5.6 x86" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
+
+            # *See Changes* PipInstall "ctypeslib 0.5.6 x86" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
+
+
             PipInstall "paramiko 2.2.1 x86" "paramiko==2.2.1"
             PipInstall "pywin32 223 x86" pywin32==223
 
+            If (Test-Path $PythonSysWOWDLL) {
+                Copy-Item $PythonSysWOWDLL -Destination $PythonX86
+                Remove-Item $PythonSysWOWDLL
+            }
+            Rename-Item $PythonX86 -NewName 'Stackless27'
+
+            " "
+            "=============== Installing x64 Requirements =============="
+
+            "  ---- Installing Stackless 2.7.12150 x64"
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64Temp" -Wait
+            "       Done."
 
             $Env:PYTHON = $PythonX64
             $Env:PYTHONPATH = $PythonPathX64
             $Env:PATH = $PathX64
 
-            "Installing wxPython 3.0.2.0 x64"
+            "  ---- Installing wxPython 3.0.2.0 x64"
             Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackagesX64" -NoNewWindow -Wait
-            "Done"
+            "       Done."
 
-            " "
-            "--- pip 9.0.1 x64"
-            "    Updating..."
+            "  ---- Upgrading pip 9.0.1 x64"
             python -m pip install --no-cache-dir -q -U "pip==9.0.1"
-            "    Done."
-            " "
-            "--- setuptools 40.2.0 x64"
-            "    Updating..."
+            "       Done."
+
+            "  ---- Upgrading setuptools 40.2.0 x64"
             pip install -q --no-cache-dir -U "setuptools==40.2.0"
-            "    Done."
+            "     Done."
 
-            "Installing py2exe 0.6.9 x64"
+            "  ---- Installing py2exe 0.6.9 x64"
             easy_install --always-unzip --quiet $Py2ExeInstallerX64
-            "Done"
-            " "
+            "       Done."
 
-            # removed pycrypto as this library is no longer being maintained.
-            # the library pycryptodome can be used as an alternative and has
-            # most of the same API
-            # PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
+
+            # *See Changes* PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
             PipInstall "pycryptodome 3.6.6 x64" "pycryptodome==3.6.6"
 
             PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
+
             # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
             # jinja2 >= 2.9 has an async module which py2exe has
             # problems with (build of eg will fail)
             PipInstall "jinja2 2.8.1 x64" "jinja2==2.8.1"
             PipInstall "sphinx 1.5.6 x64" "sphinx==1.5.6"
+
             PipInstall "commonmark 0.7.3 x64" "commonmark==0.7.3"
             PipInstall "pillow 3.4.2 x64" "pillow==3.4.2"
             PipInstall "comtypes 1.1.3 x64" "https://github.com/enthought/comtypes/archive/1.1.3.zip"
-            # PipInstall "ctypeslib 0.5.6 x64" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
+
+            # *See Changes* PipInstall "ctypeslib 0.5.6 x64" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
+
             PipInstall "paramiko 2.2.1 x64" "paramiko==2.2.1"
             PipInstall "pywin32 223 x64" pywin32==223
+
+            If (Test-Path $PythonSystemDLL) {
+                Copy-Item $PythonSystemDLL -Destination $PythonX64
+                Remove-Item $PythonSystemDLL
+            }
+            Rename-Item $PythonX64 -NewName 'Stackless27x64
+
+            " "
         }
-
-        $Env:PythonX86 = $PythonX86
-        $Env:PythonPathX86 = $PythonPathX86
-        $Env:PathX86 = $PathX86
-
-        $Env:PythonX64 = $PythonX64
-        $Env:PythonPathX64 = $PythonPathX64
-        $Env:PathX64 = $PathX64
 
 build_script:
     ps: |
         "=============== Start the EventGhost build ==============="
-        " "
-
         If ($Env:APPVEYOR_REPO_TAG.tolower() -eq "true" -and $Env:APPVEYOR_REPO_TAG_NAME.tolower().startswith("deploy")) {
             # to do a release, create a tag in the form "Deploy_VERSION"
             # VERSION must be a valid version string (without leading 'v')
@@ -246,7 +365,7 @@ build_script:
             $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
         } else {
 
-            "=================== Building Test x86 ===================="
+            "=================== Building WIP x86 ===================="
             $Env:PYTHON = $Env:PythonX86
             $Env:PYTHONPATH = $Env:PythonPathX86
             $Env:PATH = $Env:PathX86
@@ -254,7 +373,7 @@ build_script:
             $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
 
-            "=================== Building Test x64 ===================="
+            "=================== Building WIP x64 ===================="
             $Env:PYTHON = $Env:PythonX64
             $Env:PYTHONPATH = $Env:PythonPathX64
             $Env:PATH = $Env:PathX64
@@ -273,8 +392,6 @@ build_script:
 
         " "
         "=============== EventGhost build finished ================"
-
-        " "
         " "
 
 #after_test:

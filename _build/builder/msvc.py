@@ -20,6 +20,7 @@ import sys
 import os
 import platform
 import shutil
+from xml.etree import ElementTree
 from ctypes import (
     POINTER,
     byref,
@@ -933,21 +934,24 @@ class Environment(object):
         else:
             raise RuntimeError('Unable to locate sln file')
 
-        for vcxproj_file in os.listdir(dst):
-            if vcxproj_file.endswith('.vcxproj'):
-                break
-        else:
-            raise RuntimeError('Unable to locate vcxproj file')
-
         sln_file = os.path.join(dst, sln_file)
 
         update_vs_solution(sln_file)
-        update_vs_project(self, os.path.join(dst, vcxproj_file))
 
-        if self.architecture == 'x64':
-            return sln_file, os.path.join(dst, 'x64', self.configuration)
-        else:
-            return sln_file, os.path.join(dst, self.configuration)
+        project_outputs = dict()
+
+        for vcxproj_file in os.listdir(dst):
+            if vcxproj_file.endswith('.vcxproj'):
+                project_name, build_output = update_vs_project(
+                    self,
+                    os.path.join(dst, vcxproj_file)
+                )
+                project_outputs[project_name] = build_output
+
+        if not project_outputs:
+            raise RuntimeError('Unable to locate vcxproj file')
+
+        return sln_file, project_outputs
 
     def __str__(self):
         template = (
@@ -1118,6 +1122,175 @@ def update_vs_solution(path):
         f.write(sln)
 
 
+def iter_node(old_node):
+
+    def has_64(v):
+        for pattern in ('x64', 'X64', 'WIN64'):
+            if pattern in v:
+                return True
+        return False
+
+    new_node = ElementTree.Element(old_node.tag)
+    if old_node.text is not None:
+        if has_64(old_node.text):
+            return old_node
+
+        new_node.text = old_node.text.replace('Win32', 'x64')
+        new_node.text = new_node.text.replace('x86', 'x64')
+        new_node.text = new_node.text.replace('X86', 'X64')
+        new_node.text = new_node.text.replace('WIN32', 'WIN64')
+
+    for key, value in old_node.attrib.items():
+        if has_64(value):
+            return old_node
+
+        new_node.attrib[key] = value.replace('Win32', 'x64')
+        new_node.attrib[key] = new_node.attrib[key].replace('x86', 'x64')
+        new_node.attrib[key] = new_node.attrib[key].replace('X86', 'X64')
+        new_node.attrib[key] = new_node.attrib[key].replace('WIN32', 'WIN64')
+
+    for old_sub_node in old_node:
+        new_nodes = iter_node(old_sub_node)
+        new_node.append(new_nodes)
+
+    return new_node
+
+
+def get_output_path(project_name, solution_dir, env, project):
+
+    build_config = env.configuration + '|' + env.platform
+    vcxproj_xmlns = '{http://schemas.microsoft.com/developer/msbuild/2003}'
+    output_file = None
+
+    def build_nodes():
+        for node in project:
+            if (
+                node.tag.replace(vcxproj_xmlns, '') == 'ItemGroup' and
+                'Label' in node.attrib and
+                node.attrib['Label'] == 'ProjectConfigurations'
+            ):
+                for sub_node in node:
+                    if (
+                        sub_node.tag.replace(vcxproj_xmlns, '') ==
+                        'ProjectConfiguration' and
+                        sub_node.attrib['Include'] != build_config
+                    ):
+                        continue
+                    yield sub_node
+                continue
+            if (
+                'Condition' in node.attrib and
+                build_config not in node.attrib['Condition']
+            ):
+                continue
+
+            yield node
+
+    def locate_variable(var):
+        if var == 'TargetName':
+            val = '$(ProjectName)'
+        elif var == 'ProjectName':
+            val = project_name
+        elif var == 'SolutionDir':
+            val = solution_dir
+        elif var == 'OutDir':
+            val = '$(SolutionDir)$(Platform)\\$(Configuration)\\'
+        elif var == 'IntDir':
+            val = '$(Platform)\\$(Configuration)\\'
+        elif var == 'TargetExt':
+            val = None
+
+            for node in build_nodes():
+                if node.tag.replace(vcxproj_xmlns, '') == 'PropertyGroup':
+                    if 'Label' not in node.attrib:
+                        continue
+                    if node.attrib['Label'] != 'Configuration':
+                        continue
+
+                    for sub_node in node:
+                        if (
+                            sub_node.tag.replace(vcxproj_xmlns, '') ==
+                            'ConfigurationType'
+                        ):
+                            if sub_node.text == 'DynamicLibrary':
+                                val = '.dll'
+                            elif sub_node.text == 'StaticLibrary':
+                                val = '.lib'
+                            elif sub_node.text == 'Application':
+                                val = '.exe'
+
+                            break
+                    else:
+                        continue
+
+                    break
+        else:
+            val = None
+
+        def find_var(n):
+            for c in n:
+                if c.tag.replace(vcxproj_xmlns, '') == var:
+                    return c.text
+                else:
+                    r = find_var(c)
+                    if r is not None:
+                        return r
+
+        for node in build_nodes():
+            ret = find_var(node)
+
+            if ret is not None:
+                val = ret
+                break
+
+        return val
+
+    def iter_variable(variable):
+        out_data = ''
+        if variable is None:
+            return None
+
+        if '$' in variable:
+            variables = variable.split('$')
+            for variable in variables:
+                if not variable.startswith('('):
+                    out_data += variable
+                    continue
+
+                variable, extra = variable[1:].split(')', 1)
+                var_data = iter_variable(locate_variable(variable))
+
+                if var_data is None:
+                    return None
+
+                out_data += var_data + extra
+        else:
+            out_data = variable
+
+        return out_data
+
+    for node in build_nodes():
+        if (
+            node.tag.replace(vcxproj_xmlns, '') ==
+            'ItemDefinitionGroup'
+        ):
+            for sub_node in node:
+                if sub_node.tag.replace(vcxproj_xmlns, '') == 'Link':
+                    for sub_sub_node in sub_node:
+                        if (
+                            sub_sub_node.tag.replace(vcxproj_xmlns, '') ==
+                            'OutputFile'
+                        ):
+                            output_file = sub_sub_node.text
+                            break
+                    else:
+                        continue
+
+                    break
+
+    return iter_variable(output_file)
+
+
 def update_vs_project(env, path):
 
     tools_version = env.tools_version
@@ -1126,8 +1299,6 @@ def update_vs_project(env, path):
     includes = env.py_includes
     libs = env.py_libraries
     dependency = [env.py_dependency]
-
-    from xml.etree import ElementTree
 
     vcxproj_xmlns = 'http://schemas.microsoft.com/developer/msbuild/2003'
     ElementTree.register_namespace('', vcxproj_xmlns)
@@ -1145,6 +1316,9 @@ def update_vs_project(env, path):
 
     vcxproj_xmlns = '{' + vcxproj_xmlns + '}'
 
+    if env.architecture == 'x64':
+        root = iter_node(root)
+
     # there are only 3 things that need to get changed once the solution has
     # been fully updated. the tools version, the platform toolset
     # and the windows target platform. if a cached version of openzwave is used
@@ -1153,76 +1327,48 @@ def update_vs_project(env, path):
     # upgraded already.
 
     root.attrib['ToolsVersion'] = tools_version
+    project_name = os.path.splitext(os.path.split(path)[1])[0]
 
     for node in root.findall(vcxproj_xmlns + 'PropertyGroup'):
-        if (
-            'Label' in node.attrib and
-            node.attrib['Label'] == 'Configuration'
-        ):
-            for sub_node in node:
-                if (
-                    sub_node.tag.replace(vcxproj_xmlns, '') ==
-                    'PlatformToolset'
-                ):
-                    sub_node.text = platform_toolset
-                    break
-            else:
-                sub_node = ElementTree.Element('PlatformToolset')
-                sub_node.text = platform_toolset
-                node.append(sub_node)
-
-    for node in root.findall(vcxproj_xmlns + 'PropertyGroup'):
-        if 'Label' in node.attrib and node.attrib['Label'] == 'Globals':
-            for sub_node in node:
-                if (
-                    sub_node.tag.replace(vcxproj_xmlns, '') ==
-                    'WindowsTargetPlatformVersion'
-                ):
+        if 'Label' in node.attrib:
+            if node.attrib['Label'] == 'Globals':
+                for sub_node in node:
+                    if (
+                        sub_node.tag.replace(vcxproj_xmlns, '') ==
+                        'WindowsTargetPlatformVersion'
+                    ):
+                        sub_node.text = target_platform
+                        break
+                else:
+                    sub_node = ElementTree.Element('WindowsTargetPlatformVersion')
                     sub_node.text = target_platform
-                    break
-            else:
-                sub_node = ElementTree.Element('WindowsTargetPlatformVersion')
-                sub_node.text = target_platform
-                node.append(sub_node)
+                    node.append(sub_node)
+
+                for sub_node in node:
+                    if (
+                        sub_node.tag.replace(vcxproj_xmlns, '') ==
+                        'ProjectName'
+                    ):
+                        project_name = sub_node.text
+                        break
+
+            elif node.attrib['Label'] == 'Configuration':
+                for sub_node in node:
+                    if (
+                        sub_node.tag.replace(vcxproj_xmlns, '') ==
+                        'PlatformToolset'
+                    ):
+                        sub_node.text = platform_toolset
+                        break
+                else:
+                    sub_node = ElementTree.Element('PlatformToolset')
+                    sub_node.text = platform_toolset
+                    node.append(sub_node)
 
     # this function is the core of upgrading the solution. It burrows down
     # into a node through each layer and makes a copy. this copy gets modified
     # to become an x64 version. the copy gets returned and then added to the
     # xml file
-
-    def iter_node(old_node):
-
-        def has_64(v):
-            for pattern in ('x64', 'X64', 'WIN64'):
-                if pattern in v:
-                    return True
-            return False
-
-        new_node = ElementTree.Element(old_node.tag)
-        if old_node.text is not None:
-            if has_64(old_node.text):
-                return None
-
-            new_node.text = old_node.text.replace('Win32', 'x64')
-            new_node.text = new_node.text.replace('x86', 'x64')
-            new_node.text = new_node.text.replace('X86', 'X64')
-            new_node.text = new_node.text.replace('WIN32', 'WIN64')
-
-        for key, value in old_node.attrib.items():
-            if has_64(value):
-                return None
-
-            new_node.attrib[key] = value.replace('Win32', 'x64')
-            new_node.attrib[key] = new_node.attrib[key].replace('x86', 'x64')
-            new_node.attrib[key] = new_node.attrib[key].replace('X86', 'X64')
-            new_node.attrib[key] = new_node.attrib[key].replace('WIN32', 'WIN64')
-
-        for old_sub_node in old_node:
-            new_nodes = iter_node(old_sub_node)
-            if new_nodes is not None:
-                new_node.append(new_nodes)
-
-        return new_node
 
     # here is the testing to se if the file has been updated before.
     i = 0
@@ -1252,37 +1398,6 @@ def update_vs_project(env, path):
 
     for node in root[:]:
         tag = node.tag.replace(vcxproj_xmlns, '')
-
-        if (
-            tag == 'ItemGroup' and
-            'Label' in node.attrib and
-            node.attrib['Label'] == 'ProjectConfigurations'
-        ):
-            for sub_item in node[:]:
-                new_data = iter_node(sub_item)
-                if new_data is not None:
-                    node.append(new_data)
-
-        if (
-            tag == 'PropertyGroup' and
-            'Label' in node.attrib and
-            node.attrib['Label'] == 'Configuration'
-        ):
-            new_data = iter_node(node)
-            if new_data is not None:
-                root.insert(i, new_data)
-                i += 1
-
-        if (
-            tag == 'ImportGroup' and
-            'Label' in node.attrib and
-            node.attrib['Label'] == 'PropertySheets'
-        ):
-            new_data = iter_node(node)
-            if new_data is not None:
-                root.insert(i, new_data)
-                i += 1
-
         if (
             tag == 'PropertyGroup' and
             not node.attrib.keys()
@@ -1303,11 +1418,10 @@ def update_vs_project(env, path):
                 sub_tag = sub_item.tag.replace(vcxproj_xmlns, '')
                 if sub_tag == 'ClCompile':
                     for sub_sub_item in sub_item:
-                        sub_sub_tag = sub_sub_item.tag.replace(
-                            vcxproj_xmlns,
-                            ''
-                        )
-                        if sub_sub_tag == 'AdditionalIncludeDirectories':
+                        if (
+                            sub_sub_item.tag.replace(vcxproj_xmlns, '') ==
+                            'AdditionalIncludeDirectories'
+                        ):
                             sub_sub_item.text = add_items(
                                 sub_sub_item.text.split(';'),
                                 includes
@@ -1319,7 +1433,6 @@ def update_vs_project(env, path):
                             vcxproj_xmlns,
                             ''
                         )
-
                         if sub_sub_tag == 'AdditionalDependencies':
                             cur_deps = sub_sub_item.text.split(';')
                             for dep in cur_deps[:]:
@@ -1331,20 +1444,20 @@ def update_vs_project(env, path):
 
                             sub_sub_item.text = add_items(cur_deps, dependency)
 
-                        if sub_sub_tag == 'AdditionalLibraryDirectories':
+                        elif sub_sub_tag == 'AdditionalLibraryDirectories':
                             sub_sub_item.text = add_items(
                                 sub_sub_item.text.split(';'),
                                 libs
                             )
-
-            new_data = iter_node(node)
-            if new_data is not None:
-                root.insert(i, new_data)
-                i += 1
         i += 1
 
-    with open(path, 'w')as f:
+    with open(path, 'w') as f:
         f.write(xml_tostring(root, vcxproj_xmlns))
+
+    return (
+        project_name,
+        get_output_path(project_name, os.path.dirname(path) + '\\', env, root)
+    )
 
 
 # this is a custom xml writer. it recursively iterates through an

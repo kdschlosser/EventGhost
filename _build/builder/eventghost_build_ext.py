@@ -20,7 +20,6 @@ import os
 from distutils.core import Command
 import sys
 from subprocess import Popen, PIPE
-import builder
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 EXTENSIONS_PATH = os.path.join(BASE_PATH, '..', 'extensions')
@@ -104,7 +103,7 @@ class BuildEXT(Command):
                 )
             )
 
-            solution, output_path = environment.update_solution(
+            solution, output_paths = environment.update_solution(
                 os.path.abspath(solution_path),
                 os.path.abspath(build_path)
             )
@@ -129,14 +128,37 @@ class BuildEXT(Command):
                 for line in iter(proc.stdout.readline, empty_return):
                     if line:
                         print line.rstrip()
-            src_file = os.path.join(output_path, name)
 
-            if not os.path.exists(src_file):
-                print 'BUILD FAILURE'
-                print name + ' failed to compile.'
-                sys.exit(1)
+            for project_name, output_file in output_paths.items():
+                if output_file is None:
+                    print 'BUILD FAILURE'
+                    print (
+                        'Solution: {0}, '
+                        'Project: {1}, '
+                        'No File path returned.'.format(name, project_name)
+                    )
 
-            self.copy_file(src_file, destination_path)
+                    sys.exit(1)
+
+                if not os.path.exists(output_file):
+                    test_output_file = os.path.join(build_path, output_file)
+                    if not os.path.exists(test_output_file):
+                        print 'BUILD FAILURE'
+                        print (
+                            'Solution: {0}, '
+                            'Project: {1}, '
+                            'Output File: {2} '
+                            'Compilation Failed.'.format(
+                                name,
+                                project_name,
+                                output_file
+                            )
+                        )
+                        sys.exit(1)
+                    else:
+                        output_file = test_output_file
+
+                self.copy_file(output_file, destination_path)
 
         del sys.modules['cFunctions']
 
