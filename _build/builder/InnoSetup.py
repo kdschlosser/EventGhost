@@ -17,8 +17,7 @@
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
 import _winreg
-from os.path import abspath, exists, join
-
+import os
 # Local imports
 from builder.Utils import EncodePath, StartProcess
 
@@ -47,7 +46,7 @@ class InnoInstaller(object):
         Adds a file to the [Files] section.
         """
         line = 'Source: "%s"; DestDir: "%s\\%s"' % (
-            abspath(source), prefix, destDir
+            os.path.abspath(source), prefix, destDir
         )
         if destName is not None:
             line += '; DestName: "%s"' % destName
@@ -60,36 +59,39 @@ class InnoInstaller(object):
         Finishes the setup, writes the Inno Setup script and calls the
         Inno Setup compiler.
         """
-        innoScriptTemplate = file(
-            join(self.buildSetup.dataDir, "InnoSetup.template"),
-            "rt"
-        ).read()
-        innoScriptPath = join(self.buildSetup.tmpDir, "Setup.iss")
-        issFile = open(innoScriptPath, "w")
 
         if self.buildSetup.arch == 'x86':
             arch = ''
         else:
             arch = 'x64'
 
-        issFile.write('# define ARCH {0}\n\n'.format(arch))
-
-        templateDict = {}
+        template_dict = {}
         for key, value in self.buildSetup.__dict__.iteritems():
             if isinstance(value, unicode):
                 value = EncodePath(value)
-            templateDict[key] = value
 
-        issFile.write(innoScriptTemplate % templateDict)
-        for section, lines in self.innoSections.iteritems():
-            issFile.write("[%s]\n" % section)
-            for line in lines:
-                issFile.write("%s\n" % line)
-        issFile.close()
+            template_dict[key] = value
 
-        command = GetInnoCompilerPath().replace('%1', innoScriptPath)
+        template_path = os.path.join(
+            self.buildSetup.dataDir,
+            "InnoSetup.template"
+        )
+        script_path = os.path.join(self.buildSetup.tmpDir, "Setup.iss")
 
-        if not (StartProcess(command) == 0):
+        with open(template_path, "rt") as f:
+            script_template = f.read()
+
+        with open(script_path, "w") as iss_file:
+            iss_file.write('# define ARCH {0}\n\n'.format(arch))
+            iss_file.write(script_template % template_dict)
+
+            for section, lines in self.innoSections.iteritems():
+                iss_file.write("[%s]\n" % section)
+
+                for line in lines:
+                    iss_file.write("%s\n" % line)
+
+        if not (StartProcess(GetInnoCompilerPath(), script_path) == 0):
             raise InnoSetupError
 
 
@@ -102,11 +104,14 @@ def GetInnoCompilerPath():
                 "shell\\Compile\\command"
             )
         )
-        installPath = _winreg.QueryValueEx(key, "")[0]
+        install_path = _winreg.QueryValueEx(key, "")[0]
         _winreg.CloseKey(key)
     except WindowsError:
         return None
 
-    if not exists(installPath[1:].split('"')[0]):
+    install_path = os.path.dirname(install_path[1:].split('"')[0])
+    install_path = os.path.join(install_path, "ISCC.exe")
+    if not os.path.exists(install_path):
         return None
-    return installPath
+
+    return install_path

@@ -20,7 +20,7 @@ import os
 from distutils.core import Command
 import sys
 from subprocess import Popen, PIPE
-
+import builder
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 EXTENSIONS_PATH = os.path.join(BASE_PATH, '..', 'extensions')
@@ -84,9 +84,10 @@ class BuildEXT(Command):
         for ext in extensions:
             name = ext.name
             solution_path = ext.solution_path
-            destination_path =  os.path.join(tmp_folder, ext.destination_path)
+            destination_path = os.path.join(tmp_folder, ext.destination_path)
+
             if not os.path.exists(destination_path):
-                os.mkdir(destination_path)
+                os.makedirs(destination_path)
 
             if (
                 'pyd_imports' in destination_path and
@@ -96,10 +97,10 @@ class BuildEXT(Command):
 
             build_path = os.path.join(extensions_build_path, name)
 
-            print(
+            print (
                 '\n\n-- updating solution {0} {1}\n\n'.format(
                     name,
-                    '-' * (59 - len(ext.name))
+                    '-' * (59 - len(name))
                 )
             )
 
@@ -128,47 +129,55 @@ class BuildEXT(Command):
                 for line in iter(proc.stdout.readline, empty_return):
                     if line:
                         print line.rstrip()
+            src_file = os.path.join(output_path, name)
 
-            self.copy_file(os.path.join(output_path, name), destination_path)
+            if not os.path.exists(src_file):
+                print 'BUILD FAILURE'
+                print name + ' failed to compile.'
+                sys.exit(1)
+
+            self.copy_file(src_file, destination_path)
+
+        del sys.modules['cFunctions']
 
 
-RawInputHook = eventghost_build_ext.Extension(
+RawInputHook = Extension(
     'RawInputHook.dll',
     RAW_INPUT_HOOK_SRC,
     RAW_INPUT_HOOK_DST
 )
 
-MceIr = eventghost_build_ext.Extension(
+MceIr = Extension(
     'MceIr.dll',
     MCE_IR_SRC,
     MCE_IR_DST
 )
 
-TaskHook = eventghost_build_ext.Extension(
+TaskHook = Extension(
     'TaskHook.dll',
     TASK_HOOK_SRC,
     TASK_HOOK_DST
 )
 
-cFunctions = eventghost_build_ext.Extension(
+cFunctions = Extension(
     'cFunctions.pyd',
     C_FUNCTIONS_SRC,
     C_FUNCTIONS_DST
 )
 
-dxJoystick = eventghost_build_ext.Extension(
+dxJoystick = Extension(
     '_dxJoystick.pyd',
     DX_JOYSTICK_SRC,
     DX_JOYSTICK_DST
 )
 
-VistaVolEvents = eventghost_build_ext.Extension(
+VistaVolEvents = Extension(
     'VistaVolEvents.pyd',
     VISTA_VOL_EVENTS_SRC,
     VISTA_VOL_EVENTS_DST
 )
 
-WinUsbWrapper = eventghost_build_ext.Extension(
+WinUsbWrapper = Extension(
     'WinUsbWrapper.dll',
     WIN_USB_SRC,
     WIN_USB_DST

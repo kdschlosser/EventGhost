@@ -118,6 +118,22 @@ class MyBuilder(builder.Builder):
                 ignoreversion=(filename not in SKIP_IF_UNCHANGED),
                 prefix=prefix
             )
+
+        from builder import eventghost_build_ext
+
+        def extension_inno(ext):
+            src = join(
+                self.tmpDir,
+                ext.destination_path,
+                ext.name
+            )
+            inno.AddFile(src, ext.destination_path)
+
+        extension_inno(eventghost_build_ext.RawInputHook)
+        extension_inno(eventghost_build_ext.WinUsbWrapper)
+        extension_inno(eventghost_build_ext.MceIr)
+        extension_inno(eventghost_build_ext.TaskHook)
+
         if exists(join(self.outputDir, "CHANGELOG.md")):
             inno.AddFile(join(self.outputDir, "CHANGELOG.md"))
         else:
@@ -159,6 +175,7 @@ class MyBuilder(builder.Builder):
             elif f.endswith("core-plugin"):
                 coreplugins.append(f.replace("core-plugin", ""))
                 files.remove(f)
+
 
         installFiles = []
         for f in files:

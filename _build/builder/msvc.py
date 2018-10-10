@@ -1319,6 +1319,7 @@ def update_vs_project(env, path):
                             vcxproj_xmlns,
                             ''
                         )
+
                         if sub_sub_tag == 'AdditionalDependencies':
                             cur_deps = sub_sub_item.text.split(';')
                             for dep in cur_deps[:]:
