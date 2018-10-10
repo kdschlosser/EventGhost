@@ -248,11 +248,11 @@ install:
             "       Done."
             "  ---- Upgrading setuptools 40.0.0 x86"
             pip install --no-cache-dir -q -U "setuptools==40.2.0"
-            "     Done."
+            "       Done."
 
             "  ---- Installing py2exe 0.6.9 x86"
             easy_install --always-unzip --quiet $Py2ExeInstallerX86
-            "     Done."
+            "       Done."
 
             # *See Changes* PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
             PipInstall "pycryptodome 3.6.6 x86" "pycryptodome==3.6.6"
@@ -285,7 +285,7 @@ install:
             "=============== Installing x64 Requirements =============="
 
             "  ---- Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64Temp" -Wait
+            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
             "       Done."
 
             $Env:PYTHON = $PythonX64
@@ -302,7 +302,7 @@ install:
 
             "  ---- Upgrading setuptools 40.2.0 x64"
             pip install -q --no-cache-dir -U "setuptools==40.2.0"
-            "     Done."
+            "       Done."
 
             "  ---- Installing py2exe 0.6.9 x64"
             easy_install --always-unzip --quiet $Py2ExeInstallerX64
