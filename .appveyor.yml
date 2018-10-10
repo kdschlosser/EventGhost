@@ -166,7 +166,7 @@ install:
 
         " "
 
-        If (-not (Test-Path $PythonX86)) {
+        If (-not (Test-Path $Env:PythonX86)) {
             $PythonX86 = "C:\Stackless27_temp"
             $PythonPathX86 = "C:\Stackless27_temp;C:\Stackless27_temp\Scripts;C:\Stackless27_temp\DLLs;C:\Stackless27_temp\Lib;C:\Stackless27_temp\Lib\site-packages;"
             $PythonScriptsX86 = $PythonX86 + "\Scripts"
