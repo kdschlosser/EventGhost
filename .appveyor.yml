@@ -167,14 +167,14 @@ install:
         " "
 
         If (-not (Test-Path $PythonX86)) {
-            $PythonX86 = 'C:\Stackless27_temp'
-            $PythonPathX86 = 'C:\Stackless27_temp;C:\Stackless27_temp\Scripts;C:\Stackless27_temp\DLLs;C:\Stackless27_temp\Lib;C:\Stackless27_temp\Lib\site-packages;'
+            $PythonX86 = "C:\Stackless27_temp"
+            $PythonPathX86 = "C:\Stackless27_temp;C:\Stackless27_temp\Scripts;C:\Stackless27_temp\DLLs;C:\Stackless27_temp\Lib;C:\Stackless27_temp\Lib\site-packages;"
             $PythonScriptsX86 = $PythonX86 + "\Scripts"
             $SitePackagesX86 = $PythonX86 + "\lib\site-packages"
             $PathX86 = $PythonPathX86 + $Env:PATH
 
-            $PythonX64 = 'C:\Stackless27x64_temp'
-            $PythonPathX64 = 'C:\Stackless27x64_temp;C:\Stackless27x64_temp\Scripts;C:\Stackless27x64_temp\DLLs;C:\Stackless27x64_temp\Lib;C:\Stackless27x64_temp\Lib\site-packages;'
+            $PythonX64 = "C:\Stackless27x64_temp"
+            $PythonPathX64 = "C:\Stackless27x64_temp;C:\Stackless27x64_temp\Scripts;C:\Stackless27x64_temp\DLLs;C:\Stackless27x64_temp\Lib;C:\Stackless27x64_temp\Lib\site-packages;"
             $PythonScriptsX64 = $PythonX64 + "\Scripts"
             $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
             $PathX64 = $PythonPathX64 + $Env:PATH
@@ -273,13 +273,13 @@ install:
 
 
             PipInstall "paramiko 2.2.1 x86" "paramiko==2.2.1"
-            PipInstall "pywin32 223 x86" pywin32==223
+            PipInstall "pywin32 223 x86" "pywin32==223"
 
             If (Test-Path $PythonSysWOWDLL) {
                 Copy-Item $PythonSysWOWDLL -Destination $PythonX86
                 Remove-Item $PythonSysWOWDLL
             }
-            Rename-Item $PythonX86 -NewName 'Stackless27'
+            Rename-Item $PythonX86 -NewName "Stackless27"
 
             " "
             "=============== Installing x64 Requirements =============="
@@ -327,13 +327,13 @@ install:
             # *See Changes* PipInstall "ctypeslib 0.5.6 x64" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
 
             PipInstall "paramiko 2.2.1 x64" "paramiko==2.2.1"
-            PipInstall "pywin32 223 x64" pywin32==223
+            PipInstall "pywin32 223 x64" "pywin32==223"
 
             If (Test-Path $PythonSystemDLL) {
                 Copy-Item $PythonSystemDLL -Destination $PythonX64
                 Remove-Item $PythonSystemDLL
             }
-            Rename-Item $PythonX64 -NewName 'Stackless27x64
+            Rename-Item $PythonX64 -NewName "Stackless27x64"
 
             " "
         }
