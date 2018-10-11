@@ -56,12 +56,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
            [Parameter(Mandatory=$False)]
            [String]$LogDir
         )
-        $Executable
-        $Args
-        $StdErr
-        $StdOut
-        $MsiFile
-        $LogDir
+
 
         if ($LogDir) {
             $msg = $Args
@@ -96,12 +91,12 @@ if (-Not (Test-Path $Env:PYTHON)) {
                 Write-Host " "
                 Write-Host "******************* ERROR LOG ***********************"
                 Write-Host " "
-                Write-Host Get-Content -Path "$StdErr"
+                Get-Content -Path "$StdErr"
                 Write-Host " "
                 Write-Host " "
                 Write-Host "******************* OUTPUT LOG ***********************"
                 Write-Host " "
-                Write-Host Get-Content -Path "$StdOut"
+                Get-Content -Path "$StdOut"
             }
             $host.SetShouldExit(1)
         }
