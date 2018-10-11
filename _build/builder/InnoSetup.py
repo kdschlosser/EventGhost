@@ -77,7 +77,7 @@ class InnoInstaller(object):
             script_template = f.read()
 
         with open(script_path, "w") as iss_file:
-            iss_file.write('# define ARCH {0}\n\n'.format(self.buildSetup.arch))
+            iss_file.write('# define ARCH "{0}"\n\n'.format(self.buildSetup.arch))
             iss_file.write(script_template % template_dict)
 
             for section, lines in self.innoSections.iteritems():
