@@ -18,10 +18,6 @@
 
     $Env:EXITCODE = 0
 
-    if ($Env:DEBUG -eq "1") {
-        $PrintOutput = $true
-    }
-
 
     if ($LogDir) {
         $msg = $Args
@@ -51,7 +47,6 @@
     }
 
 
-
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
     $process_info.FileName = $Executable
     $process_info.RedirectStandardError = $true
@@ -61,33 +56,52 @@
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $process_info
     $process.Start() | Out-Null
-    $process.WaitForExit()
 
-    $o_log = $process.StandardOutput.ReadToEnd()
-    $e_log = $process.StandardError.ReadToEnd()
     
     if ($ErrLog) {
-        Out-File "$ErrLog" -Encoding utf8 -InputObject $e_log
+        Out-File "$ErrLog" -Encoding utf8 -InputObject ""
     }
 
     if ($OutLog) {
-        Out-File "$OutLog" -Encoding utf8 -InputObject $o_log
+        Out-File "$OutLog" -Encoding utf8 -InputObject ""
     }
 
+    Function Print-Logs ($p, $ot_log, $er_log) {
+        $o_log = $p.StandardOutput.ReadToEnd()
+        $e_log = $p.StandardError.ReadToEnd()
+        $prnt = $Env:DEBUG -eq "1"
+
+        if ($o_log) {
+            if ($ot_log) {
+                Out-File "$ot_log" -Encoding utf8 -Append -InputObject $o_log
+            }
+            if ($prnt) {
+                Write-Host $o_log
+            }
+        }
+
+        if ($e_log) {
+            if ($er_log) {
+                Out-File "$er_log" -Encoding utf8 -Append -InputObject $e_log
+            }
+            if ($prnt) {
+                Write-Host $e_log
+            }
+        }
+
+    }
+
+
+    while (-Not ($process.HasExited)) {
+        Start-Sleep -Milliseconds 100
+        Print-Logs $process $OutLog $ErrLog
+        
+    }
+
+    Print-Logs $process $OutLog $ErrLog
+
     $Env:EXITCODE = $process.ExitCode
-
-
-     if ($PrintOutput) {
-            Write-Host " "
-            Write-Host "******************* ERROR LOG ***********************"
-            Write-Host " "
-            Write-Host $e_log
-            Write-Host " "
-            Write-Host " "
-            Write-Host "******************* OUTPUT LOG ***********************"
-            Write-Host " "
-            Write-Host $o_log
-     }
+     
 
     if ($process.ExitCode -eq 0) {
         Write-Host "       Done."
@@ -95,16 +109,16 @@
     } else {
         Write-Host "       Failed."
 
-        if ($ErrLog -and (-Not($PrintOutput)))  {
+        if ($ErrLog -and (-Not($Env:DEBUG -eq "1")))  {
             Write-Host " "
             Write-Host "******************* ERROR LOG ***********************"
             Write-Host " "
-            Write-Host $e_log
+            Get-Content  -Path $ErrLog -Encoding UTF8
             Write-Host " "
             Write-Host " "
             Write-Host "******************* OUTPUT LOG ***********************"
             Write-Host " "
-            Write-Host $o_log
+            Get-Content -Path $OutLog -Encoding UTF8 
         }
         $host.SetShouldExit(1)
         exit
