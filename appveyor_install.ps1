@@ -68,7 +68,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
             Write-Host "  ---- Installing $msg $Env:BUILDARCH"
         }
-        $LASTEXITCODE = 0
+        $LASTEXITCODE = NULL
 
         if (-Not($Args)) {
             $Args = ""
@@ -83,9 +83,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
             $LASTEXITCODE = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait
         }
 
-        $LASTEXITCODE
+        $LASTEXITCODE.ExitCode
 
-        if ($LASTEXITCODE -eq 0) {
+        if ($LASTEXITCODE.ExitCode -eq 0) {
             Write-Host "       Done."
             $host.SetShouldExit(0)
         } else {
