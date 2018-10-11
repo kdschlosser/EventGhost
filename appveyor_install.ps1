@@ -68,7 +68,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
             Write-Host "  ---- Installing $msg $Env:BUILDARCH"
         }
-        $LASTEXITCODE = NULL
+        $LASTEXITCODE = $null
 
         if (-Not($Args)) {
             $Args = ""
@@ -102,6 +102,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
                 Get-Content -Path "$StdOut"
             }
             $host.SetShouldExit(1)
+            exit
         }
     }
 
