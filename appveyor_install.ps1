@@ -1,4 +1,5 @@
 ﻿
+
 $SysWOWDLL = "$Env:SYSTEMROOT\SysWOW64\python27.dll"
 $SystemDLL = "$Env:SYSTEMROOT\System\python27.dll"
 
@@ -17,6 +18,7 @@ if (-Not(Test-Path $ModuleOutputFolder)) {
 }
 
 if (-Not (Test-Path $Env:PYTHON)) {
+    Import-Module -Name ".\appveyor_runapp.psm1"
 
     $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
     if (-Not(Test-Path $InstallersFolder)) {
@@ -40,70 +42,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     $SitePackages = "$Env:PYTHON\Lib\site-packages"
 
-    Function RUN-APP {
-        [CmdletBinding()]
-        Param (
-           [Parameter(Mandatory=$True)]
-           [String]$Executable,
-           [Parameter(Mandatory=$False)]
-           [String]$Args,
-           [Parameter(Mandatory=$False)]
-           [String]$StdErr,
-           [Parameter(Mandatory=$False)]
-           [String]$StdOut,
-           [Parameter(Mandatory=$False)]
-           [String]$MsiFile,
-           [Parameter(Mandatory=$False)]
-           [String]$LogDir
-        )
-
-
-        if ($LogDir) {
-            $msg = $Args
-            $mod = $StdErr
-
-            $StdErr = "$LogDir\$msg.err.log"
-            $StdOut = "$LogDir\$msg.out.log"
-            $Args = "install --no-cache-dir $mod"
-
-            Write-Host "  ---- Installing $msg $Env:BUILDARCH"
-        }
-
-        if (-Not($Args)) {
-            $Args = ""
-        }
-        if ($StdErr) {
-            $process = Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait -PassThru
-        }
-        elseif ($Executable -Like '*.msi') {
-            $process = Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait -PassThru
-        }
-        else {
-            $process = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait -PassThru
-        }
-
-        $process.ExitCode
-
-        if ($process.ExitCode -eq 0) {
-            Write-Host "       Done."
-            $host.SetShouldExit(0)
-        } else {
-            Write-Host "       Failed."
-            if ($StdErr)  {
-                Write-Host " "
-                Write-Host "******************* ERROR LOG ***********************"
-                Write-Host " "
-                Get-Content -Path "$StdErr"
-                Write-Host " "
-                Write-Host " "
-                Write-Host "******************* OUTPUT LOG ***********************"
-                Write-Host " "
-                Get-Content -Path "$StdOut"
-            }
-            $host.SetShouldExit(1)
-            exit
-        }
-    }
+    
 
 
     Write-Host "==================== Downloading Files ==================="

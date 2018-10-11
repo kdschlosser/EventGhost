@@ -118,6 +118,7 @@ environment:
       OUTPUTFILE: Setup.exe
       LOGFILE: Build_x86.log
       MODULEOUTPUT: ModuleOutputx86
+      DEBUG: 1
 
     - BUILDARCH: x64
       PYTHON: C:\Stackless27x64
@@ -128,6 +129,7 @@ environment:
       OUTPUTFILE: Setup_x64.exe
       LOGFILE: Build_x64.log
       MODULEOUTPUT: ModuleOutputx64
+      DEBUG: 1
 
 
 #init:

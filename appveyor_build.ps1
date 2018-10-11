@@ -1,4 +1,7 @@
-﻿Write-Host "=============== Start the EventGhost build ==============="
+﻿
+Import-Module -Name ".\appveyor_runapp.psm1"
+
+Write-Host "=============== Start the EventGhost build ==============="
 If (
     ($Env:APPVEYOR_REPO_TAG.tolower() -eq "true") -and
     ($Env:APPVEYOR_REPO_TAG_NAME.tolower().startswith("deploy"))
@@ -23,7 +26,7 @@ If (
     $url = ""
 }
 
-Start-Process python -ArgumentList "_build\Build.py --build --package$release$url" -NoNewWindow -Wait
+RUN_APP "python" "_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
     
 $Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
 $Env:Logfile = $Env:LOGFILE
