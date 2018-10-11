@@ -95,7 +95,6 @@
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
         Print-Logs $process $OutLog $ErrLog
-        
     }
 
     Print-Logs $process $OutLog $ErrLog

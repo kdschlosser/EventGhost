@@ -12,7 +12,7 @@ If (Test-Path $SysWOWDLL) {
     Remove-Item $SysWOWDLL
 }
 
-$ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\$Env:MODULEOUTPUT"
+$ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\ModuleOutput$Env:BUILDARCH"
 if (-Not(Test-Path $ModuleOutputFolder)) {
     New-Item $ModuleOutputFolder -type directory | Out-Null
 }

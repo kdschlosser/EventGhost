@@ -28,9 +28,8 @@ If (
 
 Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
     
-$Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
-$Env:Logfile = $Env:LOGFILE
-$Env:ModuleOutput = $Env:MODULEOUTPUT
+$Env:SetupExe = gci -recurse -filter "_build\output\*Setup_$Env:BUILDARCH" -name
+
 
 if (($Env:SetupExe) -and (-Not ($SetupExe -contains '*x64*'))) {
     # update the appveyor build version to be the same as the EventGhost version

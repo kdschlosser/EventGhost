@@ -29,7 +29,7 @@ class StdHandler(object):
         self.encoding = oldStream.encoding
         self.buf = ""
         self.logger = logger
-        self.verbose = 1
+        self.verbose = verbose
 
         # the following is a workaround for colorama (0.3.6),
         # which is called by sphinx (build CHM docs).
