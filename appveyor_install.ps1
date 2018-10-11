@@ -73,18 +73,18 @@ if (-Not (Test-Path $Env:PYTHON)) {
             $Args = ""
         }
         if ($StdErr) {
-            $exitcode = Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait
+            $process = Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait -PassThru
         }
         elseif ($Executable -Like '*.msi') {
-            $exitcode = Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait
+            $process = Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait -PassThru
         }
         else {
-            $exitcode = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait
+            $process = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait -PassThru
         }
 
-        $exitcode.ExitCode
+        $process.ExitCode
 
-        if ($exitcode.ExitCode -eq 0) {
+        if ($process.ExitCode -eq 0) {
             Write-Host "       Done."
             $host.SetShouldExit(0)
         } else {
