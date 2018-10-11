@@ -2,7 +2,7 @@
 $SysWOWDLL = "$Env:SYSTEMROOT\SysWOW64\python27.dll"
 $SystemDLL = "$Env:SYSTEMROOT\System\python27.dll"
 
-$Env:PATH = $Env:PATH -replace "C:\Python27", $Env:PYTHON
+$Env:PATH = $Env:PATH -replace "C:\\Python27", $Env:PYTHON
 
 If (Test-Path $SystemDLL) {
     Remove-Item $SystemDLL
