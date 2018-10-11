@@ -8,9 +8,9 @@ If (
     # this tag will be deleted and a new release "vVERSION" created.
 
     git checkout -q master
-    $release = '--release --version "' + $Env:APPVEYOR_REPO_TAG_NAME.split("_", 2)[1] + '"'
+    $release = ' --release --version "' + $Env:APPVEYOR_REPO_TAG_NAME.split("_", 2)[1] + '"'
     if ($Env:SFTP_URL) {
-        $url = '--docs --url "$Env:SFTP_URL"'
+        $url = ' --docs --url "$Env:SFTP_URL"'
     } else {
         $url = ""
     }
@@ -23,7 +23,7 @@ If (
     $url = ""
 }
 
-Start-Process python -ArgumentList "_build\Build.py", "--build", "--package", $release, $url -NoNewWindow -Wait
+Start-Process python -ArgumentList "_build\Build.py --build --package$release$url" -NoNewWindow -Wait
     
 $Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
 $Env:Logfile = $Env:LOGFILE
