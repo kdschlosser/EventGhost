@@ -51,17 +51,6 @@
     }
 
 
-    
-
-    # if ($Executable -like "*\*") {
-
-    #    $Start = $Executable.LastIndexOf("\")
-    #    $Length = $Executable.Length - $Start
-    #    $process_name = $Executable.Substring($Start + 1, $Length - 1)
-    #} else {
-    #    $process_name = $Executable
-    #}
-    
 
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
     $process_info.FileName = $Executable
@@ -74,12 +63,15 @@
     $process.Start() | Out-Null
     $process.WaitForExit()
 
+    $o_log = $process.StandardOutput.ReadToEnd()
+    $e_log = $process.StandardError.ReadToEnd()
+    
     if ($ErrLog) {
-        Out-File "$ErrLog" -InputObject $process.StandardError.ReadToEnd()
+        Out-File "$ErrLog" -InputObject $e_log $o_log
     }
 
     if ($OutLog) {
-        Out-File "$OutLog" -InputObject $process.StandardOutput.ReadToEnd()
+        Out-File "$OutLog" -InputObject $o_log
     }
 
     $Env:EXITCODE = $process.ExitCode
@@ -89,12 +81,12 @@
             Write-Host " "
             Write-Host "******************* ERROR LOG ***********************"
             Write-Host " "
-            Write-Host $process.StandardError.ReadToEnd()
+            Write-Host $e_log
             Write-Host " "
             Write-Host " "
             Write-Host "******************* OUTPUT LOG ***********************"
             Write-Host " "
-            Write-Host $process.StandardOutput.ReadToEnd()
+            Write-Host $o_log
      }
 
     if ($process.ExitCode -eq 0) {
@@ -107,12 +99,12 @@
             Write-Host " "
             Write-Host "******************* ERROR LOG ***********************"
             Write-Host " "
-            Write-Host $process.StandardError.ReadToEnd()
+            Write-Host $e_log
             Write-Host " "
             Write-Host " "
             Write-Host "******************* OUTPUT LOG ***********************"
             Write-Host " "
-            Write-Host $process.StandardOutput.ReadToEnd()
+            Write-Host $o_log
         }
         $host.SetShouldExit(1)
         exit
