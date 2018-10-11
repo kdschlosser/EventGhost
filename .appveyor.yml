@@ -118,7 +118,7 @@ environment:
       PYTHONDLL: \SysWOW64\python27.dll
       OUTPUTFILE: Setup.exe
       LOGFILE: Build_x86.log
-      MODULEOUTPUT: Module_x86.log
+      MODULEOUTPUT: ModuleOutputx86
 
     - BUILDARCH: x64
       PYTHON: C:\Stackless27x64
@@ -129,7 +129,7 @@ environment:
       PYTHONDLL: \System\python27.dll
       OUTPUTFILE: Setup_x64.exe
       LOGFILE: Build_x64.log
-      MODULEOUTPUT: Module_x64.log
+      MODULEOUTPUT: ModuleOutputx64
 
 
 #init:
@@ -160,14 +160,8 @@ install:
   # - cinst vcredist2008
 
   #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-  - ps: |
-      if (-Not (Test-Path $Env:PYTHON)) {
-          .\appveyor_install.ps1
-      } else {
-          # we are already using a cached version so
-          # there is no need to cache it agian.
-          $env:APPVEYOR_CACHE_SKIP_SAVE = "true"
-      }
+  - ps: . .\appveyor_install.ps1
+
 
 
 build_script:
@@ -188,6 +182,8 @@ artifacts:
     name: $(SetupExe)
   - path: _build\output\$(LogFile)
     name: $(LogFile)
+  - path: _build\output\$(ModuleOutput).zip
+    name: $(ModuleOutput).zip
 
 
 notifications:

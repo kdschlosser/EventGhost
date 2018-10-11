@@ -27,6 +27,7 @@ Start-Process python -ArgumentList "_build\Build.py", "--build", "--package", $r
     
 $Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
 $Env:Logfile = $Env:LOGFILE
+$Env:ModuleOutput = $Env:MODULEOUTPUT
 
 If (-Not ($SetupExe -contains '*x64*')) {
     # update the appveyor build version to be the same as the EventGhost version
