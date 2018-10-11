@@ -51,13 +51,7 @@
     }
 
 
-    if ($ErrLog) {
-        Out-File "$ErrLog" -InputObject ""
-    }
-
-    if ($OutLog) {
-        Out-File "$OutLog" -InputObject ""
-    }
+    
 
     # if ($Executable -like "*\*") {
 
@@ -78,93 +72,47 @@
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $process_info
     $process.Start() | Out-Null
+    $process.WaitForExit()
 
-    $oldstdout = ""
-    $oldstderr = ""
-
-    $origpos = $host.UI.RawUI.CursorPosition
-    $origpos.Y++
-
-    $scroll = "/-\|/-\|"
-    $idx = 0
-
-    While (!(Get-Process $process.Name)) {
-        Start-Sleep -Milliseconds 100
+    if ($ErrLog) {
+        Out-File "$ErrLog" -InputObject $process.StandardError.ReadToEnd()
     }
 
-    While ((Get-Process $process.Name)) {
-        $host.UI.RawUI.CursorPosition = $origpos
-	    Write-Host $scroll[$idx] -NoNewline
-	    $idx++
-	    if ($idx -ge $scroll.Length) {
-		    $idx = 0
-	    }
-
-	    Start-Sleep -Milliseconds 100
-
-
-        $stdout = $process.StandardOutput.ReadToEnd()
-        $stderr = $process.StandardError.ReadToEnd()
-
-        if (-Not ($oldstdout -eq $stdout)) {
-            
-            $diff = $stdout -replace $oldstdout, ""
-
-            if ($PrintOutput) {
-                $host.UI.RawUI.CursorPosition = $origpos
-                Write-Host ' '
-                Write-Host $diff
-                $origpos = $host.UI.RawUI.CursorPosition
-                $origpos.Y++
-            }
-
-            $oldstdout = $stdout
-            
-            if ($OutLog) {
-                Out-File "$OutLog" -Append -InputObject $diff
-            }
-        }
-
-        if (-Not ($oldstderr -eq $stderr)) {
-            $diff = $stderr -replace $oldstderr, ""
-            if ($PrintOutput) {
-                $host.UI.RawUI.CursorPosition = $origpos
-                Write-Host ' '
-                Write-Host $diff
-                $origpos = $host.UI.RawUI.CursorPosition
-                $origpos.Y++
-            }
-
-            $oldstderr = $stderr
-            
-            if ($ErrLog) {
-                Out-File "$ErrLog" -Append -InputObject $diff
-            }
-        }
+    if ($OutLog) {
+        Out-File "$OutLog" -InputObject $process.StandardOutput.ReadToEnd()
     }
 
     $Env:EXITCODE = $process.ExitCode
 
 
-    $host.UI.RawUI.CursorPosition = $origpos
-    Write-Host ' '
-
+     if ($PrintOutput) {
+            Write-Host " "
+            Write-Host "******************* ERROR LOG ***********************"
+            Write-Host " "
+            Write-Host $process.StandardError.ReadToEnd()
+            Write-Host " "
+            Write-Host " "
+            Write-Host "******************* OUTPUT LOG ***********************"
+            Write-Host " "
+            Write-Host $process.StandardOutput.ReadToEnd()
+     }
 
     if ($process.ExitCode -eq 0) {
         Write-Host "       Done."
         $host.SetShouldExit(0)
     } else {
         Write-Host "       Failed."
+
         if ($ErrLog -and (-Not($PrintOutput)))  {
             Write-Host " "
             Write-Host "******************* ERROR LOG ***********************"
             Write-Host " "
-            Get-Content -Path "$ErrLog"
+            Write-Host $process.StandardError.ReadToEnd()
             Write-Host " "
             Write-Host " "
             Write-Host "******************* OUTPUT LOG ***********************"
             Write-Host " "
-            Get-Content -Path "$OutLog"
+            Write-Host $process.StandardOutput.ReadToEnd()
         }
         $host.SetShouldExit(1)
         exit
