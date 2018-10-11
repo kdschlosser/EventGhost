@@ -1,4 +1,4 @@
-﻿Function RUN-APP {
+﻿Function Invoke-App {
     [CmdletBinding()]
     Param (
        [Parameter(Mandatory=$True)]
@@ -59,6 +59,13 @@
         Out-File "$OutLog" -InputObject ""
     }
 
+    if ($Executable -eq 'python') {
+        $Executable = "$Env:PYTHON\$Executable.exe"
+    }
+
+    if (($Executable -eq 'pip') -or ($Executable -eq 'easy_install')) {
+        $Executable = "$Env:PYTHON\Scripts\$Executable.exe"
+    }
 
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
     $process_info.FileName = $Executable
