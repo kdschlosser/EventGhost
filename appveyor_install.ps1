@@ -18,7 +18,7 @@ $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-
 $StacklessInstaller = $InstallersFolder + $Env:STACKLESSINSTALLER
 $StacklessURL = "http://www.stackless.com/binaries/$Env:STACKLESSINSTALLER"
 
-$WXInstaller = $InstallersFolder + + $Env:WXINSTALLER
+$WXInstaller = $InstallersFolder + $Env:WXINSTALLER
 $WXURL = "http://downloads.sourceforge.net/wxpython/$Env:WXINSTALLER"
 
 $Py2ExeInstaller = $InstallersFolder + $Env:PY2EXEINSTALLER
@@ -28,7 +28,7 @@ $SitePackages = "$Env:PYTHON\Lib\site-packages"
 
 
 Function PipInstall ($msg, $mod) {
-    Write-Host "  ---- Installing $msg $Env:BUILDARCH" + 
+    Write-Host "  ---- Installing $msg $Env:BUILDARCH" 
     START-PROCESS pip -RedirectStandardError $Env:MODULEOUTPUT -RedirectStandardOutput $Env:MODULEOUTPUT -ArgumentList "install", "--no-cache-dir", "$mod"  -NoNewWindow -Wait
     Write-Host "       Done."
 }
