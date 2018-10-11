@@ -67,11 +67,11 @@
     $e_log = $process.StandardError.ReadToEnd()
     
     if ($ErrLog) {
-        Out-File "$ErrLog" -InputObject $e_log $o_log
+        Out-File "$ErrLog" -Encoding utf8 -InputObject $e_log $o_log
     }
 
     if ($OutLog) {
-        Out-File "$OutLog" -InputObject $o_log
+        Out-File "$OutLog" -Encoding utf8 -InputObject $o_log
     }
 
     $Env:EXITCODE = $process.ExitCode
