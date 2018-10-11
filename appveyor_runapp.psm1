@@ -59,6 +59,16 @@
         Out-File "$OutLog" -InputObject ""
     }
 
+    # if ($Executable -like "*\*") {
+
+    #    $Start = $Executable.LastIndexOf("\")
+    #    $Length = $Executable.Length - $Start
+    #    $process_name = $Executable.Substring($Start + 1, $Length - 1)
+    #} else {
+    #    $process_name = $Executable
+    #}
+    
+
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
     $process_info.FileName = $Executable
     $process_info.RedirectStandardError = $true
@@ -78,11 +88,11 @@
     $scroll = "/-\|/-\|"
     $idx = 0
 
-    While (!(Get-Process python)) {
+    While (!(Get-Process $process.Name)) {
         Start-Sleep -Milliseconds 100
     }
 
-    While ((Get-Process python)) {
+    While ((Get-Process $process.Name)) {
         $host.UI.RawUI.CursorPosition = $origpos
 	    Write-Host $scroll[$idx] -NoNewline
 	    $idx++
