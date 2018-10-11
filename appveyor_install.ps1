@@ -45,7 +45,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
         Param (
            [Parameter(Mandatory=$True)]
            [String]$Executable,
-           [Parameter(Mandatory=$True)]
+           [Parameter(Mandatory=$False)]
            [String]$Args,
            [Parameter(Mandatory=$False)]
            [String]$StdErr,
@@ -74,6 +74,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
             Write-Host "  ---- Installing $msg $Env:BUILDARCH"
         }
 
+        if (-Not($Args)) {
+            $Args = ""
+        }
         if ($StdErr) {
             Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait
         }
@@ -118,7 +121,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     RUN-APP "$StacklessInstaller" "TARGETDIR=$Env:PYTHON"
 
     Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
-    RUN-APP "$VCInstaller" ""
+    RUN-APP "$VCInstaller"
 
     Write-Host "  ---- Upgrading pip 9.0.1"
     RUN-APP "python" "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
