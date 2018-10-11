@@ -219,7 +219,7 @@ class Environment(object):
         if self._win32 is False:
             return self.architecture
 
-        return '???' if self.architecture == 'x86' else 'x64'
+        return 'Win32' if self.architecture == 'x86' else 'x64'
 
     @property
     def platform_toolset(self):
