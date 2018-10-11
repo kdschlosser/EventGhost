@@ -43,7 +43,7 @@
     <_ProjectFileVersion>14.0.24720.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>Debug\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
@@ -52,7 +52,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>Release\</OutDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Release\</IntDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
