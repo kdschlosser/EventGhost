@@ -68,24 +68,23 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
             Write-Host "  ---- Installing $msg $Env:BUILDARCH"
         }
-        $LASTEXITCODE = $null
 
         if (-Not($Args)) {
             $Args = ""
         }
         if ($StdErr) {
-            $LASTEXITCODE = Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait
+            $exitcode = Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait
         }
         elseif ($Executable -Like '*.msi') {
-            $LASTEXITCODE = Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait
+            $exitcode = Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait
         }
         else {
-            $LASTEXITCODE = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait
+            $exitcode = Start-Process $Executable -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args" -NoNewWindow -Wait
         }
 
-        $LASTEXITCODE.ExitCode
+        $exitcode.ExitCode
 
-        if ($LASTEXITCODE.ExitCode -eq 0) {
+        if ($exitcode.ExitCode -eq 0) {
             Write-Host "       Done."
             $host.SetShouldExit(0)
         } else {
