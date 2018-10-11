@@ -26,7 +26,7 @@ If (
     $url = ""
 }
 
-Invoke-App "python" "_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
+Invoke-App "$Env:PYTHON\python.exe" "_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
     
 $Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
 $Env:Logfile = $Env:LOGFILE

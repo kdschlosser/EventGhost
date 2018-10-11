@@ -42,7 +42,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     $SitePackages = "$Env:PYTHON\Lib\site-packages"
 
-    
+    $Python = "$Env:PYTHON\python.exe"
+    $Pip = "$Env:PYTHON\Scripts\pip.exe"
+    $EasyInstall = "$Env:PYTHON\Scripts\easy_install.exe"
 
 
     Write-Host "==================== Downloading Files ==================="
@@ -61,28 +63,28 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App "$VCInstaller"
 
     Write-Host "  ---- Upgrading pip 9.0.1"
-    Invoke-App "python" "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
+    Invoke-App $Python "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
 
     Write-Host "  ---- Upgrading setuptools 40.2.0"
-    Invoke-App "python" "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
+    Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
     Invoke-App $WXInstaller "/dir=$SitePackages"
 
     Write-Host "  ---- Installing py2exe 0.6.9"
-    Invoke-App "easy_install" "--always-unzip $Py2ExeInstaller" "$ModuleOutputFolder\py2exe 0.6.9.err.log" "$ModuleOutputFolder\py2exe 0.6.9.out.log"
+    Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller" "$ModuleOutputFolder\py2exe 0.6.9.err.log" "$ModuleOutputFolder\py2exe 0.6.9.out.log"
 
     # *See Changes* PipInstall "pycrypto 2.6.1" "pycrypto==2.6.1"
     # *See Changes* PipInstall "ctypeslib 0.5.6" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
-    Invoke-App "pip" "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "sphinx 1.5.6" "sphinx==1.5.6" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "commonmark 0.7.3" "commonmark==0.7.3" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "pillow 3.4.2" "pillow==3.4.2" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "paramiko 2.2.1" "paramiko==2.2.1" -LogDir $ModuleOutputFolder
-    Invoke-App "pip" "pywin32 223" "pywin32==223" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "sphinx 1.5.6" "sphinx==1.5.6" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "commonmark 0.7.3" "commonmark==0.7.3" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pillow 3.4.2" "pillow==3.4.2" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "paramiko 2.2.1" "paramiko==2.2.1" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pywin32 223" "pywin32==223" -LogDir $ModuleOutputFolder
 
 } else {
     # we are already using a cached version so
