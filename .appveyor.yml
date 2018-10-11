@@ -101,9 +101,136 @@
 # *****************************************************************************
 # *****************************************************************************
 
+image:
+    - Visual Studio 2017
 
-image: Visual Studio 2017
+platform:
+  - x86
+  - x64
+
 version: '{build}-{branch}'
+
+environment:
+    global:
+        INSTALLSCRIPT: '
+if (-Not (Test-Path $Env:PYTHON)) {
+    $PythonDLL = $Env:SYSTEMROOT + $Env:PYTHONDLL
+
+    If (Test-Path $PythonDLL) {
+        Remove-Item $PythonDLL
+    }
+
+    $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
+    if (-Not(Test-Path $InstallersFolder)) {
+        New-Item $InstallersFolder -type directory | Out-Null
+
+        # I am using the VS 2017 appveyor image and this is not installed
+        # with that image. It is needed to compile the crypto library
+        $VCInstaller = $InstallersFolder + "VCForPython27.msi"
+        $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+        Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
+        "  ---- Installing Visual C Compiler for Python 2.7"
+        Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
+        "       Done."
+        " "
+    }
+
+    $StacklessInstaller = $InstallersFolder + $Env:STACKLESSINSTALLER
+    $StacklessURL = "http://www.stackless.com/binaries/$Env:STACKLESSINSTALLER"
+
+    $WXInstaller = $InstallersFolder + + $Env:WXINSTALLER
+    $WXURL = "http://downloads.sourceforge.net/wxpython/$Env:WXINSTALLER"
+
+    $Py2ExeInstaller = $InstallersFolder + $Env:PY2EXEINSTALLER
+    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Env:PY2EXEINSTALLER"
+
+    $SitePackages = "$Env:PYTHON\Lib\site-packages"
+
+    Function PipInstall ($msg, $mod) {
+        "  ---- Installing " + $msg
+        pip install --no-cache-dir -q $mod
+        "       Done."
+    }
+
+    "==================== Downloading Files ==================="
+
+    Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
+    Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller
+    Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller
+
+    " "
+    "=============== Installing Requirements =============="
+
+    "  ---- Installing Stackless 2.7.12150"
+    Start-Process MsiExec.exe -Arg "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -Wait
+    "       Done."
+
+    "  ---- Upgrading pip 9.0.1"
+    python -m pip install --no-cache-dir -q -U "pip==9.0.1"
+    "       Done."
+
+    "  ---- Upgrading setuptools 40.0.0"
+    pip install --no-cache-dir -q -U "setuptools==40.2.0"
+    "       Done."
+
+    "  ---- Installing wxPython 3.0.2.0"
+    Start-Process $WXInstaller -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -NoNewWindow -Wait
+    "       Done"
+
+    "  ---- Installing py2exe 0.6.9"
+    easy_install --always-unzip --quiet $Py2ExeInstaller
+    "       Done."
+
+    # *See Changes* PipInstall "pycrypto 2.6.1" "pycrypto==2.6.1"
+    PipInstall "pycryptodome 3.6.6" "pycryptodome==3.6.6"
+
+    PipInstall "wheel 0.29.0" "wheel==0.29.0"
+
+    # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
+    # jinja2 >= 2.9 has an async module which py2exe has
+    # problems with (build of eg will fail)
+    PipInstall "jinja2 2.8.1" "jinja2==2.8.1"
+    PipInstall "sphinx 1.5.6" "sphinx==1.5.6"
+
+    PipInstall "commonmark 0.7.3" "commonmark==0.7.3"
+    PipInstall "pillow 3.4.2" "pillow==3.4.2"
+    PipInstall "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip"
+
+    # *See Changes* PipInstall "ctypeslib 0.5.6" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
+
+    PipInstall "paramiko 2.2.1" "paramiko==2.2.1"
+    PipInstall "pywin32 223" "pywin32==223"
+
+    If (Test-Path $PythonDLL) {
+        Copy-Item $PythonDLL -Destination $Env:PYTHON
+        Remove-Item $PythonDLL
+    }
+
+} else {
+    # we are already using a cached version so
+    # there is no need to cache it agian.
+    $env:APPVEYOR_CACHE_SKIP_SAVE = "true"
+}
+'
+    matrix:
+        - platform: x86
+            PYTHON: C:\Stackless27
+            PYTHONPATH: C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;
+            STACKLESSINSTALLER: python-2.7.12150-stackless.msi
+            WXINSTALLER: wxPython3.0-win32-3.0.2.0-py27.exe
+            PY2EXEINSTALLER: py2exe-0.6.9.win32-py2.7.exe
+            PYTHONDLL: \SysWOW64\python27.dll
+            OUTPUTFILE: Setup.exe
+            LOGFILE: Build_x86.log
+        - platform: x64
+            PYTHON: C:\Stackless27x64
+            PYTHONPATH: C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;
+            STACKLESSINSTALLER: python-2.7.12150.amd64-stackless.msi
+            WXINSTALLER: wxPython3.0-win64-3.0.2.0-py27.exe
+            PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
+            PYTHONDLL: \System\python27.dll
+            OUTPUTFILE: Setup_x64.exe
+            LOGFILE: Build_x64.log
 
 
 #init:
@@ -114,12 +241,6 @@ version: '{build}-{branch}'
 matrix:
   fast_finish: true
 
-environment:
-  PythonX86: 'C:\Stackless27'
-  PythonPathX86: 'C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;'
-
-  PythonX64: 'C:\Stackless27x64'
-  PythonPathX64: 'C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;'
 
 cache:
     # Invalidate cache if .appveyor.yml has changed
@@ -140,281 +261,59 @@ install:
     # - cinst vcredist2008
 
     #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-    - ps: |
-
-        "========== Prepare EventGhost build environment =========="
-
-        $Env:PathX86 = $Env:PythonPathX86 + $Env:PATH
-        $Env:PathX64 = $Env:PythonPathX64 + $Env:PATH
-        $PythonSysWOWDLL = $Env:SYSTEMROOT + "\SysWOW64\python27.dll"
-        $PythonSystemDLL = $Env:SYSTEMROOT + "\System\python27.dll"
-
-        # remove any python dll files for pre installed versions of python
-        # because we move out installations dll files into the installations
-        # folder out dll files get cached with the installation. The cache is
-        # copied to the appveyor VM so the VM image contains these files in
-        # their original location. we want to remove them to ensure a trouble
-        # free build.
-
-        If (Test-Path $PythonSysWOWDLL) {
-            Remove-Item $PythonSysWOWDLL
-        }
-
-        If (Test-Path $PythonSystemDLL) {
-            Remove-Item $PythonSystemDLL
-        }
-
-        " "
-
-        If (-not (Test-Path $Env:PythonX86)) {
-            $PythonX86 = "C:\Stackless27_temp"
-            $PythonPathX86 = "C:\Stackless27_temp;C:\Stackless27_temp\Scripts;C:\Stackless27_temp\DLLs;C:\Stackless27_temp\Lib;C:\Stackless27_temp\Lib\site-packages;"
-            $PythonScriptsX86 = $PythonX86 + "\Scripts"
-            $SitePackagesX86 = $PythonX86 + "\lib\site-packages"
-            $PathX86 = $PythonPathX86 + $Env:PATH
-
-            $PythonX64 = "C:\Stackless27x64_temp"
-            $PythonPathX64 = "C:\Stackless27x64_temp;C:\Stackless27x64_temp\Scripts;C:\Stackless27x64_temp\DLLs;C:\Stackless27x64_temp\Lib;C:\Stackless27x64_temp\Lib\site-packages;"
-            $PythonScriptsX64 = $PythonX64 + "\Scripts"
-            $SitePackagesX64 = $PythonX64 + "\lib\site-packages"
-            $PathX64 = $PythonPathX64 + $Env:PATH
-
-            Function PipInstall ($msg, $mod) {
-                "  ---- Installing " + $msg
-                pip install --no-cache-dir -q $mod
-                "       Done."
-            }
-            $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
-            New-Item $InstallersFolder -type directory | Out-Null
-
-            $StacklessInstallerX86 = $InstallersFolder + "python-2.7.12150-stackless.msi"
-            $StacklessURLX86 = "http://www.stackless.com/binaries/python-2.7.12150-stackless.msi"
-
-            $StacklessInstallerX64 = $InstallersFolder + "python-2.7.12150.amd64-stackless.msi"
-            $StacklessURLX64 = "http://www.stackless.com/binaries/python-2.7.12150.amd64-stackless.msi"
-
-            $WXInstallerX86 = $InstallersFolder + "wxPython3.0-win32-3.0.2.0-py27.exe"
-            $WXInstallLocationX86 = $PythonX86 + "\wxPython3.0.2_x86"
-            $WXURLX86 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win32-3.0.2.0-py27.exe"
-
-            $WXInstallerX64 = $InstallersFolder + "wxPython3.0-win64-3.0.2.0-py27.exe"
-            $WXInstallLocationX64 = $PythonX64 + "\wxPython3.0.2_x64"
-            $WXURLX64 = "http://downloads.sourceforge.net/wxpython/wxPython3.0-win64-3.0.2.0-py27.exe"
-
-            $Py2ExeInstallerX86 = $InstallersFolder + "py2exe-0.6.9.win32-py2.7.exe"
-            $Py2ExeURLX86 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win32-py2.7.exe"
-            $Py2ExeInstallerX64 = $InstallersFolder + "py2exe-0.6.9.win64-py2.7.amd64.exe"
-            $Py2ExeURLX64 = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/py2exe-0.6.9.win64-py2.7.amd64.exe"
-
-            # I am using the VS 2017 appveyor image and this is not installed
-            # with that image. It is needed to compile the crypto library
-            $VCInstaller = $InstallersFolder + "VCForPython27.msi"
-            $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
-
-            "==================== Downloading Files ==================="
-
-            Start-FileDownload $StacklessURLX86 -Timeout 60000 -FileName $StacklessInstallerX86
-            Start-FileDownload $StacklessURLX64 -Timeout 60000 -FileName $StacklessInstallerX64
-            Start-FileDownload $WXURLX86 -Timeout 60000 -FileName $WXInstallerX86
-            Start-FileDownload $WXURLX64 -Timeout 60000 -FileName $WXInstallerX64
-            Start-FileDownload $Py2ExeURLX86 -Timeout 60000 -FileName $Py2ExeInstallerX86
-            Start-FileDownload $Py2ExeURLX64 -Timeout 60000 -FileName $Py2ExeInstallerX64
-            Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
-
-            " "
-            "================= Installing Requirements ================"
-
-            "  ---- Installing Visual C Compiler for Python 2.7"
-            Start-Process MsiExec.exe -Arg "/I $VCInstaller /quiet /passive /qn /norestart" -Wait
-            "       Done."
-
-            " "
-            "=============== Installing x86 Requirements =============="
-
-            "  ---- Installing Stackless 2.7.12150 x86"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX86 /quiet /passive /qn /norestart TARGETDIR=$PythonX86" -Wait
-            "       Done."
-
-            $Env:PYTHON = $PythonX86
-            $Env:PYTHONPATH = $PythonPathX86
-            $Env:PATH = $PathX86
-
-            "  ---- Installing wxPython 3.0.2.0 x86"
-            Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackagesX86" -NoNewWindow -Wait
-            "       Done"
-
-            "  ---- Upgrading pip 9.0.1 x86"
-            python -m pip install --no-cache-dir -q -U "pip==9.0.1"
-            "       Done."
-            "  ---- Upgrading setuptools 40.0.0 x86"
-            pip install --no-cache-dir -q -U "setuptools==40.2.0"
-            "       Done."
-
-            "  ---- Installing py2exe 0.6.9 x86"
-            easy_install --always-unzip --quiet $Py2ExeInstallerX86
-            "       Done."
-
-            # *See Changes* PipInstall "pycrypto 2.6.1 x86" "pycrypto==2.6.1"
-            PipInstall "pycryptodome 3.6.6 x86" "pycryptodome==3.6.6"
-
-            PipInstall "wheel 0.29.0 x86" "wheel==0.29.0"
-
-            # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
-            # jinja2 >= 2.9 has an async module which py2exe has
-            # problems with (build of eg will fail)
-            PipInstall "jinja2 2.8.1 x86" "jinja2==2.8.1"
-            PipInstall "sphinx 1.5.6 x86" "sphinx==1.5.6"
-
-            PipInstall "commonmark 0.7.3 x86" "commonmark==0.7.3"
-            PipInstall "pillow 3.4.2 x86" "pillow==3.4.2"
-            PipInstall "comtypes 1.1.3 x86" "https://github.com/enthought/comtypes/archive/1.1.3.zip"
-
-            # *See Changes* PipInstall "ctypeslib 0.5.6 x86" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
-
-
-            PipInstall "paramiko 2.2.1 x86" "paramiko==2.2.1"
-            PipInstall "pywin32 223 x86" "pywin32==223"
-
-            If (Test-Path $PythonSysWOWDLL) {
-                Copy-Item $PythonSysWOWDLL -Destination $PythonX86
-                Remove-Item $PythonSysWOWDLL
-            }
-            Rename-Item $PythonX86 -NewName "Stackless27"
-
-            " "
-            "=============== Installing x64 Requirements =============="
-
-            "  ---- Installing Stackless 2.7.12150 x64"
-            Start-Process MsiExec.exe -Arg "/I $StacklessInstallerX64 /quiet /passive /qn /norestart TARGETDIR=$PythonX64" -Wait
-            "       Done."
-
-            $Env:PYTHON = $PythonX64
-            $Env:PYTHONPATH = $PythonPathX64
-            $Env:PATH = $PathX64
-
-            "  ---- Installing wxPython 3.0.2.0 x64"
-            Start-Process $WXInstallerX86 -Arg "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackagesX64" -NoNewWindow -Wait
-            "       Done."
-
-            "  ---- Upgrading pip 9.0.1 x64"
-            python -m pip install --no-cache-dir -q -U "pip==9.0.1"
-            "       Done."
-
-            "  ---- Upgrading setuptools 40.2.0 x64"
-            pip install -q --no-cache-dir -U "setuptools==40.2.0"
-            "       Done."
-
-            "  ---- Installing py2exe 0.6.9 x64"
-            easy_install --always-unzip --quiet $Py2ExeInstallerX64
-            "       Done."
-
-
-            # *See Changes* PipInstall "pycrypto 2.6.1 x64" "pycrypto==2.6.1"
-            PipInstall "pycryptodome 3.6.6 x64" "pycryptodome==3.6.6"
-
-            PipInstall "wheel 0.29.0 x64" "wheel==0.29.0"
-
-            # sphinx >= 1.4.9 installs jinja2 >= 2.3 as dependency,
-            # jinja2 >= 2.9 has an async module which py2exe has
-            # problems with (build of eg will fail)
-            PipInstall "jinja2 2.8.1 x64" "jinja2==2.8.1"
-            PipInstall "sphinx 1.5.6 x64" "sphinx==1.5.6"
-
-            PipInstall "commonmark 0.7.3 x64" "commonmark==0.7.3"
-            PipInstall "pillow 3.4.2 x64" "pillow==3.4.2"
-            PipInstall "comtypes 1.1.3 x64" "https://github.com/enthought/comtypes/archive/1.1.3.zip"
-
-            # *See Changes* PipInstall "ctypeslib 0.5.6 x64" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
-
-            PipInstall "paramiko 2.2.1 x64" "paramiko==2.2.1"
-            PipInstall "pywin32 223 x64" "pywin32==223"
-
-            If (Test-Path $PythonSystemDLL) {
-                Copy-Item $PythonSystemDLL -Destination $PythonX64
-                Remove-Item $PythonSystemDLL
-            }
-            Rename-Item $PythonX64 -NewName "Stackless27x64"
-
-            " "
-        }
+    Invoke-Expression "& $Env:INSTALLSCRIPT"
 
 build_script:
     ps: |
+        # Invoke-Expression "& $Env:BuildScript"
+        
         "=============== Start the EventGhost build ==============="
         If ($Env:APPVEYOR_REPO_TAG.tolower() -eq "true" -and $Env:APPVEYOR_REPO_TAG_NAME.tolower().startswith("deploy")) {
             # to do a release, create a tag in the form "Deploy_VERSION"
-            # VERSION must be a valid version string (without leading 'v')
+            # VERSION must be a valid version string (without leading "v")
             # this tag will be deleted and a new release "vVERSION" created.
             git checkout -q master
             $release = $Env:APPVEYOR_REPO_TAG_NAME.split("_", 2)[1]
-            $url = if($Env:SFTP_URL){' --docs --url "' + $env:SFTP_URL + '"'} else {''}
+            $url = if($Env:SFTP_URL){" --docs --url $Env:SFTP_URL} else {""}
 
-
-            "================== Building deploy x86 ==================="
-            $Env:PYTHON = $Env:PythonX86
-            $Env:PYTHONPATH = $Env:PythonPathX86
-            $Env:PATH = $Env:PathX86
+            "=================== Building deploy ====================="
             python "_build\Build.py" --build --package --release --version $release $url
-            $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
-            "================== Building deploy x64 ==================="
-            $Env:PYTHON = $Env:PythonX64
-            $Env:PYTHONPATH = $Env:PythonPathX64
-            $Env:PATH = $Env:PathX64
-            python "_build\Build.py" --build --package --release --version $release $url
-            $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
         } else {
-
-            "=================== Building WIP x86 ===================="
-            $Env:PYTHON = $Env:PythonX86
-            $Env:PYTHONPATH = $Env:PythonPathX86
-            $Env:PATH = $Env:PathX86
+            "=================== Building WIP ===================="
             python "_build\Build.py" --build --package
-            $Env:SetupExeX86 = gci -recurse -filter "_build\output\*Setup.exe" -name
 
+        $Env:SetupExe = gci -recurse -filter "_build\output\*$Env:OUTPUTFILE" -name
+        $Env:Logfile = $Env:LOGFILE
 
-            "=================== Building WIP x64 ===================="
-            $Env:PYTHON = $Env:PythonX64
-            $Env:PYTHONPATH = $Env:PythonPathX64
-            $Env:PATH = $Env:PathX64
-            python "_build\Build.py" --build --package
-            $Env:SetupExeX64 = gci -recurse -filter "_build\output\*Setupx64.exe" -name
+        if (-Not ($SetupExe -contains '*x64*')) {
+            # update the appveyor build version to be the same as the EventGhost version
+            $Start = $Env:SetupExe.IndexOf("_")
+            $Length = $Env:SetupExe.LastIndexOf("_") - $Start
+            $BuildVersion = $Env:SetupExe.Substring($Start + 1, $Length - 1)
+            Update-AppveyorBuild -Version "$BuildVersion"
         }
-
-        # update the appveyor build version to be the same as the EventGhost version
-        $start = $env:SetupExeX86.IndexOf("_")
-        $length = $env:SetupExeX86.LastIndexOf("_") - $start
-        $build_version = $env:SetupExeX86.Substring($start + 1, $length - 1)
-        Update-AppveyorBuild -Version "$build_version"
-
-        # Make sure the appveyor cache is only saved if our build was successfull
-        If (-Not (Test-Path(".\EventGhost.exe"))) {$env:APPVEYOR_CACHE_SKIP_SAVE = "true"}
 
         " "
         "=============== EventGhost build finished ================"
         " "
 
+
 #after_test:
 #  - cmd:  echo "=============== EventGhost build finished ==============="
 #  # - cmd: START /WAIT %setup-exe% /VERYSILENT /SUPPRESSMSGBOXES /NOCLOSEAPPLICATIONS
 
-
 artifacts:
-    - path: _build\output\$(SetupExeX86)
-      name: $(SetupExeX86)
-    - path: _build\output\$(SetupExeX64)
-      name: $(SetupExeX64)
-    - path: _build\output\Build_x86.log
-      name: Build_x86.log
-    - path: _build\output\Build_x64.log
-      name: Build_x64.log
     - path: _build\output\CHANGELOG.md
       name: CHANGELOG.md
     - path: _build\output\CHANGELOG_THIS_RELEASE.md
       name: CHANGELOG_THIS_RELEASE.md
     - path: _build\output\CHANGELOG_THIS_RELEASE.bb
       name: CHANGELOG_THIS_RELEASE.bb
-
+    - path: _build\output\$(SetupExe)
+      name: $(SetupExe)
+    - path: _build\output\$(LogFile)
+      name: $(LogFile)
 
 
 notifications:

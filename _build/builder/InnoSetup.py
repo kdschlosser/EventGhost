@@ -63,7 +63,7 @@ class InnoInstaller(object):
         if self.buildSetup.arch == 'x86':
             arch = ''
         else:
-            arch = 'x64'
+            arch = '_x64'
 
         template_dict = {}
         for key, value in self.buildSetup.__dict__.iteritems():
