@@ -77,7 +77,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
         if ($StdErr) {
             Start-Process $Executable -RedirectStandardError $StdErr -RedirectStandardOutput $StdOut -ArgumentList $Args -NoNewWindow -Wait
         }
-        elseif ($Executable -contains '*.msi') {
+        elseif ($Executable -Like '*.msi') {
             Start-Process MsiExec.exe -ArgumentList "/I $Executable /quiet /passive /qn /norestart $Args" -NoNewWindow -Wait
         }
         else {
