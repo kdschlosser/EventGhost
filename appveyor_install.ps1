@@ -56,6 +56,12 @@ if (-Not (Test-Path $Env:PYTHON)) {
            [Parameter(Mandatory=$False)]
            [String]$LogDir
         )
+        $Executable
+        $Args
+        $StdErr
+        $StdOut
+        $MsiFile
+        $LogDir
 
         if ($LogDir) {
             $msg = $Args
