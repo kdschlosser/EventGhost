@@ -1,8 +1,14 @@
 ﻿
-$PythonDLL = $Env:SYSTEMROOT + $Env:PYTHONDLL
+$SysWOWDLL = "$Env:SYSTEMROOT\SysWOW64\python27.dll"
+$SystemDLL = "$Env:SYSTEMROOT\System\python27.dll"
 
-If (Test-Path $PythonDLL) {
-    Remove-Item $PythonDLL
+
+
+If (Test-Path $SystemDLL) {
+    Remove-Item $SystemDLL
+}
+If (Test-Path $SysWOWDLL) {
+    Remove-Item $SysWOWDLL
 }
 
 $ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\$Env:MODULEOUTPUT"
@@ -59,11 +65,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Start-Process MsiExec.exe -ArgumentList "/I", "$StacklessInstaller", "/quiet", "/passive", "/qn", "/norestart", "TARGETDIR=$Env:PYTHON" -NoNewWindow -Wait
     Write-Host "       Done."
 
-
     Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
     Start-Process MsiExec.exe -ArgumentList "/I", "$VCInstaller", "/quiet", "/passive", "/qn", "/norestart" -NoNewWindow -Wait
     Write-Host "       Done."
-    Write-Host " "
 
     Write-Host "  ---- Upgrading pip 9.0.1"
     Start-Process python -RedirectStandardError "$ModuleOutputFolder\pip 9.0.1.err.log" -RedirectStandardOutput "$ModuleOutputFolder\pip 9.0.1.out.log" -ArgumentList "-m", "pip", "install", "--no-cache-dir", "-U", "pip==9.0.1" -NoNewWindow -Wait
@@ -93,11 +97,13 @@ if (-Not (Test-Path $Env:PYTHON)) {
     PipInstall "paramiko 2.2.1" "paramiko==2.2.1" $ModuleOutputFolder
     PipInstall "pywin32 223" "pywin32==223" $ModuleOutputFolder
 
-    If (Test-Path $PythonDLL) {
-        Copy-Item $PythonDLL -Destination $Env:PYTHON
-        Remove-Item $PythonDLL
+    If (Test-Path $SystemDLL) {
+        Copy-Item $SystemDLL -Destination $Env:PYTHON
     }
-     
+    If (Test-Path $SysWOWDLL) {
+        Copy-Item $SysWOWDLL -Destination $Env:PYTHON
+    }
+
 } else {
     # we are already using a cached version so
     # there is no need to cache it agian.

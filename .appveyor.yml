@@ -115,7 +115,6 @@ environment:
       STACKLESSINSTALLER: python-2.7.12150-stackless.msi
       WXINSTALLER: wxPython3.0-win32-3.0.2.0-py27.exe
       PY2EXEINSTALLER: py2exe-0.6.9.win32-py2.7.exe
-      PYTHONDLL: \SysWOW64\python27.dll
       OUTPUTFILE: Setup.exe
       LOGFILE: Build_x86.log
       MODULEOUTPUT: ModuleOutputx86
@@ -126,7 +125,6 @@ environment:
       STACKLESSINSTALLER: python-2.7.12150.amd64-stackless.msi
       WXINSTALLER: wxPython3.0-win64-3.0.2.0-py27.exe
       PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
-      PYTHONDLL: \System\python27.dll
       OUTPUTFILE: Setup_x64.exe
       LOGFILE: Build_x64.log
       MODULEOUTPUT: ModuleOutputx64
