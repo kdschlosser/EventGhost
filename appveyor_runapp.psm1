@@ -67,7 +67,7 @@
     $e_log = $process.StandardError.ReadToEnd()
     
     if ($ErrLog) {
-        Out-File "$ErrLog" -Encoding utf8 -InputObject $e_log $o_log
+        Out-File "$ErrLog" -Encoding utf8 -InputObject $e_log
     }
 
     if ($OutLog) {
