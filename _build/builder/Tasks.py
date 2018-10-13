@@ -137,7 +137,7 @@ class BuildExtensions(Task):
             options=dict(
                 build_ext=dict(
                     build_base=join(self.buildSetup.tmpDir, "build"),
-                    threaded_build=Utils.Is64bitInterpreter()
+                    threaded_build=True
                 ),
             ),
             cmdclass=dict(

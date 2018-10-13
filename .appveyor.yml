@@ -128,7 +128,11 @@ environment:
 
 init:
   # Enable Remotedesktop and pause the build execution
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: |
+      if ($Env:DEBUG -eq "1") {
+          $blockRdp = $true
+          iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      }
 
 matrix:
   fast_finish: true
@@ -178,6 +182,10 @@ artifacts:
     name: $(SetupExe)
   - path: _build\output\Build_$(BUILDARCH).log
     name: Build_$(BUILDARCH).log
+  - path: _build\output\build_error.log
+    name: Build_STDError.log
+  - path: _build\output\build_output.log
+    name: Build_STDOut.log
   - path: _build\output\ModuleOutput$(BUILDARCH).zip
     name: ModuleOutput$(BUILDARCH).zip
 
@@ -225,7 +233,11 @@ notifications:
 
 on_finish:
   # pause the build execution
-  - ps: $blockRdp = $true;
+  - ps: |
+      if ($Env:DEBUG -eq "1") {
+          $blockRdp = $true
+          iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      }
 
 # notifications:
 #   - provider: GitHubPullRequest

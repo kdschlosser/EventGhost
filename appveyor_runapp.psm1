@@ -66,10 +66,12 @@
         Out-File "$OutLog" -Encoding utf8 -InputObject ""
     }
 
-    Function Print-Logs ($p, $ot_log, $er_log) {
+    Function Print-Logs ($p, $ot_log, $er_log, $prnt) {
         $o_log = $p.StandardOutput.ReadToEnd()
         $e_log = $p.StandardError.ReadToEnd()
-        $prnt = $Env:DEBUG -eq "1"
+        if (-Not ($prnt)) {
+            $prnt = $Env:DEBUG -eq "1"
+        }
 
         if ($o_log) {
             if ($ot_log) {
@@ -97,7 +99,7 @@
         Print-Logs $process $OutLog $ErrLog
     }
 
-    Print-Logs $process $OutLog $ErrLog
+    Print-Logs $process $OutLog $ErrLog $PrintOutput
 
     $Env:EXITCODE = $process.ExitCode
      

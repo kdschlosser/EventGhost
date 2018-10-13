@@ -114,9 +114,12 @@ class BuildEXT(Command):
                 os.path.abspath(solution_path),
                 os.path.abspath(build_path)
             )
+            evt.wait(0.5)
 
             build_command = environment.get_build_command(solution)
             logger.log(22, '--- building {0}'.format(name))
+
+            evt.wait(0.5)
 
             proc = Popen(build_command, stdout=PIPE, stderr=PIPE)
 

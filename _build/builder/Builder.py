@@ -164,6 +164,9 @@ class Builder(object):
         ).upper().startswith("VERBOSE:"):
             self.args.verbose = True
 
+        if os.environ.get('DEBUG', '0') == '1':
+            self.args.verbose = True
+
         os.chdir(self.buildDir)
 
         if not exists(self.outputDir):
