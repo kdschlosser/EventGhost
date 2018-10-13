@@ -53,8 +53,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Start-Job -ScriptBlock {Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller} -Name "wxPython"
     Start-Job -ScriptBlock {Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller} -Name "py2exe"
 
-    Get-Job | Wait-Job
-
+    Wait-Job -Name "Stackless"
+    Wait-Job -Name "wxPython"
+    Wait-Job -Name "py2exe"
 
     Write-Host " "
     Write-Host "=============== Installing Requirements =============="
