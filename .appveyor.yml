@@ -108,8 +108,15 @@ version: '{build}-{branch}'
 
 environment:
   DEBUG: 0
-  # APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
+  APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
   matrix:
+
+    - BUILDARCH: x64
+      PYTHON: C:\Stackless27x64
+      PYTHONPATH: C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;
+      STACKLESSINSTALLER: python-2.7.12150.amd64-stackless.msi
+      WXINSTALLER: wxPython3.0-win64-3.0.2.0-py27.exe
+      PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
 
     - BUILDARCH: x86
       PYTHON: C:\Stackless27
@@ -119,17 +126,9 @@ environment:
       PY2EXEINSTALLER: py2exe-0.6.9.win32-py2.7.exe
 
 
-    - BUILDARCH: x64
-      PYTHON: C:\Stackless27x64
-      PYTHONPATH: C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;
-      STACKLESSINSTALLER: python-2.7.12150.amd64-stackless.msi
-      WXINSTALLER: wxPython3.0-win64-3.0.2.0-py27.exe
-      PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
-
-#
-#init:
-#  # Enable Remotedesktop and pause the build execution
-#  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+init:
+  # Enable Remotedesktop and pause the build execution
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 matrix:
   fast_finish: true
@@ -157,7 +156,6 @@ install:
   # Microsoft Visual C++ Redistributable 2008 (version min: 9.0.21022.8)
   # - cinst vcredist2008
 
-  #- ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   - ps: . .\appveyor_install.ps1
 
 
@@ -225,11 +223,9 @@ notifications:
   on_build_status_changed: true
 
 
-#
-#on_finish:
-#  # Enable Remotedesktop and pause the build execution
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-#
+on_finish:
+  # pause the build execution
+  - ps: $blockRdp = $true;
 
 # notifications:
 #   - provider: GitHubPullRequest
