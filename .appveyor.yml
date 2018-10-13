@@ -108,6 +108,7 @@ version: '{build}-{branch}'
 
 environment:
   DEBUG: 0
+  APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
   matrix:
 
     - BUILDARCH: x86
@@ -126,10 +127,9 @@ environment:
       PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
 
 
-#init:
-#  # Enable Remotedesktop and pause the build execution
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
+init:
+  # Enable Remotedesktop and pause the build execution
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 matrix:
   fast_finish: true
@@ -226,9 +226,9 @@ notifications:
 
 
 
-#on_finish:
-#  # Enable Remotedesktop and pause the build execution
-#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+on_finish:
+  # Enable Remotedesktop and pause the build execution
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 
 # notifications:
