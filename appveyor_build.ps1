@@ -30,14 +30,22 @@ Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py 
     
 $Env:SetupExe = gci -recurse -filter "_build\output\*Setup_$Env:BUILDARCH" -name
 
-
+# EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
 if (($Env:SetupExe) -and (-Not ($SetupExe -contains '*x64*'))) {
     # update the appveyor build version to be the same as the EventGhost version
+
+
     $Start = $Env:SetupExe.IndexOf("_")
     $Length = $Env:SetupExe.LastIndexOf("_") - $Start
+
     $BuildVersion = $Env:SetupExe.Substring($Start + 1, $Length - 1)
+    $Length = $BuildVersion.LastIndexOf("_")
+    $BuildVersion = $BuildVersion.Substring(0, $Length - 1)
+
     Update-AppveyorBuild -Version "$BuildVersion"
 }
+
+Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
 Write-Host " "
 Write-Host "=============== EventGhost build finished ================"

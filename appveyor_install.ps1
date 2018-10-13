@@ -93,5 +93,3 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Out-File "$ModuleOutputFolder\cached build" -InputObject ""
 
 }
-
-Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
