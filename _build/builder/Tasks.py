@@ -167,11 +167,11 @@ from BuildWebsite import BuildWebsite  # NOQA
 from BuildChangelog import BuildChangelog  # NOQA
 
 TASKS = [
+    BuildExtensions,
     BuildVersionFile,
     CheckSourceCode,
     BuildStaticImports,
     BuildImports,
-    BuildExtensions,
     BuildInterpreters,
     BuildLibrary,
     BuildChangelog,
