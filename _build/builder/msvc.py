@@ -493,16 +493,29 @@ class Environment(object):
         from setuptools.msvc import EnvironmentInfo
         min_visual_c_version = self.min_visual_c_version
 
-        env_info = EnvironmentInfo(
-            self.architecture,
-            vc_min_ver=min_visual_c_version
-        )
-        vc_ver = env_info.vc_ver
+        if self.strict_compiler_version:
+            try:
+                _get_reg_value(
+                    'VisualStudio\\SxS\\VC7',
+                    str(min_visual_c_version)
+                )
+            except WindowsError:
+                raise RuntimeError(
+                    'No Compatible Visual C version found.'
+                )
+            return min_visual_c_version
 
-        if vc_ver != min_visual_c_version and self.strict_compiler_version:
-            raise RuntimeError(
-                'No Compatible Visual C version found.'
+        else:
+            env_info = EnvironmentInfo(
+                self.architecture,
+                vc_min_ver=min_visual_c_version
             )
+            vc_ver = env_info.vc_ver
+
+            if vc_ver != min_visual_c_version and self.strict_compiler_version:
+                raise RuntimeError(
+                    'No Compatible Visual C version found.'
+                )
 
         return vc_ver
 
