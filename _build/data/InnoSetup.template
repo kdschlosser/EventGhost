@@ -13,26 +13,34 @@ AppUpdatesURL=http://www.eventghost.org/
 AppVerName=EventGhost %(appVersion)s
 AppVersion=%(appVersion)s
 ChangesAssociations=yes
-ArchitecturesInstallIn64BitMode={#ARCH}
+
 Compression=lzma/ultra
 DefaultDirName={pf}\EventGhost
 DefaultGroupName=EventGhost
 DisableReadyPage=yes
 InfoBeforeFile=%(dataDir)s\LICENSE.RTF
 InternalCompressLevel=ultra
-OutputBaseFilename=%(appName)s_%(appVersion)s_Setup_{#ARCH}
 OutputDir=%(outputDir)s
 SetupIconFile=%(docsDir)s\_static\arrow.ico
 ShowLanguageDialog=auto
 SolidCompression=yes
 VersionInfoDescription=EventGhost Installer
+
 #if Pos('WIP-', '%(appVersion)s')
-VersionInfoVersion=0.0.0
+  VersionInfoVersion=0.0.0
 #elif Pos('-', '%(appVersion)s')
-VersionInfoVersion={#Copy('%(appVersion)s', 1, Pos('-', '%(appVersion)s') - 1)}
+  VersionInfoVersion={#Copy('%(appVersion)s', 1, Pos('-', '%(appVersion)s') - 1)}
 #else
-VersionInfoVersion=%(appVersion)s
+  VersionInfoVersion=%(appVersion)s
 #endif
+
+#if "x64" == ARCH
+  ArchitecturesInstallIn64BitMode=x64
+  OutputBaseFilename=%(appName)s_%(appVersion)s_Setup_x64
+# else
+  OutputBaseFilename=%(appName)s_%(appVersion)s_Setup_x86
+#endif
+
 WizardImageAlphaFormat=defined
 WizardImageFile=%(docsDir)s\_static\logo.bmp
 WizardImageStretch=no

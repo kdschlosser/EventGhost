@@ -22,8 +22,8 @@ from glob import glob
 from os.path import basename, exists, join
 
 # Local imports
-import builder
-from builder.Utils import EncodePath
+import Builder
+from Utils import EncodePath
 
 DLL_EXCLUDES = [
     "DINPUT8.dll",
@@ -32,7 +32,7 @@ DLL_EXCLUDES = [
 
 RT_MANIFEST = 24
 
-class BuildLibrary(builder.Task):
+class BuildLibrary(Builder.Task):
     description = "Build lib%d%d" % sys.version_info[0:2]
 
     def Setup(self):
@@ -77,10 +77,6 @@ class BuildLibrary(builder.Task):
                 buildSetup.appVersion.split("-")[1].split(".")
             )
 
-        import eventghost_build_ext
-        import eventghost_build
-
-
         setup(
             script_args=["py2exe"],
             windows=[Target(buildSetup)],
@@ -105,21 +101,7 @@ class BuildLibrary(builder.Task):
                         buildSetup.dataDir, "Py2ExeBootScript.py"
                     ),
                 )
-            ),
-            cmdclass=dict(
-                build_exe=eventghost_build.Build,
-                py2exe=eventghost_build.Build,
-                build_ext=eventghost_build_ext.BuildEXT,
-            ),
-            ext_modules=[
-                eventghost_build_ext.RawInputHook,
-                eventghost_build_ext.MceIr,
-                eventghost_build_ext.TaskHook,
-                eventghost_build_ext.cFunctions,
-                eventghost_build_ext.dxJoystick,
-                eventghost_build_ext.VistaVolEvents,
-                eventghost_build_ext.WinUsbWrapper
-            ]
+            )
         )
 
         if wip_version:

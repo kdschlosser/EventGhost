@@ -166,12 +166,58 @@ def _convert_mbcs(s):
     return s
 
 
+class _EnvironmentLock(object):
+
+    def __init__(self, environment):
+        mod = sys.modules[__name__]
+        for key, value in mod.__dict__.items():
+            if key.startswith('__'):
+                self.__dict__[key] = value
+
+        self.__environment = environment
+        self.__original_module__ = mod
+        sys.modules[__name__] = self
+
+    def __getattr__(self, item):
+        if sys.modules[__name__] != self:
+            return getattr(sys.modules[__name__], item)
+
+        if item in self.__dict__:
+            return self.__dict__[item]
+
+        if item == 'Environment':
+            return self.__environment
+
+        raise RuntimeError(
+            'Access Denied: The Environment has been locked.'
+        )
+
+
 class Environment(object):
 
     def __init__(self, strict_compiler_version=False, dll_build=False):
         self.strict_compiler_version = strict_compiler_version
         self.dll_build = dll_build
         self._win32 = None
+        self.__lock = None
+        self.__unlock = None
+        self.__environment_set = False
+
+    def lock(self):
+        if self.__unlock is not None:
+            self.__lock = self.__unlock
+            self.__unlock = None
+            sys.modules[__name__] = self.__lock
+
+        elif self.__lock is None:
+            self.__lock = _EnvironmentLock(self)
+
+    def unlock(self):
+        if self.__lock is not None:
+            mod = getattr(self.__lock, '__original_module__')
+            sys.modules[__name__] = mod
+            self.__unlock = self.__lock
+            self.__lock = None
 
     @property
     def msvc_dll_version(self):
@@ -534,6 +580,12 @@ class Environment(object):
         for item in self.build_environment.items():
             yield item
 
+    def __call__(self, *args, **kwargs):
+        if self.__lock:
+            return self
+
+        raise AttributeError
+
     @property
     def build_environment(self):
         """
@@ -576,6 +628,13 @@ class Environment(object):
 
         :return: dict of environment variables
         """
+        if self.__environment_set and self.__lock:
+            raise RuntimeError(
+                'Access Denied: Environment has been locked.'
+            )
+
+        self.__environment_set = True
+
         from setuptools.msvc import EnvironmentInfo
         env_info = EnvironmentInfo(
             self.architecture,

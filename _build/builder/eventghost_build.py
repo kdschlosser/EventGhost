@@ -16,16 +16,26 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
-from py2exe.build_exe import py2exe
+from distutils.core import Command
 
 
-class Build(py2exe):
+class Build(Command):
+    user_options = []
 
     def get_sub_commands(self):
-        sub_commands = py2exe.get_sub_commands(self)
+        sub_commands = Command.get_sub_commands(self)
         if 'build_ext' not in sub_commands:
             sub_commands += ['build_ext']
         # if 'build_docs' not in sub_commands:
         #     sub_commands += ['build_docs']
 
         return sub_commands
+
+    def finalize_options(self):
+        pass
+
+    def initialize_options(self):
+        pass
+
+    def run(self):
+        self.distribution.run_command('build_ext')

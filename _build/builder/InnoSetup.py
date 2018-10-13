@@ -19,7 +19,7 @@
 import _winreg
 import os
 # Local imports
-from builder.Utils import EncodePath, StartProcess
+from Utils import EncodePath, StartProcess
 
 # Exceptions
 class InnoSetupError(Exception):

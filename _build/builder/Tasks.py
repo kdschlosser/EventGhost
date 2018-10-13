@@ -19,16 +19,16 @@
 import logging
 import time
 from os.path import join
+import os
 from shutil import copy2
 
 # Local imports
-import builder
-
+from Builder import Task
 
 logger = logging.getLogger()
 
 
-class BuildInstaller(builder.Task):
+class BuildInstaller(Task):
     description = "Build Setup.exe"
 
     def Setup(self):
@@ -39,7 +39,7 @@ class BuildInstaller(builder.Task):
         self.buildSetup.BuildInstaller()
 
 
-class BuildVersionFile(builder.Task):
+class BuildVersionFile(Task):
     """
     Write version information to eg/Classes/VersionInfo.py
     """
@@ -65,7 +65,7 @@ class BuildVersionFile(builder.Task):
         outfile.close()
 
 
-class ReleaseToWeb(builder.Task):
+class ReleaseToWeb(Task):
     description = "Release to web"
     options = {"url": ""}
 
@@ -77,18 +77,18 @@ class ReleaseToWeb(builder.Task):
             self.activated = bool(self.buildSetup.args.release)
 
     def DoTask(self):
-        import builder.Upload
+        import Upload
         buildSetup = self.buildSetup
         filename = (
             buildSetup.appName + "_" + buildSetup.appVersion + "_Setup.exe"
         )
         src = join(buildSetup.outputDir, filename)
         dst = join(buildSetup.websiteDir, "downloads", filename)
-        builder.Upload.Upload(src, self.options["url"])
+        Upload.Upload(src, self.options["url"])
         copy2(src, dst)
 
 
-class SynchronizeWebsite(builder.Task):
+class SynchronizeWebsite(Task):
     description = "Synchronize website"
 
     def Setup(self):
@@ -117,21 +117,60 @@ class SynchronizeWebsite(builder.Task):
         syncer.Close()
 
 
-from builder.CheckSourceCode import CheckSourceCode  # NOQA
-from builder.BuildStaticImports import BuildStaticImports  # NOQA
-from builder.BuildImports import BuildImports  # NOQA
-from builder.BuildInterpreters import BuildInterpreters  # NOQA
-from builder.BuildLibrary import BuildLibrary  # NOQA
-from builder.BuildDocs import BuildChmDocs, BuildHtmlDocs  # NOQA
-from builder.ReleaseToGitHub import ReleaseToGitHub  # NOQA
-from builder.BuildWebsite import BuildWebsite  # NOQA
-from builder.BuildChangelog import BuildChangelog  # NOQA
+class BuildExtensions(Task):
+    description = "Build extensions."
+
+    def Setup(self):
+        self.activated = True
+
+    def DoTask(self):
+        from distutils.core import setup
+        import eventghost_build_ext
+        import eventghost_build
+
+        os.makedirs(join(self.buildSetup.tmpDir, "build"))
+        setup(
+            name='EventGhost-Extensions',
+            script_args=["build"],
+            verbose=0,
+            options=dict(
+                build_ext=dict(
+                    build_base=join(self.buildSetup.tmpDir, "build"),
+                    threaded_build=True
+                ),
+            ),
+            cmdclass=dict(
+                build=eventghost_build.Build,
+                build_ext=eventghost_build_ext.BuildEXT,
+            ),
+            ext_modules=[
+                eventghost_build_ext.RawInputHook,
+                eventghost_build_ext.MceIr,
+                eventghost_build_ext.TaskHook,
+                eventghost_build_ext.cFunctions,
+                eventghost_build_ext.dxJoystick,
+                eventghost_build_ext.VistaVolEvents,
+                eventghost_build_ext.WinUsbWrapper
+            ]
+        )
+
+
+from CheckSourceCode import CheckSourceCode  # NOQA
+from BuildStaticImports import BuildStaticImports  # NOQA
+from BuildImports import BuildImports  # NOQA
+from BuildInterpreters import BuildInterpreters  # NOQA
+from BuildLibrary import BuildLibrary  # NOQA
+from BuildDocs import BuildChmDocs, BuildHtmlDocs  # NOQA
+from ReleaseToGitHub import ReleaseToGitHub  # NOQA
+from BuildWebsite import BuildWebsite  # NOQA
+from BuildChangelog import BuildChangelog  # NOQA
 
 TASKS = [
     BuildVersionFile,
     CheckSourceCode,
     BuildStaticImports,
     BuildImports,
+    BuildExtensions,
     BuildInterpreters,
     BuildLibrary,
     BuildChangelog,
@@ -143,6 +182,7 @@ TASKS = [
     BuildHtmlDocs,
     SynchronizeWebsite,
 ]
+
 
 def Main(buildSetup):
     """

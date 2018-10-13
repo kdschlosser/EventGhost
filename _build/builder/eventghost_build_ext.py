@@ -21,6 +21,10 @@ from distutils.core import Command
 import sys
 from subprocess import Popen, PIPE
 
+import logging
+
+logger = logging.getLogger()
+
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 EXTENSIONS_PATH = os.path.join(BASE_PATH, '..', 'extensions')
 
@@ -56,13 +60,16 @@ class Extension(object):
 class BuildEXT(Command):
 
     def initialize_options(self):
-        pass
+        print 'initilize options'
+        self.build_base = None
+        self.threaded_build = False
 
     def finalize_options(self):
-        pass
+        print 'finalize_options'
+        self.ensure_dirname('build_base')
 
     def run(self):
-        build_base = self.distribution.get_command_obj("build").build_base
+        build_base = self.build_base
         tmp_folder = os.path.split(build_base)[0]
 
         extensions_build_path = os.path.join(tmp_folder,  'extensions')
@@ -75,33 +82,33 @@ class BuildEXT(Command):
         import msvc
         environment = msvc.Environment()
 
-        print environment
+        import threading
+        folder_lock = threading.Lock()
 
-        for variable, setting in environment:
-            os.environ[variable] = setting
+        should_exit = False
 
-        for ext in extensions:
-            name = ext.name
-            solution_path = ext.solution_path
-            destination_path = os.path.join(tmp_folder, ext.destination_path)
+        def do(build_ext, evt):
+            global should_exit
 
-            if not os.path.exists(destination_path):
-                os.makedirs(destination_path)
-
-            if (
-                'pyd_imports' in destination_path and
-                destination_path not in sys.path
-            ):
-                sys.path.insert(0, destination_path)
+            name = build_ext.name
+            solution_path = build_ext.solution_path
+            destination_path = os.path.join(
+                tmp_folder,
+                build_ext.destination_path
+            )
 
             build_path = os.path.join(extensions_build_path, name)
 
-            print (
-                '\n\n-- updating solution {0} {1}\n\n'.format(
-                    name,
-                    '-' * (59 - len(name))
-                )
-            )
+            with folder_lock:
+                if not os.path.exists(destination_path):
+                    os.makedirs(destination_path)
+
+                if (
+                    'pyd_imports' in destination_path and
+                    destination_path not in sys.path
+                ):
+                    sys.path.insert(0, destination_path)
+            logger.log(22, '--- updating solution {0}'.format(name))
 
             solution, output_paths = environment.update_solution(
                 os.path.abspath(solution_path),
@@ -109,13 +116,7 @@ class BuildEXT(Command):
             )
 
             build_command = environment.get_build_command(solution)
-
-            print(
-                '\n\n-- building {0} {1}\n\n'.format(
-                    name,
-                    '-' * (68 - len(name))
-                )
-            )
+            logger.log(22, '--- building {0}'.format(name))
 
             proc = Popen(build_command, stdout=PIPE, stderr=PIPE)
 
@@ -124,41 +125,67 @@ class BuildEXT(Command):
             else:
                 empty_return = ''
 
+            log_data = []
+
             while proc.poll() is None:
                 for line in iter(proc.stdout.readline, empty_return):
                     if line:
-                        print line.rstrip()
+                        log_data += [line.rstrip()]
 
             for project_name, output_file in output_paths.items():
                 if output_file is None:
-                    print 'BUILD FAILURE'
-                    print (
-                        'Solution: {0}, '
-                        'Project: {1}, '
-                        'No File path returned.'.format(name, project_name)
-                    )
+                    out_data = [
+                        'BUILD FAILURE',
+                        'Solution: {0}'.format(name),
+                        'Project: {0}'.format(project_name),
+                        'No File path returned.'
+                    ]
 
-                    sys.exit(1)
+                    logger.log(22, '\n'.join(out_data))
+
+                    should_exit = True
+                    break
 
                 if not os.path.exists(output_file):
                     test_output_file = os.path.join(build_path, output_file)
                     if not os.path.exists(test_output_file):
-                        print 'BUILD FAILURE'
-                        print (
-                            'Solution: {0}, '
-                            'Project: {1}, '
-                            'Output File: {2} '
-                            'Compilation Failed.'.format(
-                                name,
-                                project_name,
-                                output_file
-                            )
-                        )
-                        sys.exit(1)
+                        out_data = [
+                            'BUILD FAILURE',
+                            'Solution: {0}'.format(name),
+                            'Project: {0}'.format(project_name),
+                            'Output File: {0}'.format(output_file),
+                            'Compilation Failed.'
+                        ]
+
+                        logger.log(22, '\n'.join(out_data))
+                        should_exit = True
+                        break
                     else:
                         output_file = test_output_file
 
                 self.copy_file(output_file, destination_path)
+
+            with folder_lock:
+                print '\n'.join(log_data)
+
+            evt.set()
+
+        events = []
+        for ext in extensions:
+            event = threading.Event()
+            events += [event]
+
+            if self.threaded_build:
+                t = threading.Thread(target=do, args=(ext, event))
+                t.daemon = True
+                t.start()
+            else:
+                do(ext, event)
+
+        for event in events:
+            event.wait()
+            if should_exit:
+                sys.exit(1)
 
         del sys.modules['cFunctions']
 

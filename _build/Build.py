@@ -20,11 +20,21 @@
 This script creates the EventGhost setup installer.
 """
 
+import builder # NOQA
+from builder import msvc
+from builder.Utils import CaseInsensitiveList, ListDir # NOQA
+
+import os
 from os.path import dirname, exists, join # NOQA
 
-# Local imports
-import builder # NOQA
-from builder.Utils import CaseInsensitiveList, ListDir # NOQA
+
+environment = msvc.Environment(strict_compiler_version=True)
+print environment
+
+for variable, setting in environment:
+    os.environ[variable] = setting
+
+# environment.lock()
 
 SKIP_IF_UNCHANGED = CaseInsensitiveList(
     r"plugins\Task\TaskHook.dll",

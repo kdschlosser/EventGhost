@@ -24,8 +24,8 @@ import sphinx
 from os.path import join
 
 # Local imports
-import builder
-from builder.Utils import EncodePath, GetHtmlHelpCompilerPath, StartProcess
+import Builder
+from Utils import EncodePath, GetHtmlHelpCompilerPath, StartProcess
 
 import eg
 from eg.Utils import GetFirstParagraph
@@ -56,7 +56,7 @@ MAIN_CLASSES = [
 ]
 
 
-class BuildChmDocs(builder.Task):
+class BuildChmDocs(Builder.Task):
     description = "Build CHM docs"
 
     def Setup(self):
@@ -83,7 +83,7 @@ class BuildChmDocs(builder.Task):
         shutil.copy(join(tmpDir, "EventGhost.chm"), self.buildSetup.sourceDir)
 
 
-class BuildHtmlDocs(builder.Task):
+class BuildHtmlDocs(Builder.Task):
     description = "Build HTML docs"
 
     def Setup(self):

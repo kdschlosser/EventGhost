@@ -27,8 +27,8 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     # I am using the VS 2017 appveyor image and this is not installed
     # with that image. It is needed to compile the crypto library
-    $VCInstaller = $InstallersFolder + "VCForPython27.msi"
-    $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+    # $VCInstaller = $InstallersFolder + "VCForPython27.msi"
+    # $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
 
     $StacklessInstaller = $InstallersFolder + $Env:STACKLESSINSTALLER
     $StacklessURL = "http://www.stackless.com/binaries/$Env:STACKLESSINSTALLER"
@@ -48,7 +48,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
 
     Write-Host "==================== Downloading Files ==================="
-    Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
+    # Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
     Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
     Start-FileDownload $WXURL -Timeout 60000 -FileName $WXInstaller
     Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller
@@ -59,8 +59,8 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Write-Host "  ---- Installing Stackless 2.7.12150"
     Invoke-App "$StacklessInstaller" "TARGETDIR=$Env:PYTHON"
 
-    Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
-    Invoke-App "$VCInstaller"
+    # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
+    # Invoke-App "$VCInstaller"
 
     Write-Host "  ---- Upgrading pip 9.0.1"
     Invoke-App $Python "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"

@@ -29,10 +29,10 @@ from shutil import copy2
 from string import digits
 
 # Local imports
-from builder import VirtualEnv
-from builder.DllVersionInfo import GetFileVersion
-from builder.InnoSetup import GetInnoCompilerPath
-from builder.Utils import (
+import VirtualEnv
+from DllVersionInfo import GetFileVersion
+from InnoSetup import GetInnoCompilerPath
+from Utils import (
     GetEnvironmentVar, GetHtmlHelpCompilerPath, IsAdmin, StartProcess,
     WrapText,
 )
@@ -69,38 +69,52 @@ class DependencyBase(object):
 
 class DllDependency(DependencyBase):
     def Check(self):
-        with open(join(self.buildSetup.pyVersionDir, "Manifest.xml")) as f:
-            manifest = f.read()
-        match = re.search(
-            'name="(?P<name>.+\.CRT)"\n'
-            '\s*version="(?P<ver>.+)"\n'
-            '\s*processorArchitecture="(?P<arch>.+)"',
-            manifest
-        )
-        self.exact = True
-        self.version = match.group("ver")
-        wantedVersion = tuple(int(x) for x in self.version.split("."))
+        import msvc
 
-        files = glob.glob(
-            join(
-                os.environ["SystemRoot"],
-                "WinSxS",
-                "{2}_{0}_*_{1}_*_*".format(
-                    *match.groups()
-                ),
-                "*.dll",
-            )
-        )
+        environment = msvc.Environment()
 
-        if len(files):
-            for file in files:
-                if GetFileVersion(file) != wantedVersion:
-                    raise WrongVersion
-                else:
-                    dest = join(self.buildSetup.sourceDir, basename(file))
-                    copy2(file, dest)
-        else:
+        try:
+            _ = environment.msvc_dll_version
+        except:
             raise MissingDependency
+
+        try:
+            _ = environment.msvc_dll_path
+        except:
+            raise WrongVersion
+
+        # with open(join(self.buildSetup.pyVersionDir, "Manifest.xml")) as f:
+        #     manifest = f.read()
+        # match = re.search(
+        #     'name="(?P<name>.+\.CRT)"\n'
+        #     '\s*version="(?P<ver>.+)"\n'
+        #     '\s*processorArchitecture="(?P<arch>.+)"',
+        #     manifest
+        # )
+        # self.exact = True
+        # self.version = match.group("ver")
+        # wantedVersion = tuple(int(x) for x in self.version.split("."))
+        #
+        # files = glob.glob(
+        #     join(
+        #         os.environ["SystemRoot"],
+        #         "WinSxS",
+        #         "{2}_{0}_*_{1}_*_*".format(
+        #             *match.groups()
+        #         ),
+        #         "*.dll",
+        #     )
+        # )
+        #
+        # if len(files):
+        #     for file in files:
+        #         if GetFileVersion(file) != wantedVersion:
+        #             raise WrongVersion
+        #         else:
+        #             dest = join(self.buildSetup.sourceDir, basename(file))
+        #             copy2(file, dest)
+        # else:
+        #     raise MissingDependency
 
 
 class GitDependency(DependencyBase):
