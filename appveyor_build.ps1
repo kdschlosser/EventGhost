@@ -28,8 +28,7 @@ If (
 
 Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
     
-$Env:SetupExe = gci -recurse -filter "_build\output\*Setup_$Env:BUILDARCH" -name
-$Env:SetupExe
+$Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_$Env:BUILDARCH.exe" -name
 
 # EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
 if (($Env:SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
