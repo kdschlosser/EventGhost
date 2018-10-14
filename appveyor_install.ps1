@@ -75,15 +75,18 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Write-Host "  ---- Installing py2exe 0.6.9";
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller" "$ModuleOutputFolder\py2exe 0.6.9.err.log" "$ModuleOutputFolder\py2exe 0.6.9.out.log"
 
-    Start-Job -ScriptBlock {Write-Host "  ---- Installing wxPython 3.0.2.0";Invoke-App $args[0] "/dir=" + $args[1]} -Name "wxPython" -ArgumentList $WXInstaller, $SitePackages
-    Start-Job -ScriptBlock {Invoke-App $args[0] "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $args[1]} -Name "pycryptodome" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "wheel 0.29.0" "wheel==0.29.0" -LogDir $args[1]} -Name "wheel" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "commonmark 0.7.3" "commonmark==0.7.3" -LogDir $args[1]} -Name "commonmark" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $args[1];Invoke-App $args[0] "sphinx 1.5.6" "sphinx==1.5.6" -LogDir $args[1]} -Name "sphinx" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "pillow 3.4.2" "pillow==3.4.2" -LogDir $args[1]} -Name "pillow" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip" -LogDir $args[1]} -Name "comtypes" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "paramiko 2.2.1" "paramiko==2.2.1" -LogDir $args[1]} -Name "paramiko" -ArgumentList $Pip, $ModuleOutputFolder
-    Start-Job -ScriptBlock {Invoke-App $args[0] "pywin32 223" "pywin32==223" -LogDir $args[1]} -Name "pywin32" -ArgumentList $Pip, $ModuleOutputFolder
+    Write-Host "  ---- Installing wxPython 3.0.2.0"
+    Invoke-App $WXInstaller "/dir=$SitePackages"
+
+    Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "commonmark 0.7.3" "commonmark==0.7.3" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "sphinx 1.5.6" "sphinx==1.5.6" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pillow 3.4.2" "pillow==3.4.2" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "paramiko 2.2.1" "paramiko==2.2.1" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pywin32 223" "pywin32==223" -LogDir $ModuleOutputFolder
     # *See Changes* PipInstall "pycrypto 2.6.1" "pycrypto==2.6.1"
     # *See Changes* PipInstall "ctypeslib 0.5.6" "svn+http://svn.python.org/projects/ctypes/trunk/ctypeslib/#ctypeslib=0.5.6"
     Get-Job | Wait-Job
