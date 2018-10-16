@@ -28,25 +28,6 @@ import os
 import sys
 from os.path import dirname, exists, join # NOQA
 
-from setuptools import setup
-
-setup(
-    name='Module Install',
-    setup_requires=[
-        'setuptools==40.2.0',
-        'CommonMark==0.7.5',
-        'future==0.16.0',
-        'pycrypto==2.6.1',
-        'jinja2==2.8.1',
-        'sphinx==1.5.6',
-        'pillow==3.4.2',
-        'comtypes==1.1.7',
-        'paramiko==2.2.1',
-        'pywin32==223'
-    ]
-)
-
-
 environment = msvc.Environment()# strict_compiler_version=True)
 print environment
 
