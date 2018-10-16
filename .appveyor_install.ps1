@@ -54,9 +54,6 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "py2exe" -ArgumentList $Py2ExeURL, $Py2ExeInstaller
 
     Wait-Job -Name "Stackless"
-    Wait-Job -Name "wxPython"
-    Wait-Job -Name "py2exe"
-
     Write-Host " "
     Write-Host "=============== Installing Requirements =============="
 
@@ -73,10 +70,13 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing py2exe 0.6.9";
+    Wait-Job -Name "py2exe"
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller" "$ModuleOutputFolder\py2exe 0.6.9.err.log" "$ModuleOutputFolder\py2exe 0.6.9.out.log"
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
+    Wait-Job -Name "wxPython"
     Invoke-App $WXInstaller "/dir=$SitePackages"
+
 
     Invoke-App $Pip "pycrypto 2.6.1" "pycrypto==2.6.1" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
