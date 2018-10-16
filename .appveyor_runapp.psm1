@@ -57,7 +57,7 @@
     $process.StartInfo = $process_info
     $process.Start() | Out-Null
 
-    
+
     if ($ErrLog) {
         Out-File "$ErrLog" -Encoding utf8 -InputObject ""
     }
@@ -96,13 +96,13 @@
 
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
-        Print-Logs $process $OutLog $ErrLog
+        Print-Logs $process $OutLog $ErrLog $PrintOutput
     }
 
     Print-Logs $process $OutLog $ErrLog $PrintOutput
 
     $Env:EXITCODE = $process.ExitCode
-     
+
 
     if ($process.ExitCode -eq 0) {
         Write-Host "       Done."
@@ -119,7 +119,7 @@
             Write-Host " "
             Write-Host "******************* OUTPUT LOG ***********************"
             Write-Host " "
-            Get-Content -Path $OutLog -Encoding UTF8 
+            Get-Content -Path $OutLog -Encoding UTF8
         }
         $host.SetShouldExit(1)
         exit
