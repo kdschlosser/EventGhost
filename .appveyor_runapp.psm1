@@ -34,36 +34,44 @@
         $Args = ""
     }
 
+    $Redirect = $true
+
     if ($ErrLog) {
         $ProcessArgs = $Args
-    }
 
-    elseif ($Executable -Like '*.msi') {
-        $ProcessArgs = "/I $Executable /quiet /passive /qn /norestart $Args"
-        $Executable = "MsiExec.exe"
+    }
+    elseif (!Not ($Args -Like "*--build*')) {
+        if ($Executable -Like "*.msi") {
+            $ProcessArgs = "/I $Executable /quiet /passive /qn /norestart $Args"
+            $Executable = "MsiExec.exe"
+        } else {
+            $ProcessArgs = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"
+        }
     }
     else {
-        $ProcessArgs = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"
+        $ProcessArgs = $Args
+        $Redirect = $false
     }
 
 
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
     $process_info.FileName = $Executable
-    $process_info.RedirectStandardError = $true
-    $process_info.RedirectStandardOutput = $true
+    $process_info.RedirectStandardError = $Redirect
+    $process_info.RedirectStandardOutput = $Redirect
     $process_info.UseShellExecute = $false
     $process_info.Arguments = $ProcessArgs
     $process = New-Object System.Diagnostics.Process
     $process.StartInfo = $process_info
     $process.Start() | Out-Null
 
+    if ($Redirect) {
+        if ($ErrLog) {
+            Out-File "$ErrLog" -Encoding utf8 -InputObject ""
+        }
 
-    if ($ErrLog) {
-        Out-File "$ErrLog" -Encoding utf8 -InputObject ""
-    }
-
-    if ($OutLog) {
-        Out-File "$OutLog" -Encoding utf8 -InputObject ""
+        if ($OutLog) {
+            Out-File "$OutLog" -Encoding utf8 -InputObject ""
+        }
     }
 
     Function Print-Logs ($p, $ot_log, $er_log, $prnt) {
@@ -96,10 +104,13 @@
 
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
+        if ($Redirect) {
+            Print-Logs $process $OutLog $ErrLog $PrintOutput
+        }
+    }
+    if ($Redirect) {
         Print-Logs $process $OutLog $ErrLog $PrintOutput
     }
-
-    Print-Logs $process $OutLog $ErrLog $PrintOutput
 
     $Env:EXITCODE = $process.ExitCode
 

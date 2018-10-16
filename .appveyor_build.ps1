@@ -26,7 +26,7 @@ If (
     $url = ""
 }
 
-Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package$release$url" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_error.log" "$Env:APPVEYOR_BUILD_FOLDER\_build\output\build_output.log" -PrintOutput
+Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package$release$url" -PrintOutput
 
 $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_$Env:BUILDARCH.exe" -name
 

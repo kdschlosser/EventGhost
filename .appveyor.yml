@@ -178,10 +178,6 @@ artifacts:
     name: $(SetupExe)
   - path: _build\output\Build_$(BUILDARCH).log
     name: Build_$(BUILDARCH).log
-  - path: _build\output\build_error.log
-    name: Build_STDError.log
-  - path: _build\output\build_output.log
-    name: Build_STDOut.log
   - path: _build\output\ModuleOutput$(BUILDARCH).zip
     name: ModuleOutput$(BUILDARCH).zip
 
