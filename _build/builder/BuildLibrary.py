@@ -77,31 +77,57 @@ class BuildLibrary(Builder.Task):
                 buildSetup.appVersion.split("-")[1].split(".")
             )
 
+        import includes
+
+        for item in includes.build.STD_LIB_MODULES + includes.build.INCLUDES:
+            print '******', item
+
+        import eventghost_build
+        import eventghost_build_ext
+
         setup(
             script_args=["py2exe"],
             windows=[Target(buildSetup)],
             verbose=0,
             zipfile=EncodePath(join(buildSetup.libraryName, self.zipName)),
-            options = dict(
-                build=dict(build_base=join(buildSetup.tmpDir, "build")),
+            options=dict(
+                build=dict(
+                    build_base=join(buildSetup.tmpDir, "build")
+                ),
+                build_ext=dict(
+                    build_base=buildSetup.tmpDir,
+                    threaded_build=True,
+                    dist_dir=buildSetup.sourceDir,
+                ),
                 py2exe=dict(
                     compressed=0,
-                    includes=[
-                        "encodings",
-                        "encodings.*",
-                        "Imports",
-                        'cFunctions',
-                        '_dxJoystick',
-                        'VistaVolEvents'
-                    ],
-                    excludes=buildSetup.excludeModules,
-                    dll_excludes = DLL_EXCLUDES,
-                    dist_dir = EncodePath(buildSetup.sourceDir),
+                    includes=(
+                        ['cFunctions', '_dxJoystick', 'VistaVolEvents'] +
+                        includes.build.STD_LIB_MODULES +
+                        includes.build.INCLUDES
+                    ),
+                    excludes=includes.EXCLUDES,
+                    dll_excludes=DLL_EXCLUDES,
+                    dist_dir=EncodePath(buildSetup.sourceDir),
                     custom_boot_script=join(
                         buildSetup.dataDir, "Py2ExeBootScript.py"
                     ),
                 )
-            )
+            ),
+            cmdclass=dict(
+                py2exe=eventghost_build.Build,
+                build_ext=eventghost_build_ext.BuildEXT,
+            ),
+            ext_modules=[
+                eventghost_build_ext.RawInputHook,
+                eventghost_build_ext.MceIr,
+                eventghost_build_ext.TaskHook,
+                eventghost_build_ext.cFunctions,
+                eventghost_build_ext.dxJoystick,
+                eventghost_build_ext.VistaVolEvents,
+                eventghost_build_ext.WinUsbWrapper
+            ]
+
         )
 
         if wip_version:
@@ -138,7 +164,10 @@ class Target:
 
         manifest = file(
             join(buildSetup.pyVersionDir, "Manifest.xml")
-        ).read() % buildSetup.__dict__
+        ).read()
+
+        manifest = manifest.format(app_name=buildSetup.name)
+
         self.other_resources = [(RT_MANIFEST, 1, manifest)]
         self.name = buildSetup.name
         self.description = buildSetup.description

@@ -278,9 +278,9 @@ DEPENDENCIES = [
         version = "0.6.9",
     ),
     ModuleDependency(
-        name = "pycryptodome",
+        name = "pyCrypto",
         module = "Crypto",
-        version = "3.6.6",
+        version = "2.6.1",
         url = "",
     ),
     PyWin32Dependency(),

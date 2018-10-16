@@ -29,13 +29,13 @@ BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 EXTENSIONS_PATH = os.path.join(BASE_PATH, '..', 'extensions')
 
 RAW_INPUT_HOOK_SRC = os.path.join(EXTENSIONS_PATH, 'RawInputHook.dll')
-RAW_INPUT_HOOK_DST = 'build\plugins\RawInput'
+RAW_INPUT_HOOK_DST = 'plugins\RawInput'
 
 MCE_IR_SRC = os.path.join(EXTENSIONS_PATH, 'MceIr.dll')
-MCE_IR_DST = 'build\plugins\MceRemote'
+MCE_IR_DST = 'plugins\MceRemote'
 
 TASK_HOOK_SRC = os.path.join(EXTENSIONS_PATH, 'TaskHook.dll')
-TASK_HOOK_DST = 'build\plugins\Task'
+TASK_HOOK_DST = 'plugins\Task'
 
 C_FUNCTIONS_SRC = os.path.join(EXTENSIONS_PATH, 'cFunctions')
 C_FUNCTIONS_DST = 'pyd_imports'
@@ -47,7 +47,7 @@ VISTA_VOL_EVENTS_SRC = os.path.join(EXTENSIONS_PATH, 'VistaVolEvents')
 VISTA_VOL_EVENTS_DST = 'pyd_imports'
 
 WIN_USB_SRC = os.path.join(EXTENSIONS_PATH, 'WinUsbWrapper')
-WIN_USB_DST = 'build\lib27\site-packages'
+WIN_USB_DST = 'lib27\site-packages'
 
 
 class Extension(object):
@@ -58,19 +58,26 @@ class Extension(object):
 
 
 class BuildEXT(Command):
+    user_options = [
+        ("build-base=", None, "temp directory build location"),
+        ("dist-dir=", 'distribution location'),
+        ("threaded-build", None, "build extensions at the same time"),
+
+    ]
+
+    boolean_options = ["threaded-build"]
 
     def initialize_options(self):
-        print 'initilize options'
         self.build_base = None
+        self.dist_dir = None
         self.threaded_build = False
 
     def finalize_options(self):
-        print 'finalize_options'
-        self.ensure_dirname('build_base')
+        pass
 
     def run(self):
-        build_base = self.build_base
-        tmp_folder = os.path.split(build_base)[0]
+        dist_dir = self.dist_dir
+        tmp_folder = self.build_base
 
         extensions_build_path = os.path.join(tmp_folder,  'extensions')
 
@@ -92,22 +99,25 @@ class BuildEXT(Command):
 
             name = build_ext.name
             solution_path = build_ext.solution_path
-            destination_path = os.path.join(
-                tmp_folder,
-                build_ext.destination_path
-            )
+
+            if 'pyd_imports' in build_ext.destination_path:
+                destination_path = os.path.join(
+                    tmp_folder,
+                    build_ext.destination_path
+                )
+                with folder_lock:
+                    if not os.path.exists(destination_path):
+                        os.makedirs(destination_path)
+                    if destination_path not in sys.path:
+                        sys.path.insert(0, destination_path)
+            else:
+                destination_path = os.path.join(
+                    dist_dir,
+                    build_ext.destination_path
+                )
 
             build_path = os.path.join(extensions_build_path, name)
 
-            with folder_lock:
-                if not os.path.exists(destination_path):
-                    os.makedirs(destination_path)
-
-                if (
-                    'pyd_imports' in destination_path and
-                    destination_path not in sys.path
-                ):
-                    sys.path.insert(0, destination_path)
             logger.log(22, '--- updating solution {0}'.format(name))
 
             solution, output_paths = environment.update_solution(
@@ -166,6 +176,17 @@ class BuildEXT(Command):
                     else:
                         output_file = test_output_file
 
+                output_file_path = os.path.join(
+                    destination_path,
+                    name
+                )
+
+                if os.path.exists(output_file_path):
+                    os.remove(output_file_path)
+
+                print 'copying.. ' + output_file + ' --> ' + destination_path
+
+                build_ext.destination_path = destination_path
                 self.copy_file(output_file, destination_path)
 
             with folder_lock:

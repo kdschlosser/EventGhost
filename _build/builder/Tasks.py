@@ -118,44 +118,6 @@ class SynchronizeWebsite(Task):
         syncer.Close()
 
 
-class BuildExtensions(Task):
-    description = "Build extensions."
-
-    def Setup(self):
-        self.activated = True
-
-    def DoTask(self):
-        from distutils.core import setup
-        import eventghost_build_ext
-        import eventghost_build
-
-        os.makedirs(join(self.buildSetup.tmpDir, "build"))
-        setup(
-            name='EventGhost-Extensions',
-            script_args=["build"],
-            verbose=0,
-            options=dict(
-                build_ext=dict(
-                    build_base=join(self.buildSetup.tmpDir, "build"),
-                    threaded_build=True
-                ),
-            ),
-            cmdclass=dict(
-                build=eventghost_build.Build,
-                build_ext=eventghost_build_ext.BuildEXT,
-            ),
-            ext_modules=[
-                eventghost_build_ext.RawInputHook,
-                eventghost_build_ext.MceIr,
-                eventghost_build_ext.TaskHook,
-                eventghost_build_ext.cFunctions,
-                eventghost_build_ext.dxJoystick,
-                eventghost_build_ext.VistaVolEvents,
-                eventghost_build_ext.WinUsbWrapper
-            ]
-        )
-
-
 from CheckSourceCode import CheckSourceCode  # NOQA
 from BuildStaticImports import BuildStaticImports  # NOQA
 from BuildImports import BuildImports  # NOQA
@@ -167,7 +129,6 @@ from BuildWebsite import BuildWebsite  # NOQA
 from BuildChangelog import BuildChangelog  # NOQA
 
 TASKS = [
-    BuildExtensions,
     BuildVersionFile,
     CheckSourceCode,
     BuildStaticImports,
@@ -190,8 +151,5 @@ def Main(buildSetup):
     Main task of the script.
     """
     for task in buildSetup.tasks:
-        if task.activated:
-            logger.log(22, "--- {0}".format(task.description))
-            task.DoTask()
-            logger.log(22, "")
+        task.DoTask()
     logger.log(22, "--- All done!")

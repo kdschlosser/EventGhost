@@ -25,20 +25,21 @@ from builder import msvc
 from builder.Utils import CaseInsensitiveList, ListDir # NOQA
 
 import os
+import sys
 from os.path import dirname, exists, join # NOQA
 
 
-environment = msvc.Environment(strict_compiler_version=True)
+environment = msvc.Environment()# strict_compiler_version=True)
 print environment
 
 for variable, setting in environment:
     os.environ[variable] = setting
 
 # environment.lock()
-
-SKIP_IF_UNCHANGED = CaseInsensitiveList(
-    r"plugins\Task\TaskHook.dll",
-)
+#
+# SKIP_IF_UNCHANGED = CaseInsensitiveList(
+#     r"plugins\Task\TaskHook.dll",
+# )
 
 
 class MyBuilder(builder.Builder):
@@ -125,7 +126,6 @@ class MyBuilder(builder.Builder):
             inno.AddFile(
                 join(self.sourceDir, filename),
                 dirname(filename),
-                ignoreversion=(filename not in SKIP_IF_UNCHANGED),
                 prefix=prefix
             )
 
@@ -133,11 +133,15 @@ class MyBuilder(builder.Builder):
 
         def extension_inno(ext):
             src = join(
-                self.tmpDir,
                 ext.destination_path,
                 ext.name
             )
-            inno.AddFile(src, ext.destination_path)
+
+            src_dir = os.path.abspath(
+                os.path.join(os.path.dirname(sys.argv[1]), '..')
+            )
+            dst = ext.destination_path.replace(src_dir, '')
+            inno.AddFile(src, dst)
 
         extension_inno(eventghost_build_ext.RawInputHook)
         extension_inno(eventghost_build_ext.WinUsbWrapper)

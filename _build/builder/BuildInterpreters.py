@@ -56,8 +56,10 @@ class BuildInterpreters(Builder.Task):
         manifest = file(
             join(buildSetup.pyVersionDir, "Manifest.xml")
         ).read()
+
+        manifest = manifest.format(app_name=buildSetup.name)
         setup(
-            script_args = ["py2exe"],
+            script_args=["py2exe"],
             options=dict(
                 build=dict(build_base=join(tmpDir, "build")),
                 py2exe=dict(compressed=0, dist_dir=join(tmpDir, "dist"))
@@ -69,14 +71,14 @@ class BuildInterpreters(Builder.Task):
                 dict(
                     script=join(buildSetup.dataDir, "py.py"),
                     dest_base=PYW_BASE_NAME,
-                    # other_resources = [(24, 1, manifest)],
+                    other_resources=[(24, 1, manifest)],
                 )
             ],
             console=[
                 dict(
                     script=join(buildSetup.dataDir, "py.py"),
                     dest_base=PY_BASE_NAME,
-                    # other_resources = [(24, 1, manifest)],
+                    other_resources=[(24, 1, manifest)],
                 )
             ],
             verbose=0,

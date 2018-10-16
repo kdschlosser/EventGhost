@@ -36,7 +36,7 @@ from Utils import (
 logger = logging.getLogger()
 
 
-class Task(threading.Thread):
+class Task(object):
     value = None
     visible = True
     description = ''
@@ -45,48 +45,17 @@ class Task(threading.Thread):
         self.enabled = True
         self.activated = True
         self.buildSetup = buildSetup
-        self.build_event = threading.Event()
         self.should_exit = False
-        threading.Thread.__init__(self)
-        self.daemon = True
-
-    @property
-    def is_running(self):
-        return not self.build_event.isSet()
+        self.DoTask, self._DoTask = self._DoTask, self.DoTask
 
     def Setup(self):
         pass
 
-    def start(self):
-        threading.Thread.start(self)
-        return self
-
-    def run(self):
+    def _DoTask(self):
         if self.activated:
-            self.buildSetup.Print("--- {0}".format(self.description))
-        logger.info("--- {0}".format(self.description))
-
-        try:
-            self.DoTask()
-            self.buildSetup.Print("--- {0} Finished".format(self.description))
-            logger.info("--- {0} Finished".format(self.description))
-            self.dump_log()
-        except:
-            sys.stdout.dump()
-            sys.stderr.dump()
-            import traceback
-
-            sys.stderr.write_to_screen(traceback.format_exc())
-            self.should_exit = True
-
-        self.build_event.set()
-
-    def wait(self, timeout=None):
-        self.build_event.wait(timeout)
-
-    def dump_log(self):
-        sys.stdout.dump(self)
-        sys.stderr.dump(self)
+            logger.log(22, "--- {0}".format(self.description))
+            self._DoTask()
+            logger.log(22, "--- {0} Finished".format(self.description))
 
     def DoTask(self):
         raise NotImplementedError
