@@ -160,12 +160,12 @@ install:
   # Microsoft Visual C++ Redistributable 2008 (version min: 9.0.21022.8)
   # - cinst vcredist2008
 
-  - ps: . .\appveyor_install.ps1
+  - ps: . .\.appveyor_install.ps1
 
 
 
 build_script:
-  - ps: . .\appveyor_build.ps1
+  - ps: . .\.appveyor_build.ps1
 
 #after_test:
 #  - cmd:  echo "=============== EventGhost build finished ==============="

@@ -77,13 +77,13 @@ class BuildLibrary(Builder.Task):
                 buildSetup.appVersion.split("-")[1].split(".")
             )
 
-        import includes
+        import Includes
 
-        for item in includes.build.STD_LIB_MODULES + includes.build.INCLUDES:
-            print '******', item
+        for item in Includes.build.STD_LIB_MODULES + Includes.build.INCLUDES:
+            print 'module found - ', item
 
-        import eventghost_build
-        import eventghost_build_ext
+        import EventGhostBuild
+        import EventGhostBuildExtension
 
         setup(
             script_args=["py2exe"],
@@ -103,10 +103,10 @@ class BuildLibrary(Builder.Task):
                     compressed=0,
                     includes=(
                         ['cFunctions', '_dxJoystick', 'VistaVolEvents'] +
-                        includes.build.STD_LIB_MODULES +
-                        includes.build.INCLUDES
+                        Includes.build.STD_LIB_MODULES +
+                        Includes.build.INCLUDES
                     ),
-                    excludes=includes.EXCLUDES,
+                    excludes=Includes.EXCLUDES,
                     dll_excludes=DLL_EXCLUDES,
                     dist_dir=EncodePath(buildSetup.sourceDir),
                     custom_boot_script=join(
@@ -115,17 +115,17 @@ class BuildLibrary(Builder.Task):
                 )
             ),
             cmdclass=dict(
-                py2exe=eventghost_build.Build,
-                build_ext=eventghost_build_ext.BuildEXT,
+                py2exe=EventGhostBuild.Build,
+                build_ext=EventGhostBuildExtension.BuildEXT,
             ),
             ext_modules=[
-                eventghost_build_ext.RawInputHook,
-                eventghost_build_ext.MceIr,
-                eventghost_build_ext.TaskHook,
-                eventghost_build_ext.cFunctions,
-                eventghost_build_ext.dxJoystick,
-                eventghost_build_ext.VistaVolEvents,
-                eventghost_build_ext.WinUsbWrapper
+                EventGhostBuildExtension.RawInputHook,
+                EventGhostBuildExtension.MceIr,
+                EventGhostBuildExtension.TaskHook,
+                EventGhostBuildExtension.cFunctions,
+                EventGhostBuildExtension.dxJoystick,
+                EventGhostBuildExtension.VistaVolEvents,
+                EventGhostBuildExtension.WinUsbWrapper
             ]
 
         )
