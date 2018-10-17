@@ -10,7 +10,7 @@
        [Parameter(Mandatory=$False)]
        [String]$OutLog,
        [Parameter(Mandatory=$False)]
-       [String]$LogDir,
+       [String]$LogDir
     )
 
     $Env:EXITCODE = 0
