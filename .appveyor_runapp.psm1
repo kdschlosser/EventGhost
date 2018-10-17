@@ -41,7 +41,7 @@
         $process_info.Arguments = $Args
         $process_info.FileName = $Executable
     }
-    elseif ($Args -Like "*--build*")) {
+    elseif ($Args -Like "*--build*") {
         $process_info.Arguments = $Args
         $process_info.FileName = $Executable
         $PrintOutput = $true
@@ -65,7 +65,6 @@
 
     if ($PrintOutput) {
         $process.Start()
-
     } else {
         $process.Start() | Out-Null
     }
