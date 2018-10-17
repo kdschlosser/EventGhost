@@ -25,7 +25,6 @@ if (-Not (Test-Path $Env:PYTHON)) {
     # $VCInstaller = $InstallersFolder + "VCForPython27.msi"
     # $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
 
-
     Import-Module -Name ".\.appveyor_runapp.psm1"
 
     $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
@@ -35,20 +34,22 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     if ($Env:BUILDARCH -eq "64") {
         $StacklessInstaller = "python-2.7.12150.amd64-stackless.msi"
+        $Py2ExeInstaller = "py2exe-0.6.9.win64-py2.7.amd64.exe"
     } else {
         $StacklessInstaller = "python-2.7.12150-stackless.msi"
+        $Py2ExeInstaller = "py2exe-0.6.9.win32-py2.7.exe"
     }
 
     $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
     $StacklessInstaller =  $InstallersFolder + $StacklessInstaller
 
+    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller"
+    $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
+
     $WxInstaller = "wxPython3.0-win$Env:BUILDARCH-3.0.2.0-py27.exe"
     $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
     $WXInstaller = $InstallersFolder + $WxInstaller
 
-    $Py2ExeInstaller = "py2exe-0.6.9.win$Env:BUILDARCH-py2.7.exe"
-    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller"
-    $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
 
     $SitePackages = "$Env:PYTHON\Lib\site-packages"
     $Python = "$Env:PYTHON\python.exe"
@@ -74,6 +75,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     Write-Host "  ---- Upgrading pip 9.0.1"
     Invoke-App $Python "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
+
 
     Write-Host "  ---- Upgrading setuptools 40.2.0"
     Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"

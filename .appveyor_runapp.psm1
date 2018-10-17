@@ -1,4 +1,6 @@
-﻿Function Invoke-App {
+﻿Import-Module -Name ".\.appveyor_cancelbuild.psm1"
+
+Function Invoke-App {
     [CmdletBinding()]
     Param (
        [Parameter(Mandatory=$True)]
@@ -96,6 +98,7 @@
 
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
+        Check_Build
         if ($OutLog) {
             Print-Logs $process $OutLog $ErrLog
         }

@@ -1,5 +1,6 @@
 ﻿
 Import-Module -Name ".\.appveyor_runapp.psm1"
+Import-Module -Name ".\.appveyor_cancelbuild.psm1"
 
 Write-Host "=============== Start the EventGhost build ==============="
 If (
@@ -26,7 +27,9 @@ If (
     $url = ""
 }
 
+Check_Build
 Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package --verbose$release$url"
+Check_Build
 
 $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_x$Env:BUILDARCH.exe" -name
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
