@@ -26,9 +26,15 @@ If (
     $url = ""
 }
 
-Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package$release$url" -PrintOutput
+Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package --verbose$release$url" -PrintOutput
 
 $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_$Env:BUILDARCH.exe" -name
+Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
+
+if (-Not ($Env:SetupExe) {
+    $host.SetShouldExit(1)
+    exit
+}
 
 # EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
 if (($Env:SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
@@ -43,8 +49,6 @@ if (($Env:SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
 
     Update-AppveyorBuild -Version "$BuildVersion"
 }
-
-Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
 Write-Host " "
 Write-Host "=============== EventGhost build finished ================"
