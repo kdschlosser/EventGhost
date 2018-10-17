@@ -1,4 +1,6 @@
 ﻿
+$Env:PYTHON = "C:\Stackless27_x$Env:BUILDARCH"
+$Env:PYTHONPATH = "$Env:PYTHON;$Env:PYTHON\Scripts;$Env:PYTHON\DLLs;$Env:PYTHON\Lib;$Env:PYTHON\Lib\site-packages;"
 
 $SysWOWDLL = "$Env:SYSTEMROOT\SysWOW64\python27.dll"
 $SystemDLL = "$Env:SYSTEMROOT\System\python27.dll"
@@ -12,12 +14,18 @@ If (Test-Path $SysWOWDLL) {
     Remove-Item $SysWOWDLL
 }
 
-$ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\ModuleOutput$Env:BUILDARCH"
+$ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\ModuleOutput_x$Env:BUILDARCH"
+
 if (-Not(Test-Path $ModuleOutputFolder)) {
     New-Item $ModuleOutputFolder -type directory | Out-Null
 }
 
 if (-Not (Test-Path $Env:PYTHON)) {
+    # if appveyor image is changed to VS2017 you will need to uncomment these lines
+    # $VCInstaller = $InstallersFolder + "VCForPython27.msi"
+    # $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+
+
     Import-Module -Name ".\.appveyor_runapp.psm1"
 
     $InstallersFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\installers\"
@@ -25,23 +33,24 @@ if (-Not (Test-Path $Env:PYTHON)) {
         New-Item $InstallersFolder -type directory | Out-Null
     }
 
-    # I am using the VS 2017 appveyor image and this is not installed
-    # with that image. It is needed to compile the crypto library
-    # $VCInstaller = $InstallersFolder + "VCForPython27.msi"
-    # $VCURL = "https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi"
+    if ($Env:BUILDARCH -eq "64") {
+        $StacklessInstaller = "python-2.7.12150.amd64-stackless.msi"
+    } else {
+        $StacklessInstaller = "python-2.7.12150-stackless.msi"
+    }
 
-    $StacklessInstaller = $InstallersFolder + $Env:STACKLESSINSTALLER
-    $StacklessURL = "http://www.stackless.com/binaries/$Env:STACKLESSINSTALLER"
+    $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
+    $StacklessInstaller =  $InstallersFolder + $StacklessInstaller
 
-    $WXInstaller = $InstallersFolder + $Env:WXINSTALLER
-    $WXURL = "http://downloads.sourceforge.net/wxpython/$Env:WXINSTALLER"
+    $WxInstaller = "wxPython3.0-win$Env:BUILDARCH-3.0.2.0-py27.exe"
+    $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
+    $WXInstaller = $InstallersFolder + $WxInstaller
 
-    $Py2ExeInstaller = $InstallersFolder + $Env:PY2EXEINSTALLER
-    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Env:PY2EXEINSTALLER"
-
+    $Py2ExeInstaller = "py2exe-0.6.9.win$Env:BUILDARCH-py2.7.exe"
+    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller"
+    $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
 
     $SitePackages = "$Env:PYTHON\Lib\site-packages"
-
     $Python = "$Env:PYTHON\python.exe"
     $Pip = "$Env:PYTHON\Scripts\pip.exe"
     $EasyInstall = "$Env:PYTHON\Scripts\easy_install.exe"
@@ -50,7 +59,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Write-Host "==================== Downloading Files ==================="
     # Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
     Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "Stackless" -ArgumentList $StacklessURL, $StacklessInstaller
-    Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "wxPython" -ArgumentList  $WXURL, $WXInstaller
+    Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "wxPython" -ArgumentList  $WxURL, $WXInstaller
     Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "py2exe" -ArgumentList $Py2ExeURL, $Py2ExeInstaller
 
     Write-Host " "

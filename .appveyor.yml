@@ -111,20 +111,8 @@ environment:
   APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
   matrix:
 
-    - BUILDARCH: x64
-      PYTHON: C:\Stackless27x64
-      PYTHONPATH: C:\Stackless27x64;C:\Stackless27x64\Scripts;C:\Stackless27x64\DLLs;C:\Stackless27x64\Lib;C:\Stackless27x64\Lib\site-packages;
-      STACKLESSINSTALLER: python-2.7.12150.amd64-stackless.msi
-      WXINSTALLER: wxPython3.0-win64-3.0.2.0-py27.exe
-      PY2EXEINSTALLER: py2exe-0.6.9.win64-py2.7.amd64.exe
-
-    - BUILDARCH: x86
-      PYTHON: C:\Stackless27
-      PYTHONPATH: C:\Stackless27;C:\Stackless27\Scripts;C:\Stackless27\DLLs;C:\Stackless27\Lib;C:\Stackless27\Lib\site-packages;
-      STACKLESSINSTALLER: python-2.7.12150-stackless.msi
-      WXINSTALLER: wxPython3.0-win32-3.0.2.0-py27.exe
-      PY2EXEINSTALLER: py2exe-0.6.9.win32-py2.7.exe
-
+    - BUILDARCH: 64
+    - BUILDARCH: 86
 
 init:
   # Enable Remotedesktop and pause the build execution
@@ -140,8 +128,7 @@ matrix:
 
 cache:
   # Invalidate cache if .appveyor.yml has changed
-  - C:\Stackless27 -> .appveyor.yml, .appveyor_install.ps1, .appveyor_build.ps1, .appveyor_runapp.psm1
-  - C:\Stackless27x64 -> .appveyor.yml, .appveyor_install.ps1, .appveyor_build.ps1, .appveyor_runapp.psm1
+  - C:\Stackless27_x$(BUILDARCH) -> .appveyor.yml, .appveyor_install.ps1, .appveyor_build.ps1, .appveyor_runapp.psm1
   # Manually clear cache:
   # from agithub.AppVeyor import AppVeyor
   # ci = AppVeyor(<your appveyor API token>)
@@ -176,10 +163,10 @@ artifacts:
     name: CHANGELOG_THIS_RELEASE.bb
   - path: _build\output\$(SetupExe)
     name: $(SetupExe)
-  - path: _build\output\Build_$(BUILDARCH).log
-    name: Build_$(BUILDARCH).log
-  - path: _build\output\ModuleOutput$(BUILDARCH).zip
-    name: ModuleOutput$(BUILDARCH).zip
+  - path: _build\output\Build_x$(BUILDARCH).log
+    name: Build_x$(BUILDARCH).log
+  - path: _build\output\ModuleOutput_x$(BUILDARCH).zip
+    name: ModuleOutput_x$(BUILDARCH).zip
 
 
 notifications:

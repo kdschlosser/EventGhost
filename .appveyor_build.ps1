@@ -18,28 +18,28 @@ If (
         $url = ""
     }
 
-    Write-Host "=================== Building deploy ====================="
+    Write-Host " --- Building deploy"
 
 } else {
-    Write-Host "=================== Building WIP ===================="
+    Write-Host " --- Building WIP"
     $release = ""
     $url = ""
 }
 
-Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package --verbose$release$url" -PrintOutput
+Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package --verbose$release$url"
 
-$Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_$Env:BUILDARCH.exe" -name
+$Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_x$Env:BUILDARCH.exe" -name
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
 if (-Not ($Env:SetupExe)) {
-    Get-ChildItem "_build\output\ModuleOutput$BUILDARCH.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
-    Get-ChildItem "_build\output\Build_$BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+    Get-ChildItem "_build\output\ModuleOutput_x$Env:BUILDARCH.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+    Get-ChildItem "_build\output\Build_x$Env:BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
     $host.SetShouldExit(1)
     exit
 }
 
 # EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
-if (($Env:SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
+if (-Not ($SetupExe -like '*_x64'))) {
     # update the appveyor build version to be the same as the EventGhost version
 
     $Start = $Env:SetupExe.IndexOf("_")
@@ -53,5 +53,5 @@ if (($Env:SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
 }
 
 Write-Host " "
-Write-Host "=============== EventGhost build finished ================"
+Write-Host "     Done."
 Write-Host " "

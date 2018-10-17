@@ -11,9 +11,6 @@
        [String]$OutLog,
        [Parameter(Mandatory=$False)]
        [String]$LogDir,
-       [Parameter(Mandatory=$False)]
-       [Switch]$PrintOutput
-
     )
 
     $Env:EXITCODE = 0
@@ -27,89 +24,85 @@
         $OutLog = "$LogDir\$msg.out.log"
         $Args = "install --no-cache-dir $mod"
 
-        Write-Host "  ---- Installing $msg $Env:BUILDARCH"
+        Write-Host "  ---- Installing $msg x$Env:BUILDARCH"
     }
 
     if (-Not($Args)) {
         $Args = ""
     }
 
-    $Redirect = $true
+    $process_info = New-Object System.Diagnostics.ProcessStartInfo
+    $process_info.UseShellExecute = $false
+    $process = New-Object System.Diagnostics.Process
+
+    $PrintOutput = $false
 
     if ($ErrLog) {
-        $ProcessArgs = $Args
-
+        $process_info.Arguments = $Args
+        $process_info.FileName = $Executable
     }
-    elseif (-Not ($Args -Like "*--build*")) {
-        if ($Executable -Like "*.msi") {
-            $ProcessArgs = "/I $Executable /quiet /passive /qn /norestart $Args"
-            $Executable = "MsiExec.exe"
-        } else {
-            $ProcessArgs = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"
-        }
+    elseif ($Args -Like "*--build*")) {
+        $process_info.Arguments = $Args
+        $process_info.FileName = $Executable
+        $PrintOutput = $true
+    }
+    elseif ($Executable -Like "*.msi") {
+        $process_info.Arguments = "/I $Executable /quiet /passive /qn /norestart $Args"
+        $process_info.FileName = "MsiExec.exe"
     }
     else {
-        $ProcessArgs = $Args
-        $Redirect = $false
+        $process_info.Arguments = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"
+        $process_info.FileName = $Executable
     }
 
+    $process_info.RedirectStandardError = -Not ($PrintOutput)
+    $process_info.RedirectStandardOutput = -Not ($PrintOutput)
+    $process.StartInfo = $process_info
 
-    $process_info = New-Object System.Diagnostics.ProcessStartInfo
-    $process_info.FileName = $Executable
-    $process_info.RedirectStandardError = $Redirect
-    $process_info.RedirectStandardOutput = $Redirect
-    $process_info.UseShellExecute = $false
-    $process_info.Arguments = $ProcessArgs
-    $process = New-Object System.Diagnostics.Process
+    if (-Not ($PrintOutput)) {
+        $PrintOutput = $Env:DEBUG -eq "1"
+    }
+
+    if ($PrintOutput) {
+        $process.Start()
+
+    } else {
+        $process.Start() | Out-Null
+    }
+
     $process.StartInfo = $process_info
     $process.Start() | Out-Null
 
-    if ($Redirect) {
-        if ($ErrLog) {
-            Out-File "$ErrLog" -Encoding utf8 -InputObject ""
-        }
 
-        if ($OutLog) {
-            Out-File "$OutLog" -Encoding utf8 -InputObject ""
-        }
+    if ($ErrLog) {
+        Out-File "$ErrLog" -Encoding utf8 -InputObject ""
     }
 
-    Function Print-Logs ($p, $ot_log, $er_log, $prnt) {
+    if ($OutLog) {
+        Out-File "$OutLog" -Encoding utf8 -InputObject ""
+    }
+
+    Function Print-Logs ($p, $ot_log, $er_log) {
         $o_log = $p.StandardOutput.ReadToEnd()
         $e_log = $p.StandardError.ReadToEnd()
-        if (-Not ($prnt)) {
-            $prnt = $Env:DEBUG -eq "1"
-        }
 
         if ($o_log) {
-            if ($ot_log) {
-                Out-File "$ot_log" -Encoding utf8 -Append -InputObject $o_log
-            }
-            if ($prnt) {
-                Write-Host $o_log
-            }
+            Out-File "$ot_log" -Encoding utf8 -Append -InputObject $o_log
         }
 
         if ($e_log) {
-            if ($er_log) {
-                Out-File "$er_log" -Encoding utf8 -Append -InputObject $e_log
-            }
-            if ($prnt) {
-                Write-Host $e_log
-            }
+            Out-File "$er_log" -Encoding utf8 -Append -InputObject $e_log
         }
-
     }
-
 
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
-        if ($Redirect) {
-            Print-Logs $process $OutLog $ErrLog $PrintOutput
+        if ($OutLog) {
+            Print-Logs $process $OutLog $ErrLog
         }
     }
-    if ($Redirect) {
-        Print-Logs $process $OutLog $ErrLog $PrintOutput
+    if ($OutLog) {
+        Print-Logs $process $OutLog $ErrLog
     }
 
     $Env:EXITCODE = $process.ExitCode
