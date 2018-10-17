@@ -48,6 +48,72 @@ class MyBuilder(builder.Builder):
     copyright = u"Copyright © 2005-2016 EventGhost Project"
     mainScript = "EventGhost.pyw"
 
+    includeModules = [
+        "CommonMark",
+        "comtypes",
+        "Crypto",
+        "docutils",
+        "isapi",
+        "jinja2",
+        "PIL",
+        "pkg_resources",
+        "pythoncom",
+        "pywin32",
+        "six",
+        "win32com",
+        "wx",
+    ]
+
+    excludeModules = [
+        "eg",
+        "_imagingtk",
+        "_tkinter",
+        "cffi",  # bundled for no reason
+        "comtypes.gen",
+        # "ctypes.macholib",  # seems to be for Apple
+        "curses",
+        "distutils.command.bdist_packager",
+        "distutils.mwerkscompiler",
+        "FixTk",
+        "FixTk",
+        "gopherlib",
+        "idlelib",
+        "ImageGL",
+        "ImageQt",
+        "ImageTk",  # py2exe seems to hang if not removed
+        "ipaddr",  # bundled for no reason
+        "ipaddress",  # bundled for no reason
+        "lib2to3",
+        "PIL._imagingtk",
+        "PIL.ImageTk",
+        "pyasn1",  # bundles a broken version if not removed
+        "pycparser",  # bundled for no reason
+        "pywin",
+        "simplejson",  # bundled for no reason
+        "tcl",
+        "test",
+        "Tix",
+        "Tkconstants",
+        "tkinter",  # from `future`
+        "Tkinter",
+        "turtle",  # another Tkinter module
+        "WalImageFile",  # odd syntax error in file
+        "win32com.axdebug",
+        "win32com.axscript",
+        "win32com.demos",
+        "win32com.gen_py",
+        "wx.lib.floatcanvas",  # needs NumPy
+        "wx.lib.plot",  # needs NumPy
+        "wx.lib.vtk",
+        "wx.tools.Editra",
+        "wx.tools.XRCed",
+        "wx.lib.pdfwin_old",
+        "wx.lib.pdfviewer",
+        "wx.lib.pubsub"
+        "wx.lib.iewin",
+        "wx.lib.iewin_old"
+    ]
+
     def BuildInstaller(self):
         """
         Create and compile the Inno Setup installer script.

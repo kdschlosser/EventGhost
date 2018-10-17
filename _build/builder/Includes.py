@@ -31,6 +31,8 @@ import site
 SITE_DIRS = site.getsitepackages()
 
 MODULES_TO_IGNORE = [
+    '__builtin__',
+    '__main__',
     "__phello__.foo",
     "antigravity",
     "unittest",
@@ -68,14 +70,15 @@ MODULES_TO_IGNORE = [
     'urllib.select',
 ]
 PACKAGES = [
+    'six',
     'CommonMark',
     'comtypes',
     'future',
     'PIL',
+    'jinja2',
+    'cffi',
     'wx',
-    'pycrypto',
-    'wx',
-    'CommonMark',
+    'Crypto',
     'comtypes',
     'future',
     'Pillow',
@@ -86,6 +89,45 @@ PACKAGES = [
 
 INCLUDES = [
     'winsound',
+    'afxres',
+    'commctrl',
+    'dbi',
+    'mmsystem',
+    'netbios',
+    'ntsecuritycon',
+    'pywintypes',
+    'rasutil',
+    'regcheck',
+    'regutil',
+    'sspi',
+    'win32con',
+    'win32cryptcon',
+    'win32evtlogutil',
+    'win32gui_struct',
+    'win32inetcon',
+    'win32netcon',
+    'win32pdhquery',
+    'win32pdhutil',
+    'win32rcparser',
+    'win32serviceutil',
+    'win32timezone',
+    'win32verstamp',
+    'winerror',
+    'winioclcon',
+    'winnt',
+    'winperf',
+    'winxptheme',
+    'backupEventLog',
+    'ControlService',
+    'killProcName',
+    'rasutil',
+    'regsetup',
+    'setup_d',
+    'BrandProject',
+    'bulkstamp',
+    'vssutil',
+    '_win32sysloader',
+    '_winxptheme',
     'mmapfile',
     'odbc',
     'perfmon',
@@ -121,13 +163,20 @@ INCLUDES = [
     'winxpgui',
     '_win32sysloader',
     '_winxptheme',
+    'win32com',
+    'win32com.client',
+    'win32com.makegw',
+    'win32com.server',
+    'win32com.servers',
+    'win32com.olectl',
     'win32com.storagecon',
     'win32com.universal',
     'win32com.util',
-    'win32com.olectl',
-    'win32com.server',
-    'win32com.servers',
-    'win32com.bits',
+    'win32com.adsi',
+    'win32com.authorization',
+    'win32com.axcontrol',
+    'win32com.axdebug',
+    'win32com.axscript',
     'win32com.bits',
     'win32com.directsound',
     'win32com.ifilter',
@@ -135,7 +184,7 @@ INCLUDES = [
     'win32com.mapi',
     'win32com.propsys',
     'win32com.shell',
-    'win32com.taskscheduler',
+    'win32comt.taskscheduler',
     'difflib',
 ]
 
@@ -264,9 +313,17 @@ def find_modules(path, module=""):
     if '__pycache__' in files:
         files.remove('__pycache__')
 
+
+    def bad_file():
+        for item in ('demo', 'test'):
+            if item in file.lower():
+                return True
+        return False
+
     for file in files:
-        if file in ('Demos', 'demos', 'test', 'Test'):
+        if bad_file():
             continue
+
         if os.path.isdir(os.path.join(path, file)):
             dirs += [os.path.join(path, file)]
             continue
@@ -330,6 +387,59 @@ def get_requirements(package):
 
 FOUND_PACKAGES = []
 
+import __builtin__
+
+_original_import = __builtin__.__import__
+
+
+FOUND_MODULES = {}
+
+
+def _import(name, globals={}, locals={}, fromlist=[], level=0):
+    mod = _original_import(name, globals, locals, fromlist, level)
+
+    name = mod.__name__
+
+    while '.' in name:
+        if name in MODULES_TO_IGNORE + EXCLUDES:
+            return mod
+        name = name.rsplit('.', 1)[0]
+
+    if name in MODULES_TO_IGNORE + EXCLUDES:
+        return mod
+
+    if mod.__name__ in FOUND_MODULES:
+        return mod
+
+    if hasattr(mod, '__file__'):
+        mod_path = mod.__file__
+    else:
+        mod_path = None
+
+    FOUND_MODULES[mod.__name__] = mod_path
+    return mod
+
+
+PACKAGE_IMPORTS = []
+
+
+def import_package(package):
+    try:
+        __import__(package)
+        PACKAGE_IMPORTS.append(package)
+
+        while FOUND_MODULES:
+            module = FOUND_MODULES.keys()[0]
+            path = FOUND_MODULES.pop(module)
+            if module not in PACKAGE_IMPORTS:
+                PACKAGE_IMPORTS.append(module)
+                if path is not None:
+                    for module in find_modules(os.path.dirname(path), module):
+                        if module not in PACKAGE_IMPORTS:
+                            PACKAGE_IMPORTS.append(module)
+    except:
+        pass
+
 
 def find_package_modules(package):
     if package in FOUND_PACKAGES:
@@ -392,15 +502,21 @@ class Build(object):
 
     @property
     def INCLUDES(self):
-        res = set()
+
+        __builtin__.__import__ = _import
+
         for package in PACKAGES[:]:
+            import_package(package)
             for item in find_package_modules(package):
-                res.add(item)
+                import_package(item)
 
         for item in INCLUDES[:]:
-            res.add(item)
+            import_package(item)
+            for itm in find_package_modules(item):
+                import_package(itm)
 
-        res = list(item for item in res)
-        return res
+        __builtin__.__import__ = _original_import
+
+        return sorted(item for item in set(PACKAGE_IMPORTS + self.STD_LIB_MODULES))
 
 build = Build()

@@ -76,19 +76,20 @@ class BuildLibrary(Builder.Task):
             buildSetup.appVersion = ".".join(
                 buildSetup.appVersion.split("-")[1].split(".")
             )
-
-        import Includes
-
-        for item in Includes.build.STD_LIB_MODULES + Includes.build.INCLUDES:
-            print 'module found - ', item
+        #
+        # import Includes
+        #
+        # for item in Includes.build.STD_LIB_MODULES + Includes.build.INCLUDES:
+        #     print 'module found - ', item
 
         import EventGhostBuild
         import EventGhostBuildExtension
+        import Includes
 
         setup(
             script_args=["py2exe"],
             windows=[Target(buildSetup)],
-            verbose=0,
+            verbose=buildSetup.args.verbose,
             zipfile=EncodePath(join(buildSetup.libraryName, self.zipName)),
             options=dict(
                 build=dict(
@@ -101,11 +102,12 @@ class BuildLibrary(Builder.Task):
                 ),
                 py2exe=dict(
                     compressed=0,
-                    includes=(
-                        ['cFunctions', '_dxJoystick', 'VistaVolEvents'] +
-                        Includes.build.STD_LIB_MODULES +
-                        Includes.build.INCLUDES
-                    ),
+                    packages=['wx'],
+                    includes=[
+                        'cFunctions',
+                        '_dxJoystick',
+                        'VistaVolEvents'
+                    ] + Includes.build.INCLUDES,
                     excludes=Includes.EXCLUDES,
                     dll_excludes=DLL_EXCLUDES,
                     dist_dir=EncodePath(buildSetup.sourceDir),

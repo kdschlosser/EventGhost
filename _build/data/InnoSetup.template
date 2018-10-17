@@ -228,7 +228,7 @@ Root: HKCR; Subkey: "EventGhost Plugin\shell\open\command"; ValueType: string; V
 
 [Run]
 ; EG -install needs to be called with admin rights to install the COM-server
-Filename: "{app}\EventGhost.exe"; Parameters: "-install"
+;Filename: "{app}\EventGhost.exe"; Parameters: "-install"
 Filename: "{app}\EventGhost.exe"; Flags: postinstall nowait skipifsilent
 
 [Tasks]

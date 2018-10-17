@@ -132,7 +132,7 @@ TASKS = [
     BuildVersionFile,
     CheckSourceCode,
     BuildStaticImports,
-    # BuildImports,
+    BuildImports,
     BuildInterpreters,
     BuildLibrary,
     BuildChangelog,
