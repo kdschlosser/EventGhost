@@ -76,7 +76,6 @@ PACKAGES = [
     'future',
     'PIL',
     'jinja2',
-    'cffi',
     'wx',
     'Crypto',
     'comtypes',
