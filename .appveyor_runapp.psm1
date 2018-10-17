@@ -47,9 +47,11 @@ Function Invoke-App {
         $process_info.FileName = $Executable
         $PrintOutput = $true
     }
-    elseif ($Executable -Like "*.msi") {
-        $process_info.Arguments = "/I $Executable /quiet /passive /qn /norestart $Args"
-        $process_info.FileName = "MsiExec.exe"
+    elseif ($Executable -eq "MsiExec.exe") {
+        $process_info.Arguments = "/I $Args /quiet /passive /qn /norestart TARGETDIR=$OutLog"
+        $process_info.FileName = "$Executable"
+        $OutLog = $null
+
     }
     else {
         $process_info.Arguments = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"

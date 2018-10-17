@@ -5,7 +5,7 @@ $Env:PYTHONPATH = "$Env:PYTHON;$Env:PYTHON\Scripts;$Env:PYTHON\DLLs;$Env:PYTHON\
 $SysWOWDLL = "$Env:SYSTEMROOT\SysWOW64\python27.dll"
 $SystemDLL = "$Env:SYSTEMROOT\System\python27.dll"
 
-$Env:PATH = $Env:PATH -replace "C:\\Python27", $Env:PYTHON
+$Env:PATH = $Env:PATH -replace "Python27", "Stackless27_x$Env:BUILDARCH"
 
 If (Test-Path $SystemDLL) {
     Remove-Item $SystemDLL
@@ -68,7 +68,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     Write-Host "  ---- Installing Stackless 2.7.12150"
     $junk = Wait-Job -Name "Stackless"
-    Invoke-App "$StacklessInstaller" "TARGETDIR=$Env:PYTHON"
+    Invoke-App "MsiExec.exe" $StacklessInstaller -OutLog $Env:PYTHON
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
     # Invoke-App "$VCInstaller"
