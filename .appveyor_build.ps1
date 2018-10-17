@@ -39,7 +39,7 @@ if (-Not ($Env:SetupExe)) {
 }
 
 # EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
-if (-Not ($SetupExe -like '*_x64'))) {
+if (-Not ($SetupExe -like '*_x64')) {
     # update the appveyor build version to be the same as the EventGhost version
 
     $Start = $Env:SetupExe.IndexOf("_")
