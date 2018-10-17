@@ -40,7 +40,7 @@
         $ProcessArgs = $Args
 
     }
-    elseif (!Not ($Args -Like "*--build*")) {
+    elseif (-Not ($Args -Like "*--build*")) {
         if ($Executable -Like "*.msi") {
             $ProcessArgs = "/I $Executable /quiet /passive /qn /norestart $Args"
             $Executable = "MsiExec.exe"
