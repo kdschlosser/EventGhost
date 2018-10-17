@@ -32,6 +32,8 @@ $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
 if (-Not ($Env:SetupExe)) {
+    Get-ChildItem "_build\output\ModuleOutput$BUILDARCH.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+    Get-ChildItem "_build\output\Build_$BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
     $host.SetShouldExit(1)
     exit
 }
