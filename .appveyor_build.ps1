@@ -31,7 +31,7 @@ Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py 
 $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_$Env:BUILDARCH.exe" -name
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
-if (-Not ($Env:SetupExe) {
+if (-Not ($Env:SetupExe)) {
     $host.SetShouldExit(1)
     exit
 }
