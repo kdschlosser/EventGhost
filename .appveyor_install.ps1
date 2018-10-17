@@ -88,7 +88,8 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $junk = Wait-Job -Name "wxPython"
     Invoke-App $WXInstaller "/dir=$SitePackages"
 
-    Invoke-App $Python "-m pip install --no-cache-dir pycrypto==2.6.1" "$ModuleOutputFolder\pycrypto 2.6.1.err.log" "$ModuleOutputFolder\pycrypto 2.6.1.out.log"
+    Invoke-App $Python "-m pip install --no-cache-dir " "$ModuleOutputFolder\pycryptodome 2.6.1.err.log" "$ModuleOutputFolder\pycryptodome 2.6.1.out.log"
+    Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "commonmark 0.7.5" "commonmark==0.7.5" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder
