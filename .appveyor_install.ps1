@@ -80,11 +80,11 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     Invoke-App $Pip "pycrypto 2.6.1" "pycrypto==2.6.1" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
-    Invoke-App $Pip "commonmark 0.7.3" "commonmark==0.7.3" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "commonmark 0.7.5" "commonmark==0.7.5" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "sphinx 1.5.6" "sphinx==1.5.6" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "pillow 3.4.2" "pillow==3.4.2" -LogDir $ModuleOutputFolder
-    Invoke-App $Pip "comtypes 1.1.3" "https://github.com/enthought/comtypes/archive/1.1.3.zip" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "comtypes 1.1.7" "comtypes==1.1.7" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "paramiko 2.2.1" "paramiko==2.2.1" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "pywin32 223" "pywin32==223" -LogDir $ModuleOutputFolder
     # *See Changes* PipInstall "pycrypto 2.6.1" "pycrypto==2.6.1"

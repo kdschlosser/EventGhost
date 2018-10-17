@@ -83,7 +83,30 @@ PACKAGES = [
     'Pillow',
     'pkg_resources',
     'docutils',
-    'pywin32'
+    'pywin32',
+    'alabaster',
+    'asn1crypto',
+    'babel',
+    'bcrypt',
+    'certifi',
+    'cffi',
+    'chardet',
+    'colorama',
+    'comtypes',
+    'cryptography',
+    'docutils',
+    'enum34',
+    'idna',
+    'imagesize',
+    'ipaddress',
+    'markupsafe',
+    'paramiko',
+    'pyasn1',
+    'pycparser',
+    'pygments',
+    'pynacl',
+    'pytz',
+    'snowballstemmer',
 ]
 
 INCLUDES = [
@@ -188,6 +211,9 @@ INCLUDES = [
 ]
 
 EXCLUDES = [
+    'sphinx',
+    'six.moves',
+    'moves',
     'eg',
     '_imagingtk',
     '_tkinter',
