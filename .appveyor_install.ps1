@@ -40,9 +40,11 @@ if (-Not (Test-Path $Env:PYTHON)) {
     if ($Env:BUILDARCH -eq "64") {
         $StacklessInstaller = "python-2.7.15150.amd64-stackless.msi"
         $Py2ExeInstaller = "py2exe-0.6.9.win64-py2.7.amd64.exe"
+        $WxInstaller = "wxPython3.0-win64-3.0.2.0-py27.exe"
     } else {
         $StacklessInstaller = "python-2.7.15150-stackless.msi"
         $Py2ExeInstaller = "py2exe-0.6.9.win32-py2.7.exe"
+        $WxInstaller = "wxPython3.0-win32-3.0.2.0-py27.exe"
     }
 
     $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
@@ -51,8 +53,8 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller/download"
     $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
 
-    $WxInstaller = "wxPython3.0-win$Env:BUILDARCH-3.0.2.0-py27.exe"
-    $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
+
+    $WxURL = "https://sourceforge.net/projects/wxpython/files/wxPython/3.0.2.0/$WxInstaller/download"
     $WxInstaller = $InstallersFolder + $WxInstaller
 
     $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL, $StacklessInstaller
