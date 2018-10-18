@@ -28,12 +28,14 @@ import os
 import sys
 from os.path import dirname, exists, join # NOQA
 
-environment = msvc.Environment()# strict_compiler_version=True)
+environment = msvc.Environment(strict_compiler_version=True)
 print environment
 
 for variable, setting in environment:
     os.environ[variable] = setting
 
+
+os.environ['PATH'] += ';' + environment.msvc_dll_path
 # environment.lock()
 #
 # SKIP_IF_UNCHANGED = CaseInsensitiveList(
