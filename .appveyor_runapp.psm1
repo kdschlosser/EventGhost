@@ -33,48 +33,31 @@ Function Invoke-App {
     }
 
     $process_info = New-Object System.Diagnostics.ProcessStartInfo
+    $process_info.CreateNoWindow = $true
     $process_info.UseShellExecute = $false
     $process = New-Object System.Diagnostics.Process
-
     $PrintOutput = $false
 
-    if ($ErrLog) {
+    if ($Args -Like "*--build*") {
         $process_info.Arguments = $Args
-        $process_info.FileName = $Executable
-    }
-    elseif ($Args -Like "*--build*") {
-        $process_info.Arguments = $Args
-        $process_info.FileName = $Executable
+        $process_info.FileName = $Executabl
+        $process_info.RedirectStandardError = $false
+        $process_info.RedirectStandardOutput = $false
+        $process.StartInfo = $process_info
+        $process.Start()
         $PrintOutput = $true
-    }
-    elseif ($Executable -eq "MsiExec.exe") {
-        $process_info.Arguments = "/I $Args /quiet /passive /qn /norestart TARGETDIR=$OutLog"
-        $process_info.FileName = "$Executable"
-        $OutLog = $null
-
-    }
-    else {
-        $process_info.Arguments = "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent $Args"
+    } else {
+        $process_info.Arguments = $Args
         $process_info.FileName = $Executable
+        $process_info.RedirectStandardError = $true
+        $process_info.RedirectStandardOutput = $true
+        $process.StartInfo = $process_info
+        $process.Start() | Out-Null
     }
-
-    $process_info.RedirectStandardError = -Not ($PrintOutput)
-    $process_info.RedirectStandardOutput = -Not ($PrintOutput)
-    $process.StartInfo = $process_info
 
     if (-Not ($PrintOutput)) {
         $PrintOutput = $Env:DEBUG -eq "1"
     }
-
-    if ($PrintOutput) {
-        $process.Start()
-    } else {
-        $process.Start() | Out-Null
-    }
-
-    $process.StartInfo = $process_info
-    $process.Start() | Out-Null
-
 
     if ($ErrLog) {
         Out-File "$ErrLog" -Encoding utf8 -InputObject ""
@@ -83,7 +66,6 @@ Function Invoke-App {
     if ($OutLog) {
         Out-File "$OutLog" -Encoding utf8 -InputObject ""
     }
-
     Function Print-Logs ($p, $ot_log, $er_log) {
         $o_log = $p.StandardOutput.ReadToEnd()
         $e_log = $p.StandardError.ReadToEnd()
@@ -116,7 +98,8 @@ Function Invoke-App {
     } else {
         Write-Host "       Failed."
 
-        if ($ErrLog -and (-Not($Env:DEBUG -eq "1")))  {
+        if ($ErrLog -and (-Not($Env:DEBUG -eq "1")))
+        {
             Write-Host " "
             Write-Host "******************* ERROR LOG ***********************"
             Write-Host " "
@@ -130,5 +113,6 @@ Function Invoke-App {
         $host.SetShouldExit(1)
         exit
     }
+
 }
 
