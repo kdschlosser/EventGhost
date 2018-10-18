@@ -82,7 +82,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
     Get-Job -Name "wxPython" | Out-Null
-    Start-Process $WXInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
+    Start-Process $WxInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
 
     Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
