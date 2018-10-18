@@ -65,6 +65,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Write-Host "  ---- Installing Stackless 2.7.12150"
     $junk = Wait-Job -Name "Stackless"
     Start-Process "MsiExec.exe" -ArgumentList "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -WindowStyle Hidden -Wait
+    Write-Host "       Done."
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
     # Invoke-App "$VCInstaller"
@@ -73,8 +74,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App $Python "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
 
     Write-Host "  ---- Upgrading setuptools 40.2.0"
-    Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder
-    }\setuptools 40.2.0.out.log"
+    Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing py2exe 0.6.9"
     $junk = Wait-Job -Name "py2exe"
@@ -83,6 +83,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Write-Host "  ---- Installing wxPython 3.0.2.0"
     $junk = Wait-Job -Name "wxPython"
     Start-Process $WxInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
+    Write-Host "       Done."
 
     Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
