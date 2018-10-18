@@ -29,10 +29,12 @@ If (
 Invoke-App "$Env:PYTHON\python.exe" "$Env:APPVEYOR_BUILD_FOLDER\_build\Build.py --build --package --verbose$release$url"
 
 $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File -include "*Setup_x$Env:BUILDARCH.exe" -name
+
+$ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\ModuleOutput_x$Env:BUILDARCH"
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
 
 if (-Not ($Env:SetupExe)) {
-    Get-ChildItem "_build\output\ModuleOutput_x$Env:BUILDARCH.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+    Get-ChildItem "$ModuleOutputFolder.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
     Get-ChildItem "_build\output\Build_x$Env:BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
     $host.SetShouldExit(1)
     exit
