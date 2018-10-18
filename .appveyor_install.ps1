@@ -41,7 +41,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
         $StacklessInstaller = "python-2.7.15150.amd64-stackless.msi"
         $Py2ExeInstaller = "py2exe-0.6.9.win64-py2.7.amd64.exe"
     } else {
-        $StacklessInstaller = "python-2.7.12150-stackless.msi"
+        $StacklessInstaller = "python-2.7.15150-stackless.msi"
         $Py2ExeInstaller = "py2exe-0.6.9.win32-py2.7.exe"
     }
 
@@ -62,7 +62,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
 
     Write-Host "=============== Installing Requirements =============="
 
-    Write-Host "  ---- Installing Stackless 2.7.12150"
+    Write-Host "  ---- Installing Stackless 2.7.15150"
     $junk = Wait-Job -Name "Stackless"
     Start-Process "MsiExec.exe" -ArgumentList "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -WindowStyle Hidden -Wait
     Write-Host "       Done."

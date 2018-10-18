@@ -32,16 +32,16 @@ $Env:SetupExe = Get-ChildItem "$Env:APPVEYOR_BUILD_FOLDER\_build\output\*" -File
 
 $ModuleOutputFolder = $Env:APPVEYOR_BUILD_FOLDER + "\_build\output\ModuleOutput_x$Env:BUILDARCH"
 Start-Process 7z -ArgumentList "a", "-bsp1", "-bb3", "$ModuleOutputFolder.zip", "-r", "$ModuleOutputFolder\*.*" -NoNewWindow -Wait
-
-if (-Not ($Env:SetupExe)) {
-    Get-ChildItem "$ModuleOutputFolder.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
-    Get-ChildItem "_build\output\Build_x$Env:BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
-    $host.SetShouldExit(1)
-    exit
-}
+#
+#if (-Not ($Env:SetupExe)) {
+#    Get-ChildItem "$ModuleOutputFolder.zip" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+#    Get-ChildItem "_build\output\Build_x$Env:BUILDARCH.log" | % { Push-AppveyorArtifact $_.Name -FileName $_.Name }
+#    $host.SetShouldExit(1)
+#    exit
+#}
 
 # EventGhost_WIP-2018.10.13-07.17.46_Setup_x64.exe
-if (-Not ($SetupExe -like '*_x64')) {
+if (($SetupExe) -and (-Not ($SetupExe -like '*_x64'))) {
     # update the appveyor build version to be the same as the EventGhost version
 
     $Start = $Env:SetupExe.IndexOf("_")
