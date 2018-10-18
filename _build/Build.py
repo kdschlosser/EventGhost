@@ -36,6 +36,8 @@ for variable, setting in environment:
 
 
 os.environ['PATH'] += ';' + environment.msvc_dll_path
+
+
 # environment.lock()
 #
 # SKIP_IF_UNCHANGED = CaseInsensitiveList(

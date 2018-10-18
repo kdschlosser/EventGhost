@@ -108,8 +108,8 @@ version: '{build}-{branch}'
 
 environment:
   DEBUG: 0
-  DISTUTILS_DEBUG: 1
-  APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
+  # DISTUTILS_DEBUG: 1
+  # APPVEYOR_RDP_PASSWORD: HGtoDr16GH~
   matrix:
 
     - BUILDARCH: 64

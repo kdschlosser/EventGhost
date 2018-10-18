@@ -134,6 +134,7 @@ class Builder(object):
             self.args.verbose = True
 
         if os.environ.get('DEBUG', '0') == '1':
+            os.environ['DISTUTILS_DEBUG'] = '1'
             self.args.verbose = True
 
         os.chdir(self.buildDir)
