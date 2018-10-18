@@ -55,9 +55,9 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
     $WxInstaller = $InstallersFolder + $WxInstaller
 
-    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL $StacklessInstaller
-    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "wxPython" -ArgumentList $WxURL $WxInstaller
-    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "py2exe" -ArgumentList $Py2ExeURL $Py2ExeInstaller
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL, $StacklessInstaller
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "wxPython" -ArgumentList $WxURL, $WxInstaller
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "py2exe" -ArgumentList $Py2ExeURL, $Py2ExeInstaller
 
 
     Write-Host "=============== Installing Requirements =============="
