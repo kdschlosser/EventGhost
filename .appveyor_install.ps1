@@ -85,7 +85,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Start-Process $WxInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
     Write-Host "       Done."
 
-    Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
+    Invoke-App $Pip "pycrypto 2.6.1" "pycrypto==2.6.1" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "commonmark 0.7.5" "commonmark==0.7.5" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "jinja2 2.8.1" "jinja2==2.8.1" -LogDir $ModuleOutputFolder

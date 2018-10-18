@@ -89,7 +89,7 @@ Function Invoke-App {
     }
 
     Print-Logs $process $OutLog $ErrLog $PrintOutput
-    
+
 
     $Env:EXITCODE = $process.ExitCode
 
