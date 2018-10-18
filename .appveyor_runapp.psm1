@@ -38,9 +38,12 @@ Function Invoke-App {
     $process = New-Object System.Diagnostics.Process
     $PrintOutput = $false
 
+
+
     if ($Args -Like "*--build*") {
         $process_info.Arguments = $Args
-        $process_info.FileName = $Executabl
+        $process_info.FileName = $Executable
+
         $process_info.RedirectStandardError = $false
         $process_info.RedirectStandardOutput = $false
         $process.StartInfo = $process_info

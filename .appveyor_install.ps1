@@ -45,12 +45,25 @@ if (-Not (Test-Path $Env:PYTHON)) {
         $Py2ExeInstaller = "py2exe-0.6.9.win32-py2.7.exe"
     }
 
+    $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
+    $StacklessInstaller =  $InstallersFolder + $StacklessInstaller
+
+    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller/download"
+    $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
+
+    $WxInstaller = "wxPython3.0-win$Env:BUILDARCH-3.0.2.0-py27.exe"
+    $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
+    $WxInstaller = $InstallersFolder + $WxInstaller
+
+    Start-Job -ScriptBlock { Start-FileDownload &Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL $StacklessInstaller | Out-Null
+    Start-Job -ScriptBlock { Start-FileDownload &Args[0] -Timeout 60000 -FileName $Args[1] } -Name "wxPython" -ArgumentList $WxURL $WxInstaller | Out-Null
+    Start-Job -ScriptBlock { Start-FileDownload &Args[0] -Timeout 60000 -FileName $Args[1] } -Name "py2exe" -ArgumentList $Py2ExeURL $Py2ExeInstaller | Out-Null
+
+
     Write-Host "=============== Installing Requirements =============="
 
     Write-Host "  ---- Installing Stackless 2.7.12150"
-    $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
-    $StacklessInstaller =  $InstallersFolder + $StacklessInstaller
-    Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
+    Get-Job -Name "Stackless" | Out-Null
     Start-Process "MsiExec.exe" -ArgumentList "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -WindowStyle Hidden -Wait
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
@@ -60,19 +73,15 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App $Python "-m pip install --no-cache-dir -U pip==9.0.1" "$ModuleOutputFolder\pip 9.0.1.err.log" "$ModuleOutputFolder\pip 9.0.1.out.log"
 
     Write-Host "  ---- Upgrading setuptools 40.2.0"
-    Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
+    Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder
+    }\setuptools 40.2.0.out.log"
 
-    Write-Host "  ---- Installing py2exe 0.6.9";
-    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller/download"
-    $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
-    Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller
+    Write-Host "  ---- Installing py2exe 0.6.9"
+    Get-Job -Name "py2exe" | Out-Null
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller"
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
-    $WxInstaller = "wxPython3.0-win$Env:BUILDARCH-3.0.2.0-py27.exe"
-    $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
-    $WXInstaller = $InstallersFolder + $WxInstaller
-    Start-FileDownload $WxURL -Timeout 60000 -FileName $WXInstaller
+    Get-Job -Name "wxPython" | Out-Null
     Start-Process $WXInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
 
     Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
