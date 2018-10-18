@@ -63,7 +63,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing py2exe 0.6.9";
-    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller"
+    $Py2ExeURL = "https://sourceforge.net/projects/py2exe/files/py2exe/0.6.9/$Py2ExeInstaller/download"
     $Py2ExeInstaller = $InstallersFolder + $Py2ExeInstaller
     Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller"
