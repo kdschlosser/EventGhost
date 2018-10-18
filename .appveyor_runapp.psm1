@@ -39,22 +39,14 @@ Function Invoke-App {
     $PrintOutput = $false
 
     if ($Args -Like "*--build*") {
-        $process_info.Arguments = $Args
-        $process_info.FileName = $Executable
-
-        $process_info.RedirectStandardError = $false
-        $process_info.RedirectStandardOutput = $false
-        $process.StartInfo = $process_info
-        $process.Start()
         $PrintOutput = $true
-    } else {
-        $process_info.Arguments = $Args
-        $process_info.FileName = $Executable
-        $process_info.RedirectStandardError = $true
-        $process_info.RedirectStandardOutput = $true
-        $process.StartInfo = $process_info
-        $process.Start() | Out-Null
     }
+    $process_info.Arguments = $Args
+    $process_info.FileName = $Executable
+    $process_info.RedirectStandardError = $true
+    $process_info.RedirectStandardOutput = $true
+    $process.StartInfo = $process_info
+    $process.Start() | Out-Null
 
     if (-Not ($PrintOutput)) {
         $PrintOutput = $Env:DEBUG -eq "1"
@@ -67,28 +59,37 @@ Function Invoke-App {
     if ($OutLog) {
         Out-File "$OutLog" -Encoding utf8 -InputObject ""
     }
-    Function Print-Logs ($p, $ot_log, $er_log) {
+    Function Print-Logs ($p, $ot_log, $er_log, $prnt) {
         $o_log = $p.StandardOutput.ReadToEnd()
         $e_log = $p.StandardError.ReadToEnd()
 
         if ($o_log) {
-            Out-File "$ot_log" -Encoding utf8 -Append -InputObject $o_log
+            if ($prnt) {
+                Write-Host $o_log
+            }
+            if ($ot_log) {
+                Out-File "$ot_log" -Encoding utf8 -Append -InputObject $o_log
+            }
+
         }
 
         if ($e_log) {
-            Out-File "$er_log" -Encoding utf8 -Append -InputObject $e_log
+            if ($prnt) {
+                Write-Host $o_log
+            }
+            if ($er_log) {
+                Out-File "$er_log" -Encoding utf8 -Append -InputObject $e_log
+            }
         }
     }
 
     while (-Not ($process.HasExited)) {
         Start-Sleep -Milliseconds 100
-        if ($OutLog) {
-            Print-Logs $process $OutLog $ErrLog
-        }
+        Print-Logs $process $OutLog $ErrLog $PrintOutput
     }
-    if ($OutLog) {
-        Print-Logs $process $OutLog $ErrLog
-    }
+
+    Print-Logs $process $OutLog $ErrLog $PrintOutput
+    
 
     $Env:EXITCODE = $process.ExitCode
 
