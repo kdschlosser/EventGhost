@@ -55,15 +55,15 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
     $WxInstaller = $InstallersFolder + $WxInstaller
 
-    Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL $StacklessInstaller | Out-Null
-    Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "wxPython" -ArgumentList $WxURL $WxInstaller | Out-Null
-    Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "py2exe" -ArgumentList $Py2ExeURL $Py2ExeInstaller | Out-Null
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "Stackless" -ArgumentList $StacklessURL $StacklessInstaller
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "wxPython" -ArgumentList $WxURL $WxInstaller
+    $junk = Start-Job -ScriptBlock { Start-FileDownload $Args[0] -Timeout 60000 -FileName $Args[1] } -Name "py2exe" -ArgumentList $Py2ExeURL $Py2ExeInstaller
 
 
     Write-Host "=============== Installing Requirements =============="
 
     Write-Host "  ---- Installing Stackless 2.7.12150"
-    Get-Job -Name "Stackless" | Out-Null
+    $junk = Wait-Job -Name "Stackless"
     Start-Process "MsiExec.exe" -ArgumentList "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -WindowStyle Hidden -Wait
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
@@ -77,11 +77,11 @@ if (-Not (Test-Path $Env:PYTHON)) {
     }\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing py2exe 0.6.9"
-    Get-Job -Name "py2exe" | Out-Null
+    $junk = Wait-Job -Name "py2exe"
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller"
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
-    Get-Job -Name "wxPython" | Out-Null
+    $junk = Wait-Job -Name "wxPython"
     Start-Process $WxInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
 
     Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
