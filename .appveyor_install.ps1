@@ -51,7 +51,7 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $StacklessURL = "http://www.stackless.com/binaries/$StacklessInstaller"
     $StacklessInstaller =  $InstallersFolder + $StacklessInstaller
     Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
-    Start-Process "MsiExec.exe" -Arguments "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON"
+    Start-Process "MsiExec.exe" -ArgumentList "/I $StacklessInstaller /quiet /passive /qn /norestart TARGETDIR=$Env:PYTHON" -WindowStyle Hidden -Wait
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
     # Invoke-App "$VCInstaller"
@@ -73,9 +73,8 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $WxURL = "http://downloads.sourceforge.net/wxpython/$WxInstaller"
     $WXInstaller = $InstallersFolder + $WxInstaller
     Start-FileDownload $WxURL -Timeout 60000 -FileName $WXInstaller
-    Start-Process $WXInstaller -Arguements "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages"
+    Start-Process $WXInstaller -ArgumentList "/VerySilent /NoRestart /NoCancel /SupressMessageBoxes /Silent /dir=$SitePackages" -WindowStyle Hidden -Wait
 
-    Invoke-App $Python "-m pip install --no-cache-dir " "$ModuleOutputFolder\pycryptodome 2.6.1.err.log" "$ModuleOutputFolder\pycryptodome 2.6.1.out.log"
     Invoke-App $Pip "pycryptodome 3.6.6" "pycryptodome==3.6.6" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "wheel 0.29.0" "wheel==0.29.0" -LogDir $ModuleOutputFolder
     Invoke-App $Pip "commonmark 0.7.5" "commonmark==0.7.5" -LogDir $ModuleOutputFolder
