@@ -56,18 +56,10 @@ if (-Not (Test-Path $Env:PYTHON)) {
     $Pip = "$Env:PYTHON\Scripts\pip.exe"
     $EasyInstall = "$Env:PYTHON\Scripts\easy_install.exe"
 
-
-    Write-Host "==================== Downloading Files ==================="
-    # Start-FileDownload $VCURL -Timeout 60000 -FileName $VCInstaller
-    Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "Stackless" -ArgumentList $StacklessURL, $StacklessInstaller
-    Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "wxPython" -ArgumentList  $WxURL, $WXInstaller
-    Start-Job -ScriptBlock {Start-FileDownload $args[0] -Timeout 60000 -FileName $args[1]} -Name "py2exe" -ArgumentList $Py2ExeURL, $Py2ExeInstaller
-
-    Write-Host " "
     Write-Host "=============== Installing Requirements =============="
 
     Write-Host "  ---- Installing Stackless 2.7.12150"
-    $junk = Wait-Job -Name "Stackless"
+    Start-FileDownload $StacklessURL -Timeout 60000 -FileName $StacklessInstaller
     Invoke-App "MsiExec.exe" $StacklessInstaller -OutLog $Env:PYTHON
 
     # Write-Host "  ---- Installing Visual C Compiler for Python 2.7"
@@ -81,11 +73,11 @@ if (-Not (Test-Path $Env:PYTHON)) {
     Invoke-App $Python "-m pip install --no-cache-dir -U setuptools==40.2.0" "$ModuleOutputFolder\setuptools 40.2.0.err.log" "$ModuleOutputFolder\setuptools 40.2.0.out.log"
 
     Write-Host "  ---- Installing py2exe 0.6.9";
-    $junk = Wait-Job -Name "py2exe"
+    Start-FileDownload $Py2ExeURL -Timeout 60000 -FileName $Py2ExeInstaller
     Invoke-App $EasyInstall "--always-unzip $Py2ExeInstaller" "$ModuleOutputFolder\py2exe 0.6.9.err.log" "$ModuleOutputFolder\py2exe 0.6.9.out.log"
 
     Write-Host "  ---- Installing wxPython 3.0.2.0"
-    $junk = Wait-Job -Name "wxPython"
+    Start-FileDownload $WxURL -Timeout 60000 -FileName $WXInstaller
     Invoke-App $WXInstaller "/dir=$SitePackages"
 
     Invoke-App $Python "-m pip install --no-cache-dir " "$ModuleOutputFolder\pycryptodome 2.6.1.err.log" "$ModuleOutputFolder\pycryptodome 2.6.1.out.log"
