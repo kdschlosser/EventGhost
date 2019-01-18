@@ -24,69 +24,77 @@ import shutil
 import sys
 import tempfile
 import warnings
-from distutils.core import setup
-from os.path import exists, join
+from os.path import join
 
-# Local imports
-import builder
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    import py2exe  # NOQA
+    import py2exe # NOQA
+    from py2exe import build_exe # NOQA
+
 
 PYVERSION = "%d%d" % sys.version_info[:2]
 PY_BASE_NAME = "py%s" % PYVERSION
 PYW_BASE_NAME = "pyw%s" % PYVERSION
 
-class BuildInterpreters(builder.Task):
-    description = "Build interpreters (py.exe, pyw.exe)"
 
-    def Setup(self):
-        if self.buildSetup.showGui:
-            sourceDir = self.buildSetup.sourceDir
-            if (exists(join(sourceDir, PY_BASE_NAME + ".exe")) and
-                    exists(join(sourceDir, PYW_BASE_NAME + ".exe"))):
-                self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.build)
+class BuildInterpreters(build_exe.py2exe):
 
-    def DoTask(self):
-        buildSetup = self.buildSetup
-        tmpDir = tempfile.mkdtemp()
+    def initialize_options(self):
+        self.build_setup = build_setup = (
+            self.distribution.get_command_obj('build')
+        )
+        self.tmp_dir = tmp_dir = tempfile.mkdtemp()
+        
         manifest = file(
-            join(buildSetup.pyVersionDir, "Manifest.xml")
+            join(build_setup.py_version_dir, "Manifest.xml")
         ).read()
-        setup(
-            script_args = ["py2exe"],
-            options=dict(
-                build=dict(build_base=join(tmpDir, "build")),
-                py2exe=dict(compressed=0, dist_dir=join(tmpDir, "dist"))
-            ),
-            # it is important, that the zipfile argument does match the one
-            # from the main installer.
-            zipfile="lib%s/python%s.zip" % (PYVERSION, PYVERSION),
-            windows=[
-                dict(
-                    script=join(buildSetup.dataDir, "py.py"),
-                    dest_base=PYW_BASE_NAME,
-                    other_resources = [(24, 1, manifest)],
-                )
-            ],
-            console=[
-                dict(
-                    script=join(buildSetup.dataDir, "py.py"),
-                    dest_base=PY_BASE_NAME,
-                    other_resources = [(24, 1, manifest)],
-                )
-            ],
-            verbose=0,
+
+        self.distribution.zipfile = "lib{0}/python{1}.zip".format(
+            PYVERSION,
+            PYVERSION
+        )
+
+        self.distribution.script_args = ["py2exe"]
+        self.distribution.options.update(
+            dict(
+                build=dict(build_base=join(tmp_dir, "build")),
+                py2exe=dict(compressed=0, dist_dir=join(tmp_dir, "dist"))
+            )
+        )
+
+        self.distribution.windows = [
+            dict(
+                script=join(build_setup.data_dir, "py.py"),
+                dest_base=PYW_BASE_NAME,
+                other_resources=[(24, 1, manifest)],
+            )
+        ]
+        self.distribution.console = [
+            dict(
+                script=join(build_setup.data_dir, "py.py"),
+                dest_base=PY_BASE_NAME,
+                other_resources=[(24, 1, manifest)],
+            )
+        ]
+        self.distribution.verbose = 0
+        
+        build_exe.py2exe.initialize_options(self)
+
+    def finalize_options(self):
+        build_exe.py2exe.finalize_options(self)
+
+    def run(self):
+        build_exe.py2exe.run(self)
+        
+        build_setup = self.build_setup
+        
+        shutil.copy(
+            join(self.tmp_dir, "dist", PY_BASE_NAME + ".exe"),
+            build_setup.sourceDir
         )
         shutil.copy(
-            join(tmpDir, "dist", PY_BASE_NAME + ".exe"),
-            buildSetup.sourceDir
+            join(self.tmp_dir, "dist", PYW_BASE_NAME + ".exe"),
+            build_setup.sourceDir
         )
-        shutil.copy(
-            join(tmpDir, "dist", PYW_BASE_NAME + ".exe"),
-            buildSetup.sourceDir
-        )
-        shutil.rmtree(tmpDir)
+        shutil.rmtree(self.tmp_dir)

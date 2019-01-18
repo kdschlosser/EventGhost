@@ -22,9 +22,36 @@ import sys
 from glob import glob
 from os.path import basename, exists, join
 
+
+def InstallPy2exePatch():
+    """
+    Tricks py2exe to include the win32com module.
+
+    ModuleFinder can't handle runtime changes to __path__, but win32com
+    uses them, particularly for people who build from sources.
+    """
+    try:
+        import modulefinder
+        import win32com
+        for path in win32com.__path__[1:]:
+            modulefinder.AddPackagePath("win32com", path)
+        for extra in ["win32com.shell"]:
+            __import__(extra)
+            module = sys.modules[extra]
+            for path in module.__path__[1:]:
+                modulefinder.AddPackagePath(extra, path)
+    except ImportError:  # IGNORE:W0704
+        # no build path setup, no worries.
+        pass
+
+
+InstallPy2exePatch()
+
+
+from py2exe import build_exe # NOQA
+
 # Local imports
-import builder
-from builder.Utils import EncodePath
+from Utils import EncodePath # NOQA
 
 
 _compile = __builtin__.compile
@@ -53,76 +80,81 @@ DLL_EXCLUDES = [
 
 RT_MANIFEST = 24
 
-class BuildLibrary(builder.Task):
-    description = "Build lib%d%d" % sys.version_info[0:2]
 
-    def Setup(self):
-        self.zipName = "python%s.zip" % self.buildSetup.pyVersionStr
-        if self.buildSetup.showGui:
-            if exists(join(self.buildSetup.libraryDir, self.zipName)):
-                self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.build)
+class BuildInterpreters(build_exe.py2exe):
 
-    def DoTask(self):
-        """
-        Build the library and .exe files with py2exe.
-        """
-        buildSetup = self.buildSetup
-        sys.path.append(EncodePath(buildSetup.pyVersionDir))
-        from distutils.core import setup
-        InstallPy2exePatch()
+    def initialize_options(self):        
+        self.build_setup = build_setup = (
+            self.distribution.get_command_obj('build')
+        )
+        self.zip_name = "python%s.zip" % self.build_setup.py_version_str
 
-        import py2exe
-        origIsSystemDLL = py2exe.build_exe.isSystemDLL
+        sys.path.append(EncodePath(build_setup.py_version_dir))
+        
+        orig_is_system_dll = build_exe.isSystemDLL
 
         def isSystemDLL(path):
             if basename(path).lower().startswith("api-ms-win-"):
                 return 1
             else:
-                return origIsSystemDLL(path)
-        py2exe.build_exe.isSystemDLL = isSystemDLL
+                return orig_is_system_dll(path)
+            
+        build_exe.isSystemDLL = isSystemDLL
 
-        libraryDir = buildSetup.libraryDir
-        if exists(libraryDir):
-            for filename in os.listdir(libraryDir):
-                path = join(libraryDir, filename)
-                if not os.path.isdir(path):
-                    os.remove(path)
-
-        wip_version = None
-        if buildSetup.appVersion.startswith("WIP-"):
-            # this is to avoid a py2exe warning when building a WIP version
-            wip_version = buildSetup.appVersion
-            buildSetup.appVersion = ".".join(
-                buildSetup.appVersion.split("-")[1].split(".")
-            )
-
-        setup(
-            script_args=["py2exe"],
-            windows=[Target(buildSetup)],
-            verbose=0,
-            zipfile=EncodePath(join(buildSetup.libraryName, self.zipName)),
-            options = dict(
-                build=dict(build_base=join(buildSetup.tmpDir, "build")),
+        self.distribution.script_args = ["py2exe"]
+        self.distribution.windows = [Target(build_setup)]
+        self.distribution.verbose = 0
+        self.distribution.zipfile = EncodePath(
+            join(build_setup.library_name, self.zip_name)
+        )
+        self.distribution.options.update(
+            dict(
+                build=dict(build_base=join(build_setup.tmp_dir, "build")),
                 py2exe=dict(
                     compressed=0,
                     includes=["encodings", "encodings.*", "Imports"],
-                    excludes=buildSetup.excludeModules,
-                    dll_excludes = DLL_EXCLUDES,
-                    dist_dir = EncodePath(buildSetup.sourceDir),
+                    excludes=build_setup.exclude_modules,
+                    dll_excludes=DLL_EXCLUDES,
+                    dist_dir=EncodePath(build_setup.source_dir),
                     custom_boot_script=join(
-                        buildSetup.dataDir, "Py2ExeBootScript.py"
+                        build_setup.data_dir, "Py2ExeBootScript.py"
                     ),
                 )
             )
         )
 
-        if wip_version:
-            buildSetup.appVersion = wip_version
+        build_exe.py2exe.initialize_options(self)
 
-        dllNames = [basename(name) for name in glob(join(libraryDir, "*.dll"))]
-        neededDlls = []
+    def finalize_options(self):
+        build_exe.py2exe.finalize_options(self)
+
+    def run(self):
+        build_setup = self.build_setup
+
+        library_dir = build_setup.library_dir
+        if exists(library_dir):
+            for filename in os.listdir(library_dir):
+                path = join(library_dir, filename)
+                if not os.path.isdir(path):
+                    os.remove(path)
+        
+        wip_version = None
+        if build_setup.app_version.startswith("WIP-"):
+            # this is to avoid a py2exe warning when building a WIP version
+            wip_version = build_setup.app_version
+            build_setup.app_version = ".".join(
+                build_setup.app_version.split("-")[1].split(".")
+            )
+            
+        build_exe.py2exe.run(self)
+
+        if wip_version:
+            build_setup.app_version = wip_version
+
+        dll_names = list(
+            basename(name) for name in glob(join(library_dir, "*.dll"))
+        )
+        needed_dlls = []
 
         paths = [sys.prefix]
         if hasattr(sys, "real_prefix"):
@@ -131,58 +163,39 @@ class BuildLibrary(builder.Task):
         for path in paths:
             for _, _, files in os.walk(path):
                 for filename in files:
-                    if filename in dllNames:
-                        neededDlls.append(filename)
-        for dllName in dllNames:
-            if dllName not in neededDlls:
-                os.remove(join(libraryDir, dllName))
+                    if filename in dll_names:
+                        needed_dlls.append(filename)
 
-        #RemoveAllManifests(libraryDir)
+        for dll_name in dll_names:
+            if dll_name not in needed_dlls:
+                os.remove(join(library_dir, dll_name))
 
 
 class Target:
-    def __init__(self, buildSetup):
+    def __init__(self, build_setup):
         self.icon_resources = []
-        iconPath = join(buildSetup.docsDir, "_static", "arrow.ico")
-        if exists(iconPath):
-            self.icon_resources.append((0, iconPath))
-        iconPath = join(buildSetup.docsDir, "_static", "ghost.ico")
-        if exists(iconPath):
-            self.icon_resources.append((6, iconPath))
+        
+        icon_path = join(build_setup.docs_dir, "_static", "arrow.ico")
+        if exists(icon_path):
+            self.icon_resources.append((0, icon_path))
+            
+        icon_path = join(build_setup.docsDir, "_static", "ghost.ico")
+        if exists(icon_path):
+            self.icon_resources.append((6, icon_path))
 
         manifest = file(
-            join(buildSetup.pyVersionDir, "Manifest.xml")
-        ).read() % buildSetup.__dict__
+            join(build_setup.pyVersionDir, "Manifest.xml")
+        ).read() % build_setup.__dict__
+        
         self.other_resources = [(RT_MANIFEST, 1, manifest)]
-        self.name = buildSetup.name
-        self.description = buildSetup.description
-        self.company_name = buildSetup.companyName
-        self.copyright = buildSetup.copyright
-        self.dest_base = buildSetup.name
-        self.version = buildSetup.appVersion
-        self.script = join(buildSetup.sourceDir, buildSetup.mainScript)
+        self.name = build_setup.name
+        self.description = build_setup.description
+        self.company_name = build_setup.company_name
+        self.copyright = build_setup.copyright
+        self.dest_base = build_setup.name
+        self.version = build_setup.app_version
+        self.script = join(build_setup.source_dir, build_setup.main_script)
 
-
-def InstallPy2exePatch():
-    """
-    Tricks py2exe to include the win32com module.
-
-    ModuleFinder can't handle runtime changes to __path__, but win32com
-    uses them, particularly for people who build from sources.
-    """
-    try:
-        import modulefinder
-        import win32com
-        for path in win32com.__path__[1:]:
-            modulefinder.AddPackagePath("win32com", path)
-        for extra in ["win32com.shell"]:
-            __import__(extra)
-            module = sys.modules[extra]
-            for path in module.__path__[1:]:
-                modulefinder.AddPackagePath(extra, path)
-    except ImportError:  # IGNORE:W0704
-        # no build path setup, no worries.
-        pass
 
 def RemoveAllManifests(scanDir):
     """

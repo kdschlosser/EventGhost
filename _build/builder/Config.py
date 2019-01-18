@@ -17,61 +17,63 @@
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
 import ConfigParser
-from builder.Utils import IsCIBuild
+from Utils import IsCIBuild
 
 
 class Config(object):
-    def __init__(self, buildSetup, configFilePath):
-        self.buildSetup = buildSetup
-        self._configFilePath = configFilePath
-        self.LoadSettings()
+    def __init__(self, build_setup, config_file_path):
+        self.build_setup = build_setup
+        self._config_file_path = config_file_path
+        self.load_settings()
 
-    def LoadSettings(self):
+    def load_settings(self):
         """
         Load the ini file and set all options.
         """
-        configParser = ConfigParser.ConfigParser()
+        config_parser = ConfigParser.ConfigParser()
         if not IsCIBuild():
-            configParser.read(self._configFilePath)
-        for task in self.buildSetup.tasks:
+            config_parser.read(self._config_file_path)
+        for task in self.build_setup.tasks:
             section = task.GetId()
-            if not configParser.has_section(section):
+            if not config_parser.has_section(section):
                 continue
-            options = configParser.options(section)
+            options = config_parser.options(section)
             for option in options:
                 if option == "enabled":
                     if task.visible:
                         task.activated = eval(
-                            configParser.get(section, "enabled")
+                            config_parser.get(section, "enabled")
                         )
                 else:
-                    task.options[option] = configParser.get(section, option)
-                    #print section, option, configParser.get(section, option)
+                    task.options[option] = config_parser.get(section, option)
+                    # print section, option, config_parser.get(section, option)
 
-        if configParser.has_option("GitHub", "Repository"):
-            repository = configParser.get('GitHub', "Repository")
+        if config_parser.has_option("GitHub", "Repository"):
+            repository = config_parser.get('GitHub', "Repository")
             try:
                 user, repo = repository.split('/')
             except ValueError:
                 user = repo = ""
-            self.buildSetup.gitConfig.update({
+            self.build_setup.git_config.update({
                 "user": user,
                 "repo": repo,
-                "branch": configParser.get('GitHub', "Branch")
+                "branch": config_parser.get('GitHub', "Branch")
             })
 
-        if configParser.has_option("Website", "url"):
-            self.buildSetup.args.websiteUrl = configParser.get('Website', "url")
+        if config_parser.has_option("Website", "url"):
+            self.build_setup.args.website_url = (
+                config_parser.get('Website', "url")
+            )
 
-    def SaveSettings(self):
+    def save_settings(self):
         """
         Save all options to the ini file.
         """
         config = ConfigParser.ConfigParser()
         # make ConfigParser case-sensitive
         config.optionxform = str
-        config.read(self._configFilePath)
-        for task in self.buildSetup.tasks:
+        config.read(self._config_file_path)
+        for task in self.build_setup.tasks:
             section = task.GetId()
             if not config.has_section(section):
                 config.add_section(section)
@@ -79,14 +81,13 @@ class Config(object):
 
         if not config.has_section('GitHub'):
                 config.add_section('GitHub')
-        repo = "{user}/{repo}".format(**self.buildSetup.gitConfig)
+        repo = "{user}/{repo}".format(**self.build_setup.git_config)
         config.set('GitHub', "Repository", repo)
-        config.set('GitHub', "Branch", self.buildSetup.gitConfig["branch"])
+        config.set('GitHub', "Branch", self.build_setup.git_config["branch"])
 
         if not config.has_section('Website'):
                 config.add_section('Website')
-        config.set('Website', "url", self.buildSetup.args.websiteUrl)
+        config.set('Website', "url", self.build_setup.args.website_url)
 
-        configFile = open(self._configFilePath, "w")
-        config.write(configFile)
-        configFile.close()
+        with open(self._config_file_path, "w") as f:
+            config.write(f)

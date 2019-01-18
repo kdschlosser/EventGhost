@@ -22,10 +22,10 @@ import re
 import shutil
 import sphinx
 from os.path import join
+from distutils.core import Command
 
 # Local imports
-import builder
-from builder.Utils import EncodePath, GetHtmlHelpCompilerPath, StartProcess
+from Utils import GetHtmlHelpCompilerPath, StartProcess
 
 GUI_CLASSES = [
     "SpinIntCtrl",
@@ -53,50 +53,51 @@ MAIN_CLASSES = [
 ]
 
 
-class BuildChmDocs(builder.Task):
-    description = "Build CHM docs"
+class BuildChmDocs(Command):
 
-    def Setup(self):
-        if self.buildSetup.showGui:
-            if os.path.exists(
-                join(self.buildSetup.sourceDir, "EventGhost.chm")
-            ):
-                self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.package)
+    def initialize_options(self):
+        self.build_setup = None
 
-    def DoTask(self):
-        tmpDir = join(self.buildSetup.tmpDir, "chm")
-        call_sphinx('htmlhelp', self.buildSetup, tmpDir)
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        tmp_dir = join(self.build_setup.tmp_dir, "chm")
+        call_sphinx('htmlhelp', self.build_setup, tmp_dir)
 
         print "calling HTML Help Workshop compiler"
-        htmlHelpCompilerPath = GetHtmlHelpCompilerPath()
-        if htmlHelpCompilerPath is None:
+        compiler_path = GetHtmlHelpCompilerPath()
+        if compiler_path is None:
             raise Exception(
                 "HTML Help Workshop command line compiler not found"
             )
-        hhpPath = join(tmpDir, "EventGhost.hhp")
-        StartProcess(htmlHelpCompilerPath, hhpPath)
-        shutil.copy(join(tmpDir, "EventGhost.chm"), self.buildSetup.sourceDir)
+        hhp_path = join(tmp_dir, "EventGhost.hhp")
+        StartProcess(compiler_path, hhp_path)
+        shutil.copy(
+            join(tmp_dir, "EventGhost.chm"),
+            self.build_setup.source_dir
+        )
 
 
-class BuildHtmlDocs(builder.Task):
-    description = "Build HTML docs"
+class BuildHtmlDocs(Command):
 
-    def Setup(self):
-        if self.buildSetup.showGui:
-            self.activated = False
-        else:
-            self.activated = self.buildSetup.args.docs and \
-                             bool(self.buildSetup.args.websiteUrl)
+    def initialize_options(self):
+        self.build_setup = None
 
-    def DoTask(self):
-        call_sphinx('html', self.buildSetup, join(self.buildSetup.websiteDir, "docs"))
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        call_sphinx(
+            'html',
+            self.build_setup,
+            join(self.build_setup.website_dir, "docs")
+        )
 
 
 def call_sphinx(builder, build_setup, dest_dir):
-    WritePluginList(join(build_setup.docsDir, "pluginlist.rst"))
-    Prepare(build_setup.docsDir)
+    WritePluginList(join(build_setup.docs_dir, "pluginlist.rst"))
+    Prepare(build_setup.docs_dir)
     sphinx.build_main(
         [
             None,
@@ -115,10 +116,10 @@ def call_sphinx(builder, build_setup, dest_dir):
             # write warnings and errors to file:
             # '-w', join('output', 'sphinx_log_chm.txt'),
             "-b", builder,
-            "-D", "version=%s" % build_setup.appVersion,
-            "-D", "release=%s" % build_setup.appVersion,
-            "-d", join(build_setup.tmpDir, ".doctree"),
-            build_setup.docsDir,
+            "-D", "version=%s" % build_setup.app_version,
+            "-D", "release=%s" % build_setup.app_version,
+            "-d", join(build_setup.tmp_dir, ".doctree"),
+            build_setup.docs_dir,
             dest_dir,
         ]
     )

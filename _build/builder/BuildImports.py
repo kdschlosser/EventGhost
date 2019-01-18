@@ -27,9 +27,8 @@ import os
 import sys
 import warnings
 from os.path import join
+from distutils.core import Command
 
-# Local imports
-import builder
 
 MODULES_TO_IGNORE = [
     "__phello__.foo",
@@ -70,60 +69,56 @@ HEADER = """\
 
 warnings.simplefilter('error', DeprecationWarning)
 
-class BuildImports(builder.Task):
-    description = "Build Imports.py"
 
-    def Setup(self):
-        self.outFileName = join(self.buildSetup.pyVersionDir, "Imports.py")
-        if self.buildSetup.showGui:
-            if os.path.exists(self.outFileName):
-                self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.build)
+class BuildImports(Command):
 
-    def DoTask(self):
-        """
-        Starts the actual work.
-        """
-        buildSetup = self.buildSetup
-        MODULES_TO_IGNORE.extend(buildSetup.excludeModules)
+    def initialize_options(self):
+        self.build_setup = None
 
-        globalModuleIndex, badModules = ReadGlobalModuleIndex(
-            join(buildSetup.pyVersionDir, "Global Module Index.txt")
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        build_setup = self.build_setup
+        MODULES_TO_IGNORE.extend(build_setup.excludeModules)
+
+        global_module_index, bad_modules = ReadGlobalModuleIndex(
+            join(build_setup.pyVersionDir, "Global Module Index.txt")
         )
-        MODULES_TO_IGNORE.extend(badModules)
+        MODULES_TO_IGNORE.extend(bad_modules)
 
-        pyDir = sys.real_prefix if hasattr(sys, "real_prefix") else sys.prefix
-        stdLibModules = (
-            FindModulesInPath(join(pyDir, "DLLs"), "", True) +
-            FindModulesInPath(join(pyDir, "Lib"), "", True)
+        py_dir = sys.real_prefix if hasattr(sys, "real_prefix") else sys.prefix
+        std_lib_modules = (
+            FindModulesInPath(join(py_dir, "DLLs"), "", True) +
+            FindModulesInPath(join(py_dir, "Lib"), "", True)
         )
 
-        notFoundModules = []
-        for module in globalModuleIndex:
-            if module in stdLibModules:
+        not_found_modules = []
+        for module in global_module_index:
+            if module in std_lib_modules:
                 continue
             if module in sys.builtin_module_names:
                 continue
             if ShouldBeIgnored(module):
                 continue
-            notFoundModules.append(module)
-        if notFoundModules:
+            not_found_modules.append(module)
+            
+        if not_found_modules:
             print "    Modules found in global module index but not in scan:"
-            for module in notFoundModules:
+            for module in not_found_modules:
                 print "       ", module
 
-        #print "Modules found in scan but not in global module index:"
-        #for module in stdLibModules:
+        # print "Modules found in scan but not in global module index:"
+        # for module in stdLibModules:
         #    if module not in globalModuleIndex:
         #        print "   ", module
 
         outfile = open(self.outFileName, "wt")
         outfile.write(HEADER)
-        for module in stdLibModules:
+        for module in std_lib_modules:
             outfile.write("import %s\n" % module)
         # add every .pyd of the current directory
-        for package in buildSetup.includeModules:
+        for package in build_setup.includeModules:
             outfile.write("\n# modules found for package '%s'\n" % package)
             for module in GetPackageModules(package):
                 outfile.write("import %s\n" % module)
@@ -183,6 +178,7 @@ def FindModulesInPath(path, prefix="", includeDeprecated=False):
             modules.append(moduleName)
     return modules
 
+
 def GetPackageModules(package):
     """
     Returns a list with all modules of the package.
@@ -210,6 +206,7 @@ def GetPackageModules(package):
             moduleList.extend(FindModulesInPath(path, package))
     return moduleList
 
+
 def GetPydFiles(path):
     """
     Returns a list of all .pyd modules in supplied path.
@@ -220,6 +217,7 @@ def GetPydFiles(path):
         if extension.lower() == ".pyd":
             files.append(moduleName)
     return files
+
 
 def ReadGlobalModuleIndex(infile):
     """
@@ -243,6 +241,7 @@ def ReadGlobalModuleIndex(infile):
     inFile.close()
     return modules, badModules
 
+
 def ReadPth(path):
     """
     Read a .PTH file and return the paths inside as a list
@@ -254,6 +253,7 @@ def ReadPth(path):
             continue
         result.append(join(os.path.dirname(path), line.strip()))
     return result
+
 
 def ShouldBeIgnored(moduleName):
     """
@@ -270,6 +270,7 @@ def ShouldBeIgnored(moduleName):
         if moduleParts[:ignorePartsLength] == ignoreParts:
             return True
     return False
+
 
 def TestImport(moduleName, includeDeprecated=False):
     """

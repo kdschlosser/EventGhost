@@ -39,6 +39,7 @@ VerQueryValueW.restype = BOOL
 VerQueryValueW.argtypes = [LPCVOID, LPCWSTR, POINTER(LPVOID), PUINT]
 VerQueryValue = VerQueryValueW  # alias
 
+
 class VS_FIXEDFILEINFO(Structure):
     _fields_ = [
         ("dwSignature", DWORD),  # will be 0xFEEF04BD

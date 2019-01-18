@@ -20,11 +20,13 @@ import _winreg
 from os.path import abspath, exists, join
 
 # Local imports
-from builder.Utils import EncodePath, StartProcess
+from Utils import EncodePath, StartProcess
+
 
 # Exceptions
 class InnoSetupError(Exception):
     pass
+
 
 class InnoInstaller(object):
     """

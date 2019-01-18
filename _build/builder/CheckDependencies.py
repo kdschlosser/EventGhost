@@ -29,10 +29,10 @@ from shutil import copy2
 from string import digits
 
 # Local imports
-from builder import VirtualEnv
-from builder.DllVersionInfo import GetFileVersion
-from builder.InnoSetup import GetInnoCompilerPath
-from builder.Utils import (
+import VirtualEnv
+from DllVersionInfo import GetFileVersion
+from InnoSetup import GetInnoCompilerPath
+from Utils import (
     GetEnvironmentVar, GetHtmlHelpCompilerPath, IsAdmin, StartProcess,
     WrapText,
 )
@@ -69,7 +69,7 @@ class DependencyBase(object):
 
 class DllDependency(DependencyBase):
     def Check(self):
-        with open(join(self.buildSetup.pyVersionDir, "Manifest.xml")) as f:
+        with open(join(self.buildSetup.py_version_dir, "Manifest.xml")) as f:
             manifest = f.read()
         match = re.search(
             'name="(?P<name>.+\.CRT)"\n'
@@ -97,7 +97,7 @@ class DllDependency(DependencyBase):
                 if GetFileVersion(file) != wantedVersion:
                     raise WrongVersion
                 else:
-                    dest = join(self.buildSetup.sourceDir, basename(file))
+                    dest = join(self.buildSetup.source_dir, basename(file))
                     copy2(file, dest)
         else:
             raise MissingDependency

@@ -22,35 +22,37 @@ import time
 from docutils.core import publish_parts
 from jinja2 import Environment, FileSystemLoader
 from os.path import abspath, join
+from distutils.core import Command
+
 
 # Local imports
-import builder
 
-class BuildWebsite(builder.Task):
-    description = "Build website"
+class BuildWebsite(Command):
 
-    def Setup(self):
-        if self.buildSetup.showGui:
-            self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.sync)
+    def initialize_options(self):
+        self.build_setup = None
 
-    def DoTask(self):
-        buildSetup = self.buildSetup
-        menuTabs = (HomePage, DocsPage, WikiPage, ForumPage, DownloadPage)
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        build_setup = self.build_setup
+        menu_tabs = (HomePage, DocsPage, WikiPage, ForumPage, DownloadPage)
         env = Environment(
             loader=FileSystemLoader(
-                abspath(join(buildSetup.dataDir, 'templates'))
+                abspath(join(build_setup.data_dir, 'templates'))
             ),
             trim_blocks=True
         )
         env.globals = {
-            "files": GetSetupFiles(join(buildSetup.websiteDir, "downloads")),
-            "MENU_TABS": menuTabs,
+            "files": GetSetupFiles(
+                join(build_setup.website_dir, "downloads")
+            ),
+            "MENU_TABS": menu_tabs,
         }
         env.filters = {'rst2html': rst2html}
-        for page in menuTabs:
-            path = os.path.abspath(join(buildSetup.websiteDir, page.outfile))
+        for page in menu_tabs:
+            path = os.path.abspath(join(build_setup.website_dir, page.outfile))
             try:
                 os.makedirs(os.path.dirname(path))
             except os.error, exc:
@@ -129,6 +131,7 @@ def GetSetupFiles(srcDir):
         return cmp(x, y)
 
     return list(reversed(sorted(files, cmp=Cmp)))
+
 
 def rst2html(rst):
     return publish_parts(rst, writer_name="html")["fragment"]

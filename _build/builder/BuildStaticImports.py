@@ -19,9 +19,9 @@
 import os
 from glob import glob
 from os.path import join
+from distutils.core import Command
 
 # Local imports
-import builder
 
 SINGLETONS = (
     "document",
@@ -65,21 +65,24 @@ def RegisterPlugin(**dummyKwArgs):
     pass
 """
 
-class BuildStaticImports(builder.Task):
-    description = "Build StaticImports.py"
 
-    def Setup(self):
-        self.outFileName = join(self.buildSetup.sourceDir,
-                                "eg", "StaticImports.py")
-        if self.buildSetup.showGui:
-            if os.path.exists(self.outFileName):
-                self.activated = False
-        else:
-            self.activated = bool(self.buildSetup.args.build)
+class BuildStaticImports(Command):
 
-    def DoTask(self):
-        outDir = join(self.buildSetup.sourceDir, "eg")
-        outfile = open(self.outFileName, "w")
+    def initialize_options(self):
+        self.build_setup = None
+        self.out_file_name = None
+
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+        self.out_file_name = join(
+            self.build_setup.source_dir,
+            "eg", 
+            "StaticImports.py"
+        )
+
+    def run(self):
+        outDir = join(self.build_setup.source_dir, "eg")
+        outfile = open(self.out_file_name, "w")
         outfile.write(HEADER)
         outfile.write("# py" + "lint: disable-msg=W0611,W0614,C0103\n")
         outfile.write("import eg\n")
@@ -89,8 +92,8 @@ class BuildStaticImports(builder.Task):
         ScanDir(outDir, outfile, "Classes.UndoHandler")
         outfile.write("\n")
         for name in SINGLETONS:
-            clsName = name[0].upper() + name[1:]
-            outfile.write("%s = %s()\n" % (name, clsName))
+            cls_name = name[0].upper() + name[1:]
+            outfile.write("%s = %s()\n" % (name, cls_name))
         outfile.write(FOOTER)
         outfile.close()
 

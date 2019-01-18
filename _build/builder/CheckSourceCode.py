@@ -18,9 +18,7 @@
 
 import os
 from os.path import join, splitext
-
-# Local imports
-import builder
+from distutils.core import Command
 
 PLUGINS = [
     "EventGhost",
@@ -80,72 +78,81 @@ HEADER = """# -*- coding: utf-8 -*-
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 """
 
-class CheckSourceCode(builder.Task):
-    description = "Check source code"
 
-    def Setup(self):
-        if not self.buildSetup.showGui:
-            self.activated = bool(self.buildSetup.args.check)
+class CheckSourceCode(Command):
 
-    def DoTask(self):
-        sourceDir = self.buildSetup.sourceDir
-        searchDirs = [
-            join(sourceDir, "eg"),
-            join(self.buildSetup.buildDir),
+    def initialize_options(self):
+        self.build_setup = None
+
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        source_dir = self.build_setup.source_dir
+        search_dirs = [
+            join(source_dir, "eg"),
+            join(self.build_setup.build_dir),
         ]
+        
         for plugin in PLUGINS:
-            searchDirs.append(join(sourceDir, "plugins", plugin))
-        serialDir = join(sourceDir, "eg", "WinApi", "serial")
+            search_dirs.append(join(source_dir, "plugins", plugin))
+        serial_dir = join(source_dir, "eg", "WinApi", "serial")
 
-        for searchDir in searchDirs:
+        for searchDir in search_dirs:
             for root, dirs, files in os.walk(searchDir):
                 for filename in files:
                     if splitext(filename)[1].lower() in (".py", ".pyw"):
                         path = join(root, filename)
-                        if path.startswith(serialDir):
+                        if path.startswith(serial_dir):
                             continue
-                        self.CheckHeader(path)
-                        self.CheckLineLength(path)
-                        # don't fix files that are versioned but haven't changed
+                        self.check_header(path)
+                        self.check_line_length(path)
+                        # don't fix files that are versioned but haven't 
+                        # changed
                         # TODO: something equivalent in git? repo.status
                         # itemStatus = status[paths.index(path)]
-                        # if itemStatus.text_status == pysvn.wc_status_kind.normal:
+                        # if itemStatus.text_status == pysvn.wc_status_
+                        # kind.normal:
                         #     continue
-                        self.FixTrailingWhitespace(path)
+                        self.fix_trailing_whitespace(path)
 
-    def CheckHeader(self, path):
+    @staticmethod
+    def check_header(path):
         """
         Checks if the source file has the right GPLv2 header.
         """
-        sourceFile = open(path, "rt")
-        header = sourceFile.read(len(HEADER))
+        source_file = open(path, "rt")
+        header = source_file.read(len(HEADER))
         if header != HEADER:
             print "wrong file header:", path
 
-    def CheckLineLength(self, path):
+    @staticmethod
+    def check_line_length(path):
         """
         Checks if the source file doesn't exceed the line length.
         """
-        sourceFile = open(path, "rt")
-        for line in sourceFile.readlines():
+        source_file = open(path, "rt")
+        for line in source_file.readlines():
             if len(line.rstrip()) > 79:
                 print "line too long", path, line.rstrip()
                 return
 
-    def FixTrailingWhitespace(self, path):
+    @staticmethod
+    def fix_trailing_whitespace(path):
         """
         Removes trailing whitespace from the source file.
         """
-        sourceFile = open(path, "rt")
-        oldContent = sourceFile.read()
-        sourceFile.close()
-        lines = [line.rstrip() for line in oldContent.splitlines()]
+        with open(path, "rt") as f:
+            old_content = f.read()
+        
+        lines = [line.rstrip() for line in old_content.splitlines()]
         while len(lines) and lines[-1].strip() == "":
             del lines[-1]
+            
         lines.append("")
         lines.append("")
-        newContent = "\n".join(lines)
-        if oldContent != newContent:
-            sourceFile = open(path, "wt")
-            sourceFile.write(newContent)
-            sourceFile.close()
+        
+        new_content = "\n".join(lines)
+        if old_content != new_content:
+            with open(path, "wt") as f:
+                f.write(new_content)

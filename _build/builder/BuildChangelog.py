@@ -22,37 +22,36 @@ from collections import OrderedDict
 from os.path import join
 from shutil import copy2
 from time import localtime, strftime
+from distutils.core import Command
 
 # Local imports
-import builder
-from builder.Utils import BuildError, EscapeMarkdown, NextPage
+from Utils import BuildError, EscapeMarkdown, NextPage
 
-class BuildChangelog(builder.Task):
-    """
-    Populate CHANGELOG.md with the latest changes from GitHub.
-    """
-    description = "Build changelog"
 
-    def Setup(self):
-        if not self.buildSetup.showGui:
-            self.activated = bool(self.buildSetup.args.package)
+class BuildChangelog(Command):
 
-    def DoTask(self):
-        if not self.buildSetup.gitConfig["token"]:
+    def initialize_options(self):
+        self.build_setup = None
+
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        if not self.build_setup.gitConfig["token"]:
             print "WARNING: Skipping changelog build due to invalid token."
             return
 
-        buildSetup = self.buildSetup
-        changelog_path = join(buildSetup.outputDir, "CHANGELOG.md")
+        build_setup = self.build_setup
+        changelog_path = join(build_setup.outputDir, "CHANGELOG.md")
         copy2(
-            join(buildSetup.sourceDir, "CHANGELOG.md"),
+            join(build_setup.sourceDir, "CHANGELOG.md"),
             changelog_path
         )
 
-        token = buildSetup.gitConfig["token"]
-        user = buildSetup.gitConfig["user"]
-        repo = buildSetup.gitConfig["repo"]
-        branch = buildSetup.gitConfig["branch"]
+        token = build_setup.gitConfig["token"]
+        user = build_setup.gitConfig["user"]
+        repo = build_setup.gitConfig["repo"]
+        branch = build_setup.gitConfig["branch"]
         gh = GitHub(token=token)
 
         # fetch all tags from github
@@ -134,31 +133,31 @@ class BuildChangelog(builder.Task):
                 prs[title_other].append(pr)
 
         # prepare the grouped output
-        buildDate = strftime("%Y-%m-%d", localtime(buildSetup.buildTime))
-        releaseUrl = "https://github.com/{0}/{1}/releases/tag/v{2}".format(
-            user, repo, buildSetup.appVersion
+        build_date = strftime("%Y-%m-%d", localtime(build_setup.build_time))
+        release_url = "https://github.com/{0}/{1}/releases/tag/v{2}".format(
+            user, repo, build_setup.app_version
         )
         changes = dict(
             md=["## [{0}]({1}) ({2})\n".format(
-                buildSetup.appVersion,
-                releaseUrl,
-                buildDate
+                build_setup.appVersion,
+                release_url,
+                build_date
             )],
             bb=["[size=150][b][url={0}]{1}[/url] ({2})[/b][/size]\n".format(
-                releaseUrl,
-                buildSetup.appVersion,
-                buildDate
+                release_url,
+                build_setup.app_version,
+                build_date
             )]
         )
-        print "## {0} ({1})".format(buildSetup.appVersion, buildDate)
-        for title, items in prs.iteritems():
+        print "## {0} ({1})".format(build_setup.appVersion, build_date)
+        for title, items in prs.items():
             if items:
                 changes['md'].append("\n**{0}:**\n\n".format(title))
                 changes['bb'].append("\n[b]{0}:[/b]\n[list]\n".format(title))
                 print "\n{0}:\n".format(title)
                 for pr in items:
                     changes['md'].append(
-                        u"* {0} [\#{1}]({2}) ([{3}]({4}))\n".format(
+                        "* {0} [\#{1}]({2}) ([{3}]({4}))\n".format(
                             EscapeMarkdown(pr["title"]),
                             pr["number"],
                             pr["html_url"],
@@ -167,8 +166,8 @@ class BuildChangelog(builder.Task):
                         )
                     )
                     changes['bb'].append(
-                        u"[*] {0} [url={1}]{2}[/url] "
-                        u"([url={3}]{4}[/url])\n".format(
+                        "[*] {0} [url={1}]{2}[/url] "
+                        "([url={3}]{4}[/url])\n".format(
                             pr["title"],
                             pr["html_url"],
                             pr["number"],
@@ -191,12 +190,12 @@ class BuildChangelog(builder.Task):
 
         # write a changelog file in bbcode for the news section in forum
         changes['bb'].append(
-            u"\n\n[size=110][url=https://github.com/EventGhost/EventGhost/"
-            u"releases/download/v{0}/EventGhost_{0}_Setup.exe]Download now"
-            u"[/url][/size]\n".format(buildSetup.appVersion)
+            "\n\n[size=110][url=https://github.com/EventGhost/EventGhost/"
+            "releases/download/v{0}/EventGhost_{0}_Setup.exe]Download now"
+            "[/url][/size]\n".format(build_setup.appVersion)
         )
         try:
-            fn = join(buildSetup.outputDir, "CHANGELOG_THIS_RELEASE.bb")
+            fn = join(build_setup.outputDir, "CHANGELOG_THIS_RELEASE.bb")
             out = codecs.open(fn, "w", "utf8")
             out.writelines(changes['bb'])
             out.close()
@@ -205,7 +204,7 @@ class BuildChangelog(builder.Task):
 
         # write a file with current changes in markdown for release description
         try:
-            fn = join(buildSetup.outputDir, "CHANGELOG_THIS_RELEASE.md")
+            fn = join(build_setup.outputDir, "CHANGELOG_THIS_RELEASE.md")
             out = codecs.open(fn, "w", "utf8")
             out.writelines(changes['md'][1:])
             out.close()
@@ -241,4 +240,9 @@ class BuildChangelog(builder.Task):
             if old_changes:
                 outfile.write('\n\n')
                 outfile.write(old_changes)
+
             outfile.close()
+
+
+
+

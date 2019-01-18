@@ -22,10 +22,9 @@ import wx
 from agithub.GitHub import GitHub
 from os import environ
 from os.path import join
+from distutils.core import Command
 
-# Local imports
-import builder
-from builder.Utils import BuildError, IsCIBuild, NextPage
+from Utils import BuildError, IsCIBuild, NextPage
 
 if sys.version_info[0:2] > (3, 0):
     import http.client
@@ -36,37 +35,53 @@ else:
     import urllib as urllib
     urllib.parse = urllib
 
-class ReleaseToGitHub(builder.Task):
-    description = "Release to GitHub"
 
-    def Setup(self):
-        self.enabled = bool(self.buildSetup.gitConfig["token"])
-        if self.buildSetup.showGui:
-            self.activated = False
+class ReleaseToGitHub(Command):
+
+    def initialize_options(self):
+        self.build_setup = None
+        self.chglog_file = "CHANGELOG.md"
+        self.chglog_short = "CHANGELOG_THIS_RELEASE.md"
+
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+        self.app_ver = "v" + self.build_setup.app_version
+
+        self.setup_file = 'EventGhost_{0}_Setup.exe'.format(self.app_ver)
+        self.setup_path = join(self.build_setup.output_dir, self.setup_file)
+        self.chglog_path = join(self.build_setup.output_dir, self.chglog_file)
+
+        self.git_config = self.build_setup.git_config
+        token = self.git_config["token"]
+        if not token:
+            self.gh = None
         else:
-            self.activated = (
-                bool(self.buildSetup.args.release) and self.enabled
-            )
+            self.gh = GitHub(token=token)
+            self.repo, self.branch = self.get_repo()
 
-    def DoTask(self):
-        buildSetup = self.buildSetup
-        appVer = "v" + buildSetup.appVersion
-        gitConfig = buildSetup.gitConfig
-        token = gitConfig["token"]
-        user = gitConfig["user"]
-        repo = gitConfig["repo"]
-        branch = gitConfig["branch"]
-        setupFile = 'EventGhost_{0}_Setup.exe'.format(buildSetup.appVersion)
-        setupPath = join(buildSetup.outputDir, setupFile)
-        self.chglogFile = "CHANGELOG.md"
-        self.chglogShort = "CHANGELOG_THIS_RELEASE.md"
-        chglogPath = join(buildSetup.outputDir, self.chglogFile)
+    def get_repo(self):
+        user = self.git_config["user"]
+        repo = self.git_config["repo"]
+        branch = self.git_config["branch"]
+        repo = self.gh.repos[user][repo]
+        branch = repo.branches[branch]
+        return repo, branch
+
+    def run(self):
+        build_setup = self.build_setup
+
+        if self.gh is None:
+            return
 
         print "reading changelog"
         try:
-            f = open(chglogPath, 'r')
+            f = open(self.chglog_path, 'r')
         except IOError:
-            print "ERROR: couldn't read changelog file ({0}).".format(self.chglogFile)
+            print (
+                "ERROR: "
+                "couldn't read changelog file ({0}).".format(self.chglog_file)
+            )
+
             return
         else:
             changelog = f.read()
@@ -74,44 +89,44 @@ class ReleaseToGitHub(builder.Task):
 
         print "loading installer file"
         try:
-            f = open(setupPath, 'rb')
+            f = open(self.setup_path, 'rb')
         except IOError:
-            print "ERROR: '{0}' not found.".format(setupFile)
+            print "ERROR: '{0}' not found.".format(self.setup_file)
             return
         else:
-            setupFileContent = f.read()
+            setup_file_content = f.read()
             f.close()
-
-        gh = GitHub(token=token)
 
         # delete a temporary tag that were used to deploy a release
         if IsCIBuild():
             # when we are on CI, we only get here,
             #  when a deploy tag was created
-            self.DeleteDeployTag(gh)
-            branch = gitConfig["branch"] = 'master'
+            self.delete_deploy_tag()
+            self.git_config["branch"] = 'master'
+            self.repo, self.branch = self.get_repo()
 
         print "getting release info"
-        releaseExists = False
-        releaseId = None
-        uploadUrl = None
+        release_exists = False
+        release_id = None
+        upload_url = None
         page = 1
         while page > 0:
-            rc, data = gh.repos[user][repo].releases.get(
-                sha=branch,
+            rc, data = self.repo.releases.get(
+                sha=self.git_config["branch"],
                 per_page=100,
                 page=page
             )
-            page = NextPage(gh)
+            page = NextPage(self.gh)
             if rc == 200:
                 for rel in data:
-                    if rel['name'] == appVer:
+                    if rel['name'] == self.app_ver:
                         msg = (
                             "Found an existing GitHub release matching"
-                            " '{0}'".format(appVer)
+                            " '{0}'".format(self.app_ver)
                         )
                         if IsCIBuild():
                             raise BuildError(msg)
+
                         app = wx.GetApp()
                         win = app.GetTopWindow()
                         dlg = wx.MessageDialog(
@@ -122,79 +137,85 @@ class ReleaseToGitHub(builder.Task):
                         )
                         if dlg.ShowModal() == wx.ID_NO:
                             return
-                        releaseId = rel["id"]
-                        uploadUrl = str(rel['upload_url'][:-13])
-                        releaseExists = True
+                        release_id = rel["id"]
+                        upload_url = str(rel['upload_url'][:-13])
+                        release_exists = True
                         page = 0
                         break
 
         print "getting branch info"
-        rc, data = gh.repos[user][repo].branches[branch].get()
+
+        rc, data = self.branch.get()
         if rc != 200:
             raise BuildError("ERROR: couldn't get branch info.")
-        commitSha = data['commit']['sha']
+        commit_sha = data['commit']['sha']
         # if not uploadUrl:
         #     uploadUrl = str(data['upload_url'][:-13])
 
-        rc, data = gh.repos[user][repo].contents[self.chglogFile].get(ref=branch)
+        rc, data = self.repo.contents[self.chglog_file].get(
+            ref=self.git_config['branch']
+        )
         if rc == 200:
-            remoteChangelog = base64.decodestring(data["content"])
+            remote_changelog = base64.decodestring(data["content"])
         else:
-            remoteChangelog = None
-        newCommitSha = None
-        if changelog != remoteChangelog:
-            newCommitSha = self.CommitChangelog(gh, commitSha, changelog)
+            remote_changelog = None
+        new_commit_sha = None
+        if changelog != remote_changelog:
+            new_commit_sha = self.commit_changelog(commit_sha, changelog)
 
-        if not releaseExists:
+        if not release_exists:
             print "reading changelog for this release"
             try:
-                f = open(join(buildSetup.outputDir, self.chglogShort), 'r')
+                f = open(join(build_setup.output_dir, self.chglog_short), 'r')
             except IOError:
-                print "ERROR: couldn't read changelog file ({0}).".format(
-                    self.chglogShort)
-                relChglog = ""
+                print (
+                    "ERROR: couldn't read changelog "
+                    "file ({0}).".format(self.chglog_short)
+                )
+                rel_chglog = ""
             else:
-                relChglog = f.read().strip()
+                rel_chglog = f.read().strip()
                 f.close()
 
             print "creating release"
             body = dict(
-                tag_name=appVer,
-                target_commitish=newCommitSha,
-                name=appVer,
-                body=relChglog,
+                tag_name=self.app_ver,
+                target_commitish=new_commit_sha,
+                name=self.app_ver,
+                body=rel_chglog,
                 draft=False,
-                prerelease=("-" in self.buildSetup.appVersion)
+                prerelease=("-" in self.app_ver)
             )
-            rc, data = gh.repos[user][repo].releases.post(body=body)
+            rc, data = self.repo.releases.post(body=body)
             if rc != 201:
                 raise BuildError(
                     "ERROR: couldn't create a release on GitHub."
                 )
-            uploadUrl = str(data['upload_url'][:-13])
+            upload_url = str(data['upload_url'][:-13])
         else:
             print 'deleting existing asset'
-            rc, data = gh.repos[user][repo].releases[releaseId].assets.get()
+            rc, data = self.repo.releases[release_id].assets.get()
             if rc == 200:
                 for asset in data:
-                    if asset["name"] == setupFile:
-                        rc, data = gh.repos[user][repo].releases.\
-                            assets[asset["id"]].delete()
+                    if asset["name"] == self.setup_file:
+                        rc, data = (
+                            self.repo.releases.assets[asset["id"]].delete()
+                        )
                         if rc != 204:
                             print "ERROR: couldn't delete existing asset."
                             return
                         break
 
         print "uploading setup file"
-        url = uploadUrl + '?name={0}'.format(setupFile)
+        url = upload_url + '?name={0}'.format(self.setup_file)
         headers = {
-            'content-type': 'application/octet-stream',
-            'authorization': 'Token {0}'.format(token),
-            'accept': 'application/vnd.github.v3+json',
-            'user-agent': 'agithub/v2.0'
+            'content-type':  'application/octet-stream',
+            'authorization': 'Token {0}'.format(self.git_config['token']),
+            'accept':        'application/vnd.github.v3+json',
+            'user-agent':    'agithub/v2.0'
         }
         conn = http.client.HTTPSConnection('uploads.github.com')
-        conn.request('POST', url, setupFileContent, headers)
+        conn.request('POST', url, setup_file_content, headers)
         response = conn.getresponse()
         status = response.status
         conn.close()
@@ -203,41 +224,35 @@ class ReleaseToGitHub(builder.Task):
                 "ERROR: couldn't upload installer file to GitHub."
             )
 
-    def CommitChangelog(self, gh, commitSha, changelog):
-        buildSetup = self.buildSetup
-        appVer = "v" + buildSetup.appVersion
-        gitConfig = buildSetup.gitConfig
-        user = gitConfig["user"]
-        repo = gitConfig["repo"]
-        branch = gitConfig["branch"]
-        ref = 'heads/{0}'.format(branch)
+    def commit_changelog(self, commit_sha, changelog):
+        ref = 'heads/{0}'.format(self.git_config["branch"])
 
         print "getting commit referenced by branch"
-        rc, data = gh.repos[user][repo].git.commits[commitSha].get()
+        rc, data = self.repo.git.commits[commit_sha].get()
         if rc != 200:
             raise BuildError("ERROR: couldn't get commit info.")
-        treeSha = data['tree']['sha']
+        tree_sha = data['tree']['sha']
 
         print "getting tree"
-        rc, data = gh.repos[user][repo].git.trees[treeSha].get()
+        rc, data = self.repo.git.trees[tree_sha].get()
         if rc != 200:
-            raise BuildError( "ERROR: couldn't get tree info.")
+            raise BuildError("ERROR: couldn't get tree info.")
 
         blob = None
-        print "getting blob for {0}".format(self.chglogFile)
+        print "getting blob for {0}".format(self.chglog_file)
         for entry in data['tree']:
-            if entry['path'] == self.chglogFile and entry['type'] == 'blob':
+            if entry['path'] == self.chglog_file and entry['type'] == 'blob':
                 blob = entry
                 break
         if blob is None:
-            raise BuildError( "ERROR: couldn't get blob info.")
+            raise BuildError("ERROR: couldn't get blob info.")
 
         print "posting new changelog"
         body = dict(content=changelog, encoding='utf-8')
-        rc, data = gh.repos[user][repo].git.blobs.post(body=body)
+        rc, data = self.repo.git.blobs.post(body=body)
         if rc != 201:
             raise BuildError("ERROR: couldn't post new changelog contents.")
-
+apart
         print "posting tree"
         newblob = dict(
             path=blob['path'],
@@ -245,43 +260,43 @@ class ReleaseToGitHub(builder.Task):
             type=blob['type'],
             sha=data['sha']
         )
-        body = dict(tree=[newblob], base_tree=treeSha)
-        rc, data = gh.repos[user][repo].git.trees.post(body=body)
+        body = dict(tree=[newblob], base_tree=tree_sha)
+        rc, data = self.repo.git.trees.post(body=body)
         if rc != 201:
             raise BuildError("ERROR: couldn't post new tree.")
-        newTreeSha = data['sha']
+        new_tree_sha = data['sha']
 
         print "creating commit for changelog update"
         body = {
-            'message': "Add changelog for {0}\n[skip appveyor]".format(appVer),
-            'tree': newTreeSha,
-            'parents': [commitSha]
+            'message': (
+                "Add changelog for {0}\n[skip appveyor]".format(self.app_ver)
+            ),
+            'tree':    new_tree_sha,
+            'parents': [commit_sha]
         }
-        rc, data = gh.repos[user][repo].git.commits.post(body=body)
+        rc, data = self.repo.git.commits.post(body=body)
         if rc != 201:
             raise BuildError(
                 "ERROR: couldn't create commit for changelog update."
             )
-        newCommitSha = data['sha']
+        new_commit_sha = data['sha']
 
         print "updating reference for branch to new commit"
-        body = dict(sha=newCommitSha)
-        rc, data = gh.repos[user][repo].git.refs[ref].patch(body=body)
+        body = dict(sha=new_commit_sha)
+        rc, data = self.repo.git.refs[ref].patch(body=body)
         if rc != 200:
             raise BuildError(
                 "ERROR: couldn't update reference ({0}) "
                 "with new commit.".format(ref)
             )
 
-        return newCommitSha
+        return new_commit_sha
 
-    def DeleteDeployTag(self, gh):
+    def delete_deploy_tag(self):
         """
         Delete a temporary tag (github release) that was used to deploy
         a new release.
         """
-        user = self.buildSetup.gitConfig["user"]
-        repo = self.buildSetup.gitConfig["repo"]
 
         deploy_tag_name = environ.get('APPVEYOR_REPO_TAG_NAME')
         if not deploy_tag_name:
@@ -290,11 +305,11 @@ class ReleaseToGitHub(builder.Task):
         deploy_tag = None
         page = 1
         while page > 0:
-            rc, data = gh.repos[user][repo].git.refs.tags.get(
+            rc, data = self.repo.git.refs.tags.get(
                 per_page=100,
                 page=page
             )
-            page = NextPage(gh)
+            page = NextPage(self.gh)
             if rc == 200:
                 for tag in data:
                     if tag['ref'].rsplit('/', 1)[1] == deploy_tag_name:
@@ -303,16 +318,16 @@ class ReleaseToGitHub(builder.Task):
                         break
 
         if deploy_tag and deploy_tag['object']['type'] == 'commit':
-            rc, data = gh.repos[user][repo].releases.tags[deploy_tag_name].get(
+            rc, data = self.repo.git.releases.tags[deploy_tag_name].get(
                 per_page=100,
                 page=page
             )
             if rc == 200:
-                rc, data2 = gh.repos[user][repo].releases[data['id']].delete()
+                rc, data2 = self.repo.git.releases[data['id']].delete()
                 if rc == 204:
                     print "deploy github release deleted"
 
         if deploy_tag:
-            rc, data = gh.repos[user][repo].git.refs.tags[deploy_tag_name].delete()
+            rc, data = self.repo.git.git.refs.tags[deploy_tag_name].delete()
             if rc == 204:
                 print "deploy tag deleted"
