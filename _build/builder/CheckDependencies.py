@@ -18,13 +18,11 @@
 
 import glob
 import os
-import pip
 import platform
 import re
 import sys
 import warnings
 from os.path import basename, exists, expandvars, join
-from pip._vendor import requests
 from shutil import copy2
 from string import digits
 
@@ -51,6 +49,26 @@ class MissingPowerShell(Exception):
 class WrongVersion(Exception):
     pass
 
+
+try:
+    from pip import get_installed_distributions
+except ImportError:
+    try:
+        from pip._internal.utils.misc import get_installed_distributions
+    except ImportError:
+        raise MissingDependency('pip')
+
+INSTALLED_MODULES = dict()
+
+for dist in get_installed_distributions():
+    try:
+        n, v = str(dist).split(' ')
+    except ValueError:
+        continue
+
+    INSTALLED_MODULES[n] = v
+
+
 class DependencyBase(object):
     #name = None
     #version = None
@@ -59,6 +77,7 @@ class DependencyBase(object):
     module = None
     package = None
     url = None
+    dist_name = None
 
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
@@ -100,7 +119,7 @@ class DllDependency(DependencyBase):
                     dest = join(self.buildSetup.sourceDir, basename(file))
                     copy2(file, dest)
         else:
-            raise MissingDependency
+            raise MissingDependency(self.name)
 
 
 class GitDependency(DependencyBase):
@@ -111,7 +130,7 @@ class GitDependency(DependencyBase):
 
     def Check(self):
         if not (os.system('"%s" --version >NUL 2>NUL' % GetGitPath()) == 0):
-            raise MissingDependency
+            raise MissingDependency(self.name)
 
 
 class HtmlHelpWorkshopDependency(DependencyBase):
@@ -126,7 +145,7 @@ class HtmlHelpWorkshopDependency(DependencyBase):
 
     def Check(self):
         if not GetHtmlHelpCompilerPath():
-            raise MissingDependency
+            raise MissingDependency(self.name)
 
 
 class InnoSetupDependency(DependencyBase):
@@ -138,56 +157,61 @@ class InnoSetupDependency(DependencyBase):
 
     def Check(self):
         if not GetInnoCompilerPath():
-            raise MissingDependency
+            raise MissingDependency(self.name)
 
 
 class ModuleDependency(DependencyBase):
+    version = None
+    name = None
+
     def Check(self):
-        try:
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore")
-                module = __import__(self.module)
-        except ImportError:
-            raise MissingDependency
-        if self.attr and hasattr(module, self.attr):
-            version = getattr(module, self.attr)
-        elif hasattr(module, "__version__"):
-            version = module.__version__
-        elif hasattr(module, "VERSION"):
-            version = module.VERSION
-        elif hasattr(module, "version"):
-            version = module.version
+        if self.dist_name and self.dist_name in INSTALLED_MODULES:
+            version = INSTALLED_MODULES[self.dist_name]
+            if CompareVersion(version, self.version) < 0:
+                raise WrongVersion
         else:
-            result = [
-                p.version
-                for p in pip.get_installed_distributions()
-                if str(p).startswith(self.name + " ")
-            ]
-            if result:
-                version = result[0]
+            try:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    module = __import__(self.module)
+            except ImportError:
+                raise MissingDependency(self.name)
+            if self.attr and hasattr(module, self.attr):
+                version = getattr(module, self.attr)
+            elif hasattr(module, "__version__"):
+                version = module.__version__
+            elif hasattr(module, "VERSION"):
+                version = module.VERSION
+            elif hasattr(module, "version"):
+                version = module.version
             else:
                 raise Exception("Can't get version information")
-        if not isinstance(version, basestring):
-            version = ".".join(str(x) for x in version)
-        if CompareVersion(version, self.version) < 0:
-            raise WrongVersion
+
+            if not isinstance(version, basestring):
+                version = ".".join(str(x) for x in version)
+            if CompareVersion(version, self.version) < 0:
+                raise WrongVersion
 
 
 class PyWin32Dependency(DependencyBase):
     name = "pywin32"
+    dist_name = 'pywin32'
     version = "220"
     url = "https://eventghost.github.io/dist/dependencies/pywin32-220-cp27-none-win32.whl"
 
     def Check(self):
-        versionFilePath = join(
-            sys.prefix, "lib/site-packages/pywin32.version.txt"
-        )
         try:
-            version = open(versionFilePath, "rt").readline().strip()
-        except IOError:
-            raise MissingDependency
-        if CompareVersion(version, self.version) < 0:
-            raise WrongVersion
+            DependencyBase.Check(self)
+        except:
+            versionFilePath = join(
+                sys.prefix, "lib/site-packages/pywin32.version.txt"
+            )
+            try:
+                version = open(versionFilePath, "rt").readline().strip()
+            except IOError:
+                raise MissingDependency(self.name)
+            if CompareVersion(version, self.version) < 0:
+                raise WrongVersion
 
 
 class StacklessDependency(DependencyBase):
@@ -199,30 +223,108 @@ class StacklessDependency(DependencyBase):
         try:
             import stackless  # NOQA
         except:
-            raise MissingDependency
+            raise MissingDependency(self.name)
         if CompareVersion("%d.%d.%d" % sys.version_info[:3], self.version) < 0:
             raise WrongVersion
 
 
+class pycURLDependency(DependencyBase):
+    name = "pycURL"
+    dist_name = 'pycurl'
+    module = 'pycurl'
+    version = "7.43.0.2"
+
+    def Check(self):
+        try:
+            DependencyBase.Check(self)
+        except:
+            try:
+                import pycurl  # NOQA
+            except:
+                raise MissingDependency(self.name)
+            if CompareVersion(
+                pycurl.version.split(' ')[0].split('/')[-1],
+                self.version
+            ) < 0:
+                raise WrongVersion
+
+
+class agithubDependency(DependencyBase):
+    name = "agithub"
+    dist_name = 'agithub'
+    version = "2.1"
+    url = ""
+
+    def Check(self):
+        try:
+            DependencyBase.Check(self)
+        except:
+            try:
+                import agithub.base  # NOQA
+            except:
+                raise MissingDependency(self.name)
+            if CompareVersion(
+                '.'.join(str(ver) for ver in agithub.base.VERSION),
+                self.version
+            ) < 0:
+                raise WrongVersion
+
+
 DEPENDENCIES = [
+    agithubDependency(),
+    pycURLDependency(),
+    ModuleDependency(
+        name = "OpenSSL",
+        dist_name='pyopenssl',
+        module = "OpenSSL",
+        version = "18.0.0",
+    ),
+    ModuleDependency(
+        name = "tornado",
+        dist_name='tornado',
+        module = "tornado",
+        version = "5.1.1",
+    ),
+    ModuleDependency(
+        name = "qrcode",
+        dist_name='qrcode',
+        module = "qrcode",
+        version = "6.1",
+    ),
+    ModuleDependency(
+        name = "websocket-client",
+        dist_name='websocket-client',
+        module = "websocket",
+        version = "0.48.0",
+    ),
+    ModuleDependency(
+        name = "requests",
+        dist_name='requests',
+        module = "requests",
+        version = "2.21.0",
+    ),
     ModuleDependency(
         name = "CommonMark",
+        dist_name='CommonMark',
         module = "CommonMark",
         version = "0.7.0",
     ),
     ModuleDependency(
         name = "comtypes",
+        dist_name='comtypes',
         module = "comtypes",
         version = "1.1.2",
     ),
     ModuleDependency(
         name = "ctypeslib",
+        dist_name='ctypeslib',
         module = "ctypeslib",
         version = "0.5.6",
         url = "https://eventghost.github.io/dist/dependencies/ctypeslib-0.5.6-cp27-none-any.whl"
     ),
     ModuleDependency(
         name = "future",
+        dist_name='future',
         module = "future",
         version = "0.15.2",
     ),
@@ -230,7 +332,7 @@ DEPENDENCIES = [
     HtmlHelpWorkshopDependency(),
     InnoSetupDependency(),
     DllDependency(
-        name="Microsoft Visual C++ Redistributable",
+        name="2008 Microsoft Visual C++ x86 Redistributable",
         package="vcredist2008",
         #url = "https://www.microsoft.com/download/details.aspx?id=29",
         url = (
@@ -240,17 +342,20 @@ DEPENDENCIES = [
     ),
     ModuleDependency(
         name = "Pillow",
+        dist_name='Pillow',
         module = "PIL",
         attr = "PILLOW_VERSION",
         version = "3.1.1",
     ),
     ModuleDependency(
         name = "py2exe_py2",
+        dist_name='py2exe',
         module = "py2exe",
         version = "0.6.9",
     ),
     ModuleDependency(
         name = "PyCrypto",
+        dist_name='pycrypto',
         module = "Crypto",
         version = "2.6.1",
         url = "https://eventghost.github.io/dist/dependencies/pycrypto-2.6.1-cp27-none-win32.whl",
@@ -258,6 +363,7 @@ DEPENDENCIES = [
     PyWin32Dependency(),
     ModuleDependency(
         name = "Sphinx",
+        dist_name='Sphinx',
         module = "sphinx",
         version = "1.7.5",
     ),
@@ -429,6 +535,7 @@ def CreateVirtualEnv():
     return result
 
 def DownloadFile(url, path = "%TEMP%"):
+    import requests
     file = expandvars(join(path, basename(url.split("?")[0])))
     r = requests.get(url, stream=True)
     with open(file, "wb") as f:

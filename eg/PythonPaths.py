@@ -47,6 +47,12 @@ os.environ['REQUESTS_CA_BUNDLE'] = os.path.join(
     'cacert.pem'
 )
 
+os.environ['CURL_CA_BUNDLE'] = os.path.join(
+    sitePackagesDir, 
+    'requests', 
+    'cacert.pem'
+)
+
 try:
     if "PYTHONPATH" in os.environ:
         for path in os.environ.get("PYTHONPATH").split(os.pathsep):

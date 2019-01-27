@@ -51,6 +51,17 @@ class MyBuilder(builder.Builder):
         "six",
         "win32com",
         "wx",
+        "requests",
+        "curl",
+        "pycurl",
+        "agithub",
+        "websocket",
+        "tornado",
+        "qrcode",
+        "OpenSSL",
+        "cFunctions",
+        "_dxJoystick",
+        "VistaVolEvents",
     ]
 
     excludeModules = [

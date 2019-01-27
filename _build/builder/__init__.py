@@ -78,6 +78,8 @@ class Builder(object):
         self.pyVersionDir = join(self.dataDir, "Python%s" % self.pyVersionStr)
         self.outputDir = join(self.buildDir, "output")
         self.websiteDir = join(self.outputDir, "website")
+        
+        sys.path.insert(0, join(self.buildDir, 'extensions', 'python_modules'))
 
         if Is64bitInterpreter():
             print(
