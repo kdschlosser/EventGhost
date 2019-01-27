@@ -70,6 +70,7 @@ class Config(Section):
     refreshEnv = False
     showTrayIcon = True
     useFixedFont = False
+    ca_cert = os.path.join(eg.mainDir, 'cacert.pem')
 
     class plugins:  #pylint: disable-msg=C0103
         pass
@@ -93,12 +94,28 @@ class Config(Section):
                     {"__metaclass__": MakeSectionMetaClass},
                     self.__dict__
                 )
+
+                os.environ['REQUESTS_CA_BUNDLE'] = self.ca_cert
+                os.environ['CURL_CA_BUNDLE'] = self.ca_cert
+                
             except:
                 if eg.debugLevel:
                     raise
         else:
             eg.PrintDebugNotice('File "%s" does not exist.' % configFilePath)
-
+            
+    @property
+    def ca_cert_path(self):
+        return self.ca_cert
+    
+    @ca_cert_path.setter
+    def ca_cert_path(self, value):
+        if os.path.exists(value):
+            self.ca_cert = value
+            os.environ['REQUESTS_CA_BUNDLE'] = self.ca_cert
+            os.environ['CURL_CA_BUNDLE'] = self.ca_cert
+            self.Save()
+    
     def Save(self):
         self.version = eg.Version.string
         config_data = StringIO()

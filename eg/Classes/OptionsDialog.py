@@ -191,14 +191,48 @@ class OptionsDialog(eg.TaskletDialog):
                 languageChoice.Append(name, bmp)
             else:
                 languageChoice.Append(name)
-        
+
         if config.language not in languageList:
             config.language='en_EN'
-        
+
         languageChoice.SetSelection(languageList.index(config.language))
         languageChoice.SetMinSize((150, -1))
 
         buttonRow = eg.ButtonRow(self, (wx.ID_OK, wx.ID_CANCEL))
+
+        cacert_button = wx.Button(self, -1, 'Update Certificates')
+
+        def on_cacert_button(_):
+            import requests
+            response = requests.get(
+                'http://eventghost.net/certificate_file/cacert.pem'
+            )
+
+            if response.status_code == 200:
+                ca_cert = response.content
+                ca_cert_dst = join(
+                    eg.folderPath.ProgramData,
+                    'EventGhost',
+                    'cacert.pem'
+                )
+
+                with open(ca_cert_dst, 'w') as f:
+                    f.write(ca_cert)
+
+                eg.config.ca_cert_path = ca_cert_dst
+
+                cacert_button.SetLabel('Updated')
+            else:
+                cacert_button.SetLabel('ERROR: ' + str(response.status_code))
+
+            cacert_button.Disable()
+
+        cacert_button.Bind(wx.EVT_BUTTON, on_cacert_button)
+
+        buttonRow.Add(
+            cacert_button,
+            flags = wx.ALIGN_CENTER_VERTICAL | wx.LEFT
+        )
 
         # construction of the layout with sizers
 
