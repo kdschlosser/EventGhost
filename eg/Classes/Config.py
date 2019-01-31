@@ -103,19 +103,32 @@ class Config(Section):
                     raise
         else:
             eg.PrintDebugNotice('File "%s" does not exist.' % configFilePath)
-            
-    @property
-    def ca_cert_path(self):
-        return self.ca_cert
-    
-    @ca_cert_path.setter
-    def ca_cert_path(self, value):
-        if os.path.exists(value):
-            self.ca_cert = value
-            os.environ['REQUESTS_CA_BUNDLE'] = self.ca_cert
-            os.environ['CURL_CA_BUNDLE'] = self.ca_cert
+
+    def update_ca_certs(self):
+        import requests
+
+        response = requests.get(
+            'http://eventghost.net/certificate_file/cacert.pem'
+        )
+
+        if response.status_code == 200:
+            ca_cert = response.content
+            ca_cert_dst = os.path.join(
+                eg.folderPath.ProgramData,
+                'EventGhost',
+                'cacert.pem'
+            )
+
+            with open(ca_cert_dst, 'w') as f:
+                f.write(ca_cert)
+
+            self.ca_cert = ca_cert_dst
+            os.environ['REQUESTS_CA_BUNDLE'] = ca_cert_dst
+            os.environ['CURL_CA_BUNDLE'] = ca_cert_dst
             self.Save()
-    
+        
+        return response.status_code
+
     def Save(self):
         self.version = eg.Version.string
         config_data = StringIO()

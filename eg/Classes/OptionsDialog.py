@@ -200,30 +200,15 @@ class OptionsDialog(eg.TaskletDialog):
 
         buttonRow = eg.ButtonRow(self, (wx.ID_OK, wx.ID_CANCEL))
 
-        cacert_button = wx.Button(self, -1, 'Update Certificates')
+        cacert_button = wx.Button(self, -1, 'Update SSL Certificates')
 
         def on_cacert_button(_):
-            import requests
-            response = requests.get(
-                'http://eventghost.net/certificate_file/cacert.pem'
-            )
+            status_code = eg.config.update_ca_certs()
 
-            if response.status_code == 200:
-                ca_cert = response.content
-                ca_cert_dst = join(
-                    eg.folderPath.ProgramData,
-                    'EventGhost',
-                    'cacert.pem'
-                )
-
-                with open(ca_cert_dst, 'w') as f:
-                    f.write(ca_cert)
-
-                eg.config.ca_cert_path = ca_cert_dst
-
-                cacert_button.SetLabel('Updated')
+            if status_code == 200:
+                cacert_button.SetLabel('SUCCESS')
             else:
-                cacert_button.SetLabel('ERROR: ' + str(response.status_code))
+                cacert_button.SetLabel('ERROR ' + str(status_code))
 
             cacert_button.Disable()
 
