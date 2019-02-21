@@ -23,29 +23,7 @@ from glob import glob
 from os.path import basename, exists, join
 
 
-def InstallPy2exePatch():
-    """
-    Tricks py2exe to include the win32com module.
 
-    ModuleFinder can't handle runtime changes to __path__, but win32com
-    uses them, particularly for people who build from sources.
-    """
-    try:
-        import modulefinder
-        import win32com
-        for path in win32com.__path__[1:]:
-            modulefinder.AddPackagePath("win32com", path)
-        for extra in ["win32com.shell"]:
-            __import__(extra)
-            module = sys.modules[extra]
-            for path in module.__path__[1:]:
-                modulefinder.AddPackagePath(extra, path)
-    except ImportError:  # IGNORE:W0704
-        # no build path setup, no worries.
-        pass
-
-
-InstallPy2exePatch()
 
 
 from py2exe import build_exe # NOQA
@@ -73,15 +51,12 @@ def compile(source, filename, *args):
 
 __builtin__.compile = compile
 
-DLL_EXCLUDES = [
-    "DINPUT8.dll",
-    "w9xpopen.exe",
-]
+
 
 RT_MANIFEST = 24
 
 
-class BuildInterpreters(build_exe.py2exe):
+class BuildLibrary(build_exe.py2exe):
 
     def initialize_options(self):        
         self.build_setup = build_setup = (
@@ -103,23 +78,13 @@ class BuildInterpreters(build_exe.py2exe):
 
         self.distribution.script_args = ["py2exe"]
         self.distribution.windows = [Target(build_setup)]
-        self.distribution.verbose = 0
         self.distribution.zipfile = EncodePath(
             join(build_setup.library_name, self.zip_name)
         )
         self.distribution.options.update(
             dict(
-                build=dict(build_base=join(build_setup.tmp_dir, "build")),
-                py2exe=dict(
-                    compressed=0,
-                    includes=["encodings", "encodings.*", "Imports"],
-                    excludes=build_setup.exclude_modules,
-                    dll_excludes=DLL_EXCLUDES,
-                    dist_dir=EncodePath(build_setup.source_dir),
-                    custom_boot_script=join(
-                        build_setup.data_dir, "Py2ExeBootScript.py"
-                    ),
-                )
+                
+                
             )
         )
 

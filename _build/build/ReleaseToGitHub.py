@@ -252,7 +252,6 @@ class ReleaseToGitHub(Command):
         rc, data = self.repo.git.blobs.post(body=body)
         if rc != 201:
             raise BuildError("ERROR: couldn't post new changelog contents.")
-apart
         print "posting tree"
         newblob = dict(
             path=blob['path'],

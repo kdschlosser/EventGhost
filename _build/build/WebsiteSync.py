@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of EventGhost.
-# Copyright © 2005-2016 EventGhost Project <http://www.eventghost.org/>
+# Copyright © 2005-2018 EventGhost Project <http://eventghost.net/>
 #
 # EventGhost is free software: you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free
@@ -16,18 +16,61 @@
 # You should have received a copy of the GNU General Public License along
 # with EventGhost. If not, see <http://www.gnu.org/licenses/>.
 
+
 import os
 import stat
 import warnings
 from os.path import join
 from urlparse import urlparse
+from distutils.core import Command
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", DeprecationWarning)
-    import paramiko
+
+# Local imports
+
+class WebsiteSync(Command):
+
+    def initialize_options(self):
+        self.build_setup = None
+        self.website_url = None
+
+    def finalize_options(self):
+        self.build_setup = self.distribution.get_command_obj('build')
+
+    def run(self):
+        
+        if not self.website_url:
+            return
+        
+        
+                  
+            
+        build_setup = self.build_setup
+
+        syncer = SftpSync(self.website_url)
+        add_files = [  # (local file, remote file)
+            # (
+            #     join(self.buildSetup.websiteDir, 'docs', 'index.html'),
+            #     'docs/index.html'
+            # ),
+        ]
+        syncer.Sync(self.build_setup.website_dir, add_files)
+        # touch wiki file, to force re-evaluation of the header template
+        # syncer.sftpClient.utime(syncer.remotePath + "wiki", None)
+
+        # clear forum cache, to force re-building of the templates
+        # syncer.ClearDirectory(
+        #     syncer.remotePath + "forum/cache",
+        #     excludes=["index.htm", ".htaccess"]
+        # )
+        syncer.Close()
+
 
 class SftpSync(object):
     def __init__(self, url):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            import paramiko  
+            
         self.url = url
         host = urlparse(url)
         self.remotePath = host.path
@@ -182,3 +225,4 @@ def FixRemotePath(remotePath):
     if not remotePath.endswith("/"):
         remotePath += "/"
     return remotePath
+
