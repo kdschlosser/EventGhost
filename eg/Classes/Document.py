@@ -334,6 +334,8 @@ class Document(object):
         else:
             self.SetFilePath(filePath)
         eg.TreeLink.StartLoad()
+        eg.EventGhostEvent.ClearCachedEvents()
+        
         xmlTree = ElementTree.parse(filePath)
         node = xmlTree.getroot()
         root = self.RootItem(self, node)

@@ -66,22 +66,16 @@ eg.debugLevel = eg.startupArguments.debugLevel
 eg.systemEncoding = locale.getdefaultlocale()[1]
 eg.document = None
 eg.mainFrame = None
-eg.result = None
+
 eg.plugins = eg.Bunch()
 eg.globals = eg.Bunch()
 eg.globals.eg = eg
-eg.event = None
 eg.eventTable = {}
-eg.eventString = ""
 eg.notificationHandlers = {}
-eg.programCounter = None
-eg.programReturnStack = []
-eg.indent = 0
+
 eg.pluginList = []
 eg.mainThread = threading.currentThread()
-eg.stopExecutionFlag = False
-eg.lastFoundWindows = []
-eg.currentItem = None
+
 eg.actionGroup = eg.Bunch()
 eg.actionGroup.items = []
 eg.GUID = eg.GUID()

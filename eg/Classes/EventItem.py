@@ -86,6 +86,7 @@ class EventItem(TreeItem):
         if eventString not in eventTable:
             eventTable[eventString] = []
         eventTable[eventString].append(self)
+        eg.EventGhostEvent.AddCachedEvent(eventString, self)
 
     @eg.AssertInActionThread
     def RenameTo(self, newName):
@@ -110,3 +111,6 @@ class EventItem(TreeItem):
             pass
         if len(eventTable[eventString]) == 0:
             del eventTable[eventString]
+
+        eg.EventGhostEvent.RemoveCachedEvent(eventString, self)
+

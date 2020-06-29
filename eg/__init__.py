@@ -35,8 +35,164 @@ from Classes.WindowsVersion import WindowsVersion
 
 APP_NAME = "EventGhost"
 
-
 class DynamicModule(object):
+
+    _result = None
+
+    @property
+    def result(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.result
+        return self._result
+
+    @result.setter
+    def result(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.result = value
+
+        else:
+            self._result = value
+
+    _event = None
+
+    @property
+    def event(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t
+        return self._event
+
+    @event.setter
+    def event(self, value):
+        t = threading.current_thread()
+        if not isinstance(t, eg.EventGhostEvent):
+            self._event = value
+
+    _eventString = ''
+
+    @property
+    def eventString(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.eventString
+        return self._eventString
+
+    @eventString.setter
+    def eventString(self, value):
+        t = threading.current_thread()
+        if not isinstance(t, eg.EventGhostEvent):
+            self._eventString = value
+
+    _programCounter = None
+
+    @property
+    def programCounter(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.programCounter
+        return self._programCounter
+
+    @programCounter.setter
+    def programCounter(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.programCounter = value
+
+        else:
+            self._programCounter = value
+
+    _programReturnStack = []
+
+    @property
+    def programReturnStack(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.programReturnStack
+        return self._programReturnStack
+
+    @programReturnStack.setter
+    def programReturnStack(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.programReturnStack = value
+
+        else:
+            self._programReturnStack = value
+
+    _indent = 0
+
+    @property
+    def indent(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.indent
+        return self._indent
+
+    @indent.setter
+    def indent(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.indent = value
+
+        else:
+            self._indent = value
+
+    _stopExecutionFlag = False
+
+    @property
+    def stopExecutionFlag(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.stopExecutionFlag
+        return self._stopExecutionFlag
+
+    @stopExecutionFlag.setter
+    def stopExecutionFlag(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.stopExecutionFlag = value
+
+        else:
+            self._stopExecutionFlag = value
+
+    _lastFoundWindows = []
+
+    @property
+    def lastFoundWindows(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.lastFoundWindows
+        return self._lastFoundWindows
+
+    @lastFoundWindows.setter
+    def lastFoundWindows(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.lastFoundWindows = value
+
+        else:
+            self._lastFoundWindows = value
+
+    _currentItem = None
+
+    @property
+    def currentItem(self):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            return t.currentItem
+
+        return self._currentItem
+
+    @currentItem.setter
+    def currentItem(self, value):
+        t = threading.current_thread()
+        if isinstance(t, eg.EventGhostEvent):
+            t.currentItem = value
+        else:
+            self._currentItem = value
+
     def __init__(self):
         mod = sys.modules[__name__]
         self.__dict__ = mod.__dict__
